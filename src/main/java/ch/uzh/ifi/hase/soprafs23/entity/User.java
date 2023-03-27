@@ -38,6 +38,10 @@ public class User implements Serializable {
   @Column(nullable = false)
   private UserStatus status;
 
+
+
+  //Methods
+
   public Long getId() {
     return id;
   }
@@ -46,11 +50,11 @@ public class User implements Serializable {
     this.id = id;
   }
 
-  public String getName() {
+  public String getPassword() {
     return name;
   }
 
-  public void setName(String name) {
+  public void setPassword(String name) {
     this.name = name;
   }
 

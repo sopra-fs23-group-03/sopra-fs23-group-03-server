@@ -50,7 +50,19 @@ public class UserService {
 
     log.debug("Created Information for User: {}", newUser);
     return newUser;
+
   }
+
+    // LOGIN
+    public void correctPassword (User user, String password){
+        if (!user.getPassword().equals(password)){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is wrong. Check spelling");
+        }
+    }
+
+
+
+
 
   /**
    * This is a helper method that will check the uniqueness criteria of the
@@ -64,7 +76,7 @@ public class UserService {
    */
   private void checkIfUserExists(User userToBeCreated) {
     User userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
-    User userByName = userRepository.findByName(userToBeCreated.getName());
+    User userByName = userRepository.findByName(userToBeCreated.getPassword());
 
     String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
     if (userByUsername != null && userByName != null) {
