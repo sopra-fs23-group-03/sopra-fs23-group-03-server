@@ -14,6 +14,7 @@ import java.io.Serializable;
  * - nullable = false -> this cannot be left empty
  * - unique = true -> this value must be unqiue across the database -> composes
  * the primary key
+ * small comment to track changes
  */
 @Entity
 @Table(name = "USER")
