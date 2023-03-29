@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class DTOMapperTest {
   @Test
-  public void testCreateUser_fromUserPostDTO_toUser_success() {
+  public void convertUserPostDTOtoEntity_success() {
     // create UserPostDTO
     UserPostDTO userPostDTO = new UserPostDTO();
     userPostDTO.setPassword("password");
@@ -30,21 +30,21 @@ public class DTOMapperTest {
   }
 
   @Test
-  public void testGetUser_fromUser_toUserGetDTO_success() {
+  public void convertEntityToUserGetDTO_success() {
     // create User
     User user = new User();
-    user.setPassword("Firstname Lastname");
-    user.setUsername("firstname@lastname");
-    user.setStatus(UserStatus.OFFLINE);
-    user.setToken("1");
+    user.setUsername("username");
+    user.setPassword("password");
+    user.setStatus(UserStatus.ONLINE);
+    user.setToken("token");
 
     // MAP -> Create UserGetDTO
     UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
 
     // check content
     assertEquals(user.getId(), userGetDTO.getId());
-    assertEquals(user.getPassword(), userGetDTO.getPassword());
     assertEquals(user.getUsername(), userGetDTO.getUsername());
     assertEquals(user.getStatus(), userGetDTO.getStatus());
+    assertEquals(user.getToken(), userGetDTO.getToken());
   }
 }
