@@ -51,7 +51,10 @@ public class UserController {
 
     // create user
     User createdUser = userService.createUser(userInput);
+
     // convert internal representation of user back to API
-    return DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
+    UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
+
+    return userGetDTO;
   }
 }

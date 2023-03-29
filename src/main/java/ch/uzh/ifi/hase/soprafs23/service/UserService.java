@@ -41,51 +41,39 @@ public class UserService {
 
   public User createUser(User newUser) {
     newUser.setToken(UUID.randomUUID().toString());
-    newUser.setStatus(UserStatus.OFFLINE);
-    checkIfUserExists(newUser);
-    // saves the given entity but data is only persisted in the database once
-    // flush() is called
+    newUser.setStatus(UserStatus.ONLINE);
+
+    // check that the username is still free
+    checkIfUsernameExists(newUser.getUsername());
+
+    // saves the given entity but data is only persisted
+    // in the database once flush() is called
     newUser = userRepository.save(newUser);
     userRepository.flush();
 
-    log.debug("Created Information for User: {}", newUser);
     return newUser;
-
   }
-
-    // LOGIN
-    public void correctPassword (User user, String password){
-        if (!user.getPassword().equals(password)){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is wrong. Check spelling");
-        }
-    }
-
-
-
 
 
   /**
-   * This is a helper method that will check the uniqueness criteria of the
-   * username and the name
-   * defined in the User entity. The method will do nothing if the input is unique
-   * and throw an error otherwise.
-   *
-   * @param userToBeCreated
-   * @throws org.springframework.web.server.ResponseStatusException
-   * @see User
-   */
-  private void checkIfUserExists(User userToBeCreated) {
-    User userByUsername = userRepository.findByUsername(userToBeCreated.getUsername());
-    User userByName = userRepository.findByName(userToBeCreated.getPassword());
+  * This is a helper method that will check the uniqueness criteria of the username
+  * defined in the User entity. The method will do nothing if the input is unique
+  * and throw an error (CONFLICT, 409) otherwise.
+  */
+  private void checkIfUsernameExists(String username) {
+    User userByUsername = userRepository.findByUsername(username);
 
-    String baseErrorMessage = "The %s provided %s not unique. Therefore, the user could not be created!";
-    if (userByUsername != null && userByName != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          String.format(baseErrorMessage, "username and the name", "are"));
-    } else if (userByUsername != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "username", "is"));
-    } else if (userByName != null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format(baseErrorMessage, "name", "is"));
+    if (userByUsername != null) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("The username %s is already taken!", username));
     }
   }
+
+
+  // LOGIN
+  public void correctPassword (User user, String password){
+      if (!user.getPassword().equals(password)){
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is wrong. Check spelling");
+      }
+  }
+
 }
