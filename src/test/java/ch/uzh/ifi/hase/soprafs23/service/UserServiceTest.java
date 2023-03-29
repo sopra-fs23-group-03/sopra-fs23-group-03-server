@@ -47,7 +47,7 @@ public class UserServiceTest {
     verify(userRepository, times(1)).save(Mockito.any());
     verify(userRepository, times(1)).flush();
 
-    assertNotNull(createdUser.getId());
+    assertEquals(createdUser.getId(), user.getId());
     assertEquals(createdUser.getUsername(), user.getUsername());
     assertEquals(createdUser.getPassword(), user.getPassword());
     assertNotNull(createdUser.getToken());
@@ -69,6 +69,14 @@ public class UserServiceTest {
   @Test
   public void createUser_invalidUsername_throwsException() {
     user.setUsername("invalid-username");
+
+    assertThrows(ResponseStatusException.class, () -> userService.createUser(user));
+  }
+
+  @Test
+  public void createUser_equalUsernameAndPassword_throwsException() {
+    user.setUsername("word");
+    user.setPassword("word");
 
     assertThrows(ResponseStatusException.class, () -> userService.createUser(user));
   }
