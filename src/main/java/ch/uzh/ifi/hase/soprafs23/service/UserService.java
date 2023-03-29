@@ -39,6 +39,8 @@ public class UserService {
     return this.userRepository.findAll();
   }
 
+
+  // creates a new user, throws CONFLICT (409) if something goes wrong
   public User createUser(User newUser) {
     newUser.setToken(UUID.randomUUID().toString());
     newUser.setStatus(UserStatus.ONLINE);
@@ -46,8 +48,17 @@ public class UserService {
     // check that the username is still free
     checkIfUsernameExists(newUser.getUsername());
 
-    // saves the given entity but data is only persisted
-    // in the database once flush() is called
+    // check if username is only latin letters
+    if (!newUser.getUsername().matches("^[a-zA-Z]+$")) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "The username should only contain Latin letters (a-z, A-Z)!");
+    }
+
+    // check that username and password are not the same
+    if(newUser.getUsername() == newUser.getPassword()) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("The username and password cannot be the same!"));
+    }
+
+    // save the user
     newUser = userRepository.save(newUser);
     userRepository.flush();
 
