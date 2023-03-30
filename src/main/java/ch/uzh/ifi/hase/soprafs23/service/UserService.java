@@ -3,8 +3,8 @@ package ch.uzh.ifi.hase.soprafs23.service;
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger; // unused
+//import org.slf4j.LoggerFactory; // unused
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -26,7 +26,7 @@ import java.util.UUID;
 @Transactional
 public class UserService {
 
-  private final Logger log = LoggerFactory.getLogger(UserService.class);
+  //private final Logger log = LoggerFactory.getLogger(UserService.class); // unused
 
   private final UserRepository userRepository;
 
@@ -54,8 +54,8 @@ public class UserService {
     }
 
     // check that username and password are not the same
-    if(newUser.getUsername() == newUser.getPassword()) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("The username and password cannot be the same!"));
+    if(newUser.getUsername().equals(newUser.getPassword())) {
+      throw new ResponseStatusException(HttpStatus.CONFLICT, "The username and password cannot be the same!");
     }
 
     // save the user
