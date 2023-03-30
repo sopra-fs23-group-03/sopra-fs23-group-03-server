@@ -68,7 +68,7 @@ public class UserService {
     // LOGIN
     public void correctPassword (User user, String password){
         if (!user.getPassword().equals(password)){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is wrong. Check spelling");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is wrong. Check the spelling");
         }
     }
 

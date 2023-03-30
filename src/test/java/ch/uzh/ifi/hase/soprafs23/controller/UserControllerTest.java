@@ -29,6 +29,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -129,6 +130,53 @@ public class UserControllerTest {
     // verify that the correct calls on UserService were made
     verify(userService, times(1)).createUser(Mockito.any(User.class));
   }
+
+    /**
+     * TEST PUT user by username - VALID version
+     */
+    @Test
+    public void loginUser_valid() throws Exception {
+        // create new User
+        User user = new User();
+        user.setId(3L);
+        user.setUsername("testUsername");
+
+        //don't need comparison with internal representation here
+
+        // when/then -> do the request - just trying to put (=update) sth.
+        MockHttpServletRequestBuilder putRequest = put("/users/testUsername/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(user));
+
+        // then
+        mockMvc.perform(putRequest)
+                .andExpect(status().isOk());
+    }
+
+    /**
+     * TEST PUT user by username - INVALID version, username not found
+     */
+    @Test
+    public void loginUser_INVALID() throws Exception {
+        User user = new User();
+        user.setId(4L);
+        user.setUsername("test");
+
+
+        //try to get user with ID 4
+        // We are mocking the method get userbyID here
+        given(userService.getUserByUsername("testUsername")).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no user with this username."));
+
+        // when/then -> do the request
+        MockHttpServletRequestBuilder putRequest = put("/users/testUsername/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(user));
+
+        // then
+        mockMvc.perform(putRequest)
+                .andExpect(status().isNotFound()); // has to map again with above http status
+    }
+
 
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
