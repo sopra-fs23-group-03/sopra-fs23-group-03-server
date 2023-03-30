@@ -65,6 +65,28 @@ public class UserService {
     return newUser;
   }
 
+    // LOGIN
+    public void correctPassword (User user, String password){
+        if (!user.getPassword().equals(password)){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is wrong. Check spelling");
+        }
+    }
+
+    public User getUserByUsername(String username){
+        User UserIGetPerUsername = userRepository.findByUsername(username);
+        if (UserIGetPerUsername == null){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"There exists no user with this username.");
+        } return UserIGetPerUsername;
+    }
+
+    public void login(User user){
+        user.setStatus(UserStatus.ONLINE);
+        user = userRepository.save(user);
+        userRepository.flush();
+    }
+
+
+
 
   /**
   * This is a helper method that will check the uniqueness criteria of the username
@@ -80,11 +102,6 @@ public class UserService {
   }
 
 
-  // LOGIN
-  public void correctPassword (User user, String password){
-      if (!user.getPassword().equals(password)){
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is wrong. Check spelling");
-      }
-  }
+
 
 }

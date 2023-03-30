@@ -57,4 +57,21 @@ public class UserController {
 
     return userGetDTO;
   }
+
+  @PutMapping("users/{username}/login")
+  @ResponseStatus(HttpStatus.OK) //OK is 200
+  @ResponseBody
+  public UserGetDTO loginUser(@RequestBody UserPostDTO userPostDTO, @PathVariable String username){
+      //get user by username
+      User user = userService.getUserByUsername(username);
+
+      //get password which belongs to given username and check if provided password is same
+      User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO); //convert info to internal representation
+      userService.correctPassword(user, userInput.getPassword());
+
+      //set online
+      userService.login(user);
+
+      return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user); //send back user
+  }
 }
