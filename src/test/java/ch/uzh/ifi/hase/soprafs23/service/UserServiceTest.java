@@ -81,4 +81,16 @@ public class UserServiceTest {
     assertThrows(ResponseStatusException.class, () -> userService.createUser(user));
   }
 
+  @Test
+  public void loginUser_NameNotExists_throwsException() {
+
+      assertThrows(ResponseStatusException.class, () -> userService.getUserByUsername(null));
+    }
+
+    @Test
+    public void loginUser_WrongPassword_throwsException() {
+      user.setPassword("word");
+
+      assertThrows(ResponseStatusException.class, () -> userService.correctPassword(user, "word2"));
+    }
 }
