@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -51,6 +52,21 @@ public class UserService {
     log.debug("Created Information for User: {}", newUser);
     return newUser;
   }
+    public User getUserById(Long id) {
+        Optional<User> user = this.userRepository.findById(id);
+
+        if(!user.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User with id %s does not exist.", id));
+        }
+
+        return user.get();
+    }
+    public void logout(Long id) {
+        User user = getUserById(id);
+        user.setStatus(UserStatus.OFFLINE);
+        user = userRepository.save(user);
+        userRepository.flush();
+    }
 
   /**
    * This is a helper method that will check the uniqueness criteria of the
