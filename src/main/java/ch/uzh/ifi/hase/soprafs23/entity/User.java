@@ -38,6 +38,15 @@ public class User implements Serializable {
   @Column(nullable = false)
   private UserStatus status;
 
+  @Column(nullable = true)
+  private String allergies;
+
+  @Column(nullable = true)
+  private String favoriteCuisine;
+
+  @Column(nullable = true)
+  private String specialDiet;
+
 
   //Methods
 
@@ -80,4 +89,27 @@ public class User implements Serializable {
   public void setStatus(UserStatus status) {
     this.status = status;
   }
+
+  public String getAllergies() {
+      return allergies;
+  }
+
+  public void setAllergies(String allergies){
+      this.allergies = allergies;
+  }
+
+  public String getFavoriteCuisine(){
+      return favoriteCuisine;
+  }
+
+    public void setFavoriteCuisine(String favoriteCuisine) {
+        this.favoriteCuisine = favoriteCuisine;
+    }
+    public String getSpecialDiet(){
+      return specialDiet;
+    }
+
+    public void setSpecialDiet(String specialDiet) {
+        this.specialDiet = specialDiet;
+    }
 }

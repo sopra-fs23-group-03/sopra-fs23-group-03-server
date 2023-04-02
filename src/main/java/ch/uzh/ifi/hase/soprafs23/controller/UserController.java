@@ -3,11 +3,14 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,4 +77,19 @@ public class UserController {
 
       return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user); //send back user
   }
+
+    @PutMapping("/users/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateUser(@PathVariable Long id,
+                           @RequestBody UserPutDTO userPutDTO,
+                           HttpServletRequest request)
+    {
+        userService.getUserById(id);
+        Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
+        if(tokenId != id) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to make changes to this profile."));
+        }
+
+        userService.updateUser(id, userPutDTO);
+    }
 }

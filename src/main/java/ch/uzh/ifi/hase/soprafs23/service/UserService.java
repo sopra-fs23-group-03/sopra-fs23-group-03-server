@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 //import org.slf4j.Logger; // unused
 //import org.slf4j.LoggerFactory; // unused
+import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -74,12 +75,6 @@ public class UserService {
 
         return user.get();
     }
-    public void logout(Long id) {
-        User user = getUserById(id);
-        user.setStatus(UserStatus.OFFLINE);
-        user = userRepository.save(user);
-        userRepository.flush();
-    }
 
     // LOGIN
     public void correctPassword (User user, String password){
@@ -100,7 +95,55 @@ public class UserService {
         user = userRepository.save(user);
         userRepository.flush();
     }
+    public void logout(Long id) {
+        User user = getUserById(id);
+        user.setStatus(UserStatus.OFFLINE);
+        user = userRepository.save(user);
+        userRepository.flush();
+    }
 
+    public void updateUser(Long id, UserPutDTO userPutDTO) {
+        User user = getUserById(id);
+
+        String newUsername = userPutDTO.getUsername();
+        String newAllergies = userPutDTO.getAllergies();
+        String newFavoriteCuisine = userPutDTO.getFavoriteCuisine();
+        String newSpecialDiet = userPutDTO.getSpecialDiet();
+
+        if(newUsername != null) {
+            checkIfUsernameExists(newUsername);
+            user.setUsername(newUsername);
+        }
+
+        if(newAllergies != null) {
+            user.setAllergies(newAllergies);
+        }
+
+        if(newFavoriteCuisine != null){
+            user.setFavoriteCuisine(newFavoriteCuisine);
+        }
+
+        if(newSpecialDiet != null){
+            user.setSpecialDiet(newSpecialDiet);
+        }
+
+        user = userRepository.save(user);
+        userRepository.flush();
+    }
+
+    public Long getUserByToken(String token) {
+        if(token == null) {
+            return 0L;
+        }
+
+        List<User> users = userRepository.findByToken(token);
+        assert users.size() <= 1;
+
+        if(users.size() == 1) {
+            return users.get(0).getId();
+        }
+        return 0L;
+    }
 
 
 
