@@ -1,10 +1,11 @@
 package ch.uzh.ifi.hase.soprafs23.entity;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.io.Serializable;
 
-public class Group {
+@Entity
+@Table(name = "GROUP")
+public class Group implements Serializable {
 
     @Id
     @GeneratedValue
@@ -12,6 +13,9 @@ public class Group {
 
     @Column(nullable = false, unique = true)
     private String groupName;
+
+    @Column(nullable = false, unique = true)
+    private Long hostId;
 
     public Long getGroupId() {
         return groupId;
@@ -27,5 +31,13 @@ public class Group {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
+    }
+
+    public Long getHostId() {
+        return hostId;
+    }
+
+    public void setHostId(Long hostId) {
+        this.hostId = hostId;
     }
 }

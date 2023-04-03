@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+//import ch.uzh.ifi.hase.soprafs23.entity.Group; // unused
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 //import org.slf4j.Logger; // unused
@@ -145,6 +146,8 @@ public class UserService {
         return 0L;
     }
 
+    // creates a new user, throws CONFLICT (409) if something goes wrong
+
 
 
   /**
@@ -159,8 +162,4 @@ public class UserService {
       throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("The username %s is already taken!", username));
     }
   }
-
-
-
-
 }
