@@ -9,6 +9,7 @@
 | Lany        | #32        | Create new class user with username and password       |
 |             | #30        | Check for unique username                              |
 |             | #29        | Implement RegEx to check valid username                |
+|             | #144       | Create new registration method                         |
 | Orestis     | #          |                                                        |
 |             | #          |                                                        |
 | Kalliopi    | #4         | Create Login page                                      |
