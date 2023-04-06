@@ -28,6 +28,7 @@
 | Chiara      | #1         | Create Register page                                   |
 |             | #4         | Create Login page                                      |
 |             | #2         | Write error messages                                   |
+|             | #3         | Create path to direct to personal profile              |
 
 </p>         
 
