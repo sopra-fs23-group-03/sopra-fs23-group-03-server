@@ -107,14 +107,18 @@ public class UserController {
   @PostMapping("users/{userId}/logout")
   @ResponseStatus(HttpStatus.NO_CONTENT) //OK is 200
   @ResponseBody
-  public UserGetDTO logoutUser(@PathVariable Long id){
+  public void logoutUser(@PathVariable Long id, HttpServletRequest request){
+    // check if user is trying to log themselves out
+    Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
+    if(tokenId != id) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
+    }
+
       //get user by id
       User user = userService.getUserById(id);
 
       //set offline
       userService.logout(user.getId());
-
-      return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user); //send back user
   }
 
   @PutMapping("/users/{id}")
