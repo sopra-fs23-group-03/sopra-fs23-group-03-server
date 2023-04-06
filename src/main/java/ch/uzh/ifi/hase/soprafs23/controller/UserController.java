@@ -6,11 +6,13 @@ import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +65,13 @@ public class UserController {
 
     // convert internal representation of user back to API
     UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
+
+    // create HttpHeaders object, add token in response header and make it accessible to the client
+    HttpHeaders headers = new org.springframework.http.HttpHeaders();
+    headers.add("X-Token", createdUser.getToken());
+    List<String> customHeaders = new ArrayList<String>();
+    customHeaders.add("X-Token");
+    headers.setAccessControlExposeHeaders(customHeaders);
 
     return userGetDTO;
   }
