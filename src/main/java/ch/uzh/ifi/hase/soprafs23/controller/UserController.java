@@ -76,7 +76,7 @@ public class UserController {
     return userGetDTO;
   }
 
-  @PutMapping("users/{username}/login")
+  @PostMapping("users/{username}/login")
   @ResponseStatus(HttpStatus.OK) //OK is 200
   @ResponseBody
   public UserGetDTO loginUser(@RequestBody UserPostDTO userPostDTO, @PathVariable String username){
