@@ -81,7 +81,7 @@ public class UserController {
     @PostMapping("users/{userId}/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT) //OK is 200
     @ResponseBody
-    public UserGetDTO logoutUser(@RequestBody UserPostDTO userPostDTO, @PathVariable Long id){
+    public UserGetDTO logoutUser(@PathVariable Long id){
         //get user by id
         User user = userService.getUserById(id);
 
