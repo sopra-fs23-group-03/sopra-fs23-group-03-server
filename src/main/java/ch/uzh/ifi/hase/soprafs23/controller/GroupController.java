@@ -26,22 +26,22 @@ public class GroupController {
     }
 
 
-    @PostMapping("/groups")
-    @ResponseStatus(HttpStatus.CREATED)
-    @ResponseBody
-    public GroupGetDTO createGroup(@RequestBody GroupPostDTO groupPostDTO, @RequestParam Long hostId) {
-        // convert API user to internal representation
-        Group groupInput = DTOMapper.INSTANCE.convertGroupPostDTOtoEntity(groupPostDTO);
-
-        // get the user creating the group
-        User host = userService.getUserById(hostId);
-
-        // create group
-        Group createdGroup = groupService.createGroup(groupInput, host);
-
-        // convert internal representation of user back to API
-        GroupGetDTO groupGetDTO = DTOMapper.INSTANCE.convertEntityToGroupGetDTO(createdGroup);
-
-        return groupGetDTO;
-    }
+//    @PostMapping("/groups")
+//    @ResponseStatus(HttpStatus.CREATED)
+//    @ResponseBody
+//    public GroupGetDTO createGroup(@RequestBody GroupPostDTO groupPostDTO, @RequestParam Long hostId) {
+//        // convert API user to internal representation
+//        GroupGetDTO groupInput = DTOMapper.INSTANCE.convertGroupPostDTOtoEntity(groupPostDTO);
+//
+//        // get the user creating the group
+//        User host = userService.getUserById(hostId);
+//
+//        // create group
+//        GroupGetDTO createdGroup = groupService.createGroup(groupInput, host);
+//
+//        // convert internal representation of user back to API
+//        GroupGetDTO groupGetDTO = DTOMapper.INSTANCE.convertEntityToGroupGetDTO(createdGroup);
+//
+//        return groupGetDTO;
+//    }
 }

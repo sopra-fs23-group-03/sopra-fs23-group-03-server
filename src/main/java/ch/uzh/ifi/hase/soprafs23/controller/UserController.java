@@ -26,7 +26,7 @@ public class UserController {
 
   private final UserService userService;
 
-  UserController(UserService userService) {
+  public UserController(UserService userService) {
     this.userService = userService;
   }
 
@@ -70,7 +70,7 @@ public class UserController {
 
       //get password which belongs to given username and check if provided password is same
       User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO); //convert info to internal representation
-      userService.correctPassword(user, userInput.getPassword());
+      userService.correctPassword(username, userInput.getPassword());
 
       //set online
       userService.login(user);

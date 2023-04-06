@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
@@ -25,8 +27,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -131,11 +132,9 @@ public class UserControllerTest {
     verify(userService, times(1)).createUser(Mockito.any(User.class));
   }
 
-    /**
-     * TEST PUT user by username - VALID version
-     */
+
     @Test
-    public void loginUser_valid() throws Exception {
+    public void putUser_valid() throws Exception {
         // create new User
         User user = new User();
         user.setId(3L);
@@ -153,11 +152,8 @@ public class UserControllerTest {
                 .andExpect(status().isOk());
     }
 
-    /**
-     * TEST PUT user by username - INVALID version, username not found
-     */
     @Test
-    public void loginUser_INVALID() throws Exception {
+    public void putUser_INVALID() throws Exception {
         User user = new User();
         user.setId(4L);
         user.setUsername("test");
@@ -177,6 +173,50 @@ public class UserControllerTest {
                 .andExpect(status().isNotFound()); // has to map again with above http status
     }
 
+    @Test
+    public void loginUser_DTOTest() throws Exception {
+        User user = new User();
+        user.setId(2L);
+        user.setUsername("testName");
+        user.setToken("123");
+        user.setStatus(UserStatus.ONLINE);
+
+        UserPutDTO userPutDTO = new UserPutDTO();
+        userPutDTO.setUsername("testName");
+
+        given(userService.getUserByUsername(Mockito.any())).willReturn(user);
+
+        MockHttpServletRequestBuilder putRequest = put("/users/"+user.getUsername()+"/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(userPutDTO));
+
+        mockMvc.perform(putRequest).andExpect(status().isOk());
+    }
+
+    @Test
+    public void testLoginUser_PasswordInvalid() throws Exception {
+        // create a User object
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("name");
+        user.setPassword("word");
+
+        // create a UserPostDTO object for the request body
+        UserPostDTO userPostDTO = new UserPostDTO();
+        userPostDTO.setUsername("name");
+        userPostDTO.setPassword("wrong_password");
+
+
+        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is wrong. Check the spelling")).when(userService).correctPassword(Mockito.any(String.class), Mockito.any(String.class));
+
+        mockMvc.perform(put("/users/" + user.getUsername() + "/login").contentType(MediaType.APPLICATION_JSON).content(asJsonString(userPostDTO)))
+                .andExpect(status().isBadRequest());
+    }
+
+
+
+
+    // TODO: add logout test?
 
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
