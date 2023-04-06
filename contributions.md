@@ -17,6 +17,7 @@
 |             | #125       | Make a function to assign name to group                                          |  X   |
 |             | #127       | Create method checking if group name already exists                              |  X   |
 |             | #126       | Create POST /groups for the creation of a new group                              |  X   |
+|             | #123       | Assign user as host                                                              |  X   |
 | Kalliopi    | #4         | Create Login page                                                                |  X   |
 |             | #6         | Create path to be directed to Landing page after login                           |  X   |
 |             | #7         | Create API call with body for backend communication                              |  X   |
