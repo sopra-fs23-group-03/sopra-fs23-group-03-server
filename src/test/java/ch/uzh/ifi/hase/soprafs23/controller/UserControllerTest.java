@@ -59,10 +59,13 @@ public class UserControllerTest {
     user.setPassword("firstPassword");
     user.setToken("firstToken");
     user.setStatus(UserStatus.ONLINE);
+
+    // mocks the getUserIdByTokem(token) method in UserService
+    given(userService.getUseridByToken(user.getToken())).willReturn(user.getId());
   }
 
   @Test
-  public void getUsers_returnsJsonArrayOfExistingUsers() throws Exception {
+  public void getUsers_returnsJsonArrayOfExistingUsers_whenAuthenticated() throws Exception {
     // given
     List<User> allUsers = Collections.singletonList(user);
 
@@ -72,13 +75,29 @@ public class UserControllerTest {
 
     // when
     MockHttpServletRequestBuilder getRequest = get("/users")
-                                                .contentType(MediaType.APPLICATION_JSON);
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .header("X-Token", user.getToken());
 
     // then
     mockMvc.perform(getRequest).andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$[0].username", is(user.getUsername())))
         .andExpect(jsonPath("$[0].status", is(user.getStatus().toString())));
+  }
+
+  @Test
+  public void getUsers_returnsErrorUNAUTHORIZED_whenNotAuthenticated() throws Exception {
+    // mocks the getUserIdByTokem(token) method in UserService
+    given(userService.getUseridByToken("newToken")).willReturn(0L);
+
+    // when
+    MockHttpServletRequestBuilder getRequest = get("/users")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .header("X-Token", "newToken");
+
+    // then
+    mockMvc.perform(getRequest).andExpect(status().isUnauthorized());
+    verify(userService, times(1)).getUseridByToken("newToken");
   }
 
   @Test
