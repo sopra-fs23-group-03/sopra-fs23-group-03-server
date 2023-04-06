@@ -21,8 +21,10 @@
 |             | #6         | Create path to be directed to Landing page after login |
 |             | #7         | Create API call with body for backend communication    |
 |             | #8         | Create path to be redirected to register page in case of error |
-| Ann-Kathrin | #          |                                                        |
-|             | #          |                                                        |
+| Ann-Kathrin | #36        | Create LogIn Method                                    |
+|             | #40        | Change Status                                          |
+|             | #39        | Check for valid password                               |
+|             | #37        | Check if user exists                                   |
 | Chiara      | #1         | Create Register page                                   |
 |             | #4         | Create Login page                                      |
 |             | #2         | Write error messages                                   |
