@@ -28,7 +28,7 @@ public class GroupService {
 
         // check if username is only latin letters
         if (!newGroup.getGroupName().matches("^[a-zA-Z]+$")) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "The username should only contain Latin letters (a-z, A-Z)!");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The Group Name should only contain Latin letters (a-z, A-Z)!");
         }
 
         // assign the user creating the group as the host
@@ -45,7 +45,7 @@ public class GroupService {
         Group groupByGroupName = groupRepository.findByGroupName(groupName);
 
         if (groupByGroupName != null) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("The username %s is already taken!", groupName));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("The Group Name %s is already taken!", groupName));
         }
     }
 }

@@ -78,6 +78,20 @@ public class UserController {
       return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user); //send back user
   }
 
+    @PostMapping("users/{userId}/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT) //OK is 200
+    @ResponseBody
+    public UserGetDTO logoutUser(@PathVariable Long id){
+        //get user by id
+        User user = userService.getUserById(id);
+
+        //set offline
+        userService.logout(user.getId());
+
+        return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user); //send back user
+    }
+
+
     @PutMapping("/users/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateUser(@PathVariable Long id,

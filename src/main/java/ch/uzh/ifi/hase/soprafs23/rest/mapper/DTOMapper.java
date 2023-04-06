@@ -35,12 +35,12 @@ public interface DTOMapper {
   @Mapping(source = "token", target = "token")
   UserGetDTO convertEntityToUserGetDTO(User user);
 
-  @Mapping(source = "username", target = "username")
+  @Mapping(source = "groupName", target = "groupName")
   @Mapping(source = "hostId", target = "hostId")
   Group convertGroupPostDTOtoEntity(GroupPostDTO groupPostDTO);
 
   @Mapping(source = "id", target = "id")
-  @Mapping(source = "username", target = "username")
+  @Mapping(source = "groupName", target = "groupName")
   @Mapping(source = "hostId",target = "hostId")
   GroupGetDTO convertEntityToGroupGetDTO(Group group);
 }
