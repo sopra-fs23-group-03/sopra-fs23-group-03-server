@@ -24,10 +24,10 @@ jobs:
           java-version: "17"
 
       - name: Test and analyze
-        run: ./gradlew test jacocoTestReport sonarqube
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew test jacocoTestReport sonarqube
 
   deploy:
     name: Deploying to Google Cloud

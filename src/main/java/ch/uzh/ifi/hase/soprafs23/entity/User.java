@@ -14,6 +14,7 @@ import java.io.Serializable;
  * - nullable = false -> this cannot be left empty
  * - unique = true -> this value must be unqiue across the database -> composes
  * the primary key
+ * small comment to track changes
  */
 @Entity
 @Table(name = "USER")
@@ -25,17 +26,29 @@ public class User implements Serializable {
   @GeneratedValue
   private Long id;
 
-  @Column(nullable = false)
-  private String name;
-
   @Column(nullable = false, unique = true)
   private String username;
+
+  @Column(nullable = false)
+  private String password;
 
   @Column(nullable = false, unique = true)
   private String token;
 
   @Column(nullable = false)
   private UserStatus status;
+
+  @Column(nullable = true)
+  private String allergies;
+
+  @Column(nullable = true)
+  private String favoriteCuisine;
+
+  @Column(nullable = true)
+  private String specialDiet;
+
+
+  //Methods
 
   public Long getId() {
     return id;
@@ -45,20 +58,20 @@ public class User implements Serializable {
     this.id = id;
   }
 
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
   public String getUsername() {
     return username;
   }
 
   public void setUsername(String username) {
     this.username = username;
+  }
+  
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
   }
 
   public String getToken() {
@@ -76,4 +89,27 @@ public class User implements Serializable {
   public void setStatus(UserStatus status) {
     this.status = status;
   }
+
+  public String getAllergies() {
+      return allergies;
+  }
+
+  public void setAllergies(String allergies){
+      this.allergies = allergies;
+  }
+
+  public String getFavoriteCuisine(){
+      return favoriteCuisine;
+  }
+
+    public void setFavoriteCuisine(String favoriteCuisine) {
+        this.favoriteCuisine = favoriteCuisine;
+    }
+    public String getSpecialDiet(){
+      return specialDiet;
+    }
+
+    public void setSpecialDiet(String specialDiet) {
+        this.specialDiet = specialDiet;
+    }
 }
