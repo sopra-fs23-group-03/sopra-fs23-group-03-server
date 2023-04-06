@@ -156,7 +156,7 @@ public class UserControllerTest {
 
 
     @Test
-    public void putUser_valid() throws Exception {
+    public void putUsersUsernameLogin_valid() throws Exception {
         // create new User
         User user = new User();
         user.setId(3L);
@@ -171,11 +171,12 @@ public class UserControllerTest {
 
         // then
         mockMvc.perform(putRequest)
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Token", notNullValue()));
     }
 
     @Test
-    public void putUser_INVALID() throws Exception {
+    public void putUsersUsernameLogin_invalid() throws Exception {
         User user = new User();
         user.setId(4L);
         user.setUsername("test");
@@ -195,6 +196,7 @@ public class UserControllerTest {
                 .andExpect(status().isNotFound()); // has to map again with above http status
     }
 
+    // is this not testing the same as putUsersUsernameLogin_valid??
     @Test
     public void loginUser_DTOTest() throws Exception {
         User user = new User();
@@ -212,7 +214,9 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(userPutDTO));
 
-        mockMvc.perform(putRequest).andExpect(status().isOk());
+        mockMvc.perform(putRequest)
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Token", notNullValue()));
     }
 
     @Test

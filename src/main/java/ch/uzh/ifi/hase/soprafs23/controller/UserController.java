@@ -8,6 +8,7 @@ import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -56,7 +57,7 @@ public class UserController {
   @PostMapping("/users")
   @ResponseStatus(HttpStatus.CREATED)
   @ResponseBody
-  public UserGetDTO createUser(@RequestBody UserPostDTO userPostDTO) {
+  public ResponseEntity<UserGetDTO> createUser(@RequestBody UserPostDTO userPostDTO) {
     // convert API user to internal representation
     User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
@@ -73,13 +74,13 @@ public class UserController {
     customHeaders.add("X-Token");
     headers.setAccessControlExposeHeaders(customHeaders);
 
-    return userGetDTO;
+    return ResponseEntity.status(HttpStatus.CREATED).headers(headers).body(userGetDTO);
   }
 
   @PostMapping("users/{username}/login")
   @ResponseStatus(HttpStatus.OK) //OK is 200
   @ResponseBody
-  public UserGetDTO loginUser(@RequestBody UserPostDTO userPostDTO, @PathVariable String username){
+  public ResponseEntity<UserGetDTO> loginUser(@RequestBody UserPostDTO userPostDTO, @PathVariable String username){
       //get user by username
       User user = userService.getUserByUsername(username);
 
@@ -100,7 +101,7 @@ public class UserController {
     customHeaders.add("X-Token");
     headers.setAccessControlExposeHeaders(customHeaders);
 
-    return userGetDTO; //send back user
+    return ResponseEntity.status(HttpStatus.OK).headers(headers).body(userGetDTO);
   }
 
   @PostMapping("users/{userId}/logout")
