@@ -33,7 +33,13 @@ public class UserController {
   @GetMapping("/users")
   @ResponseStatus(HttpStatus.OK)
   @ResponseBody
-  public List<UserGetDTO> getAllUsers() {
+  public List<UserGetDTO> getAllUsers(HttpServletRequest request) {
+    // check validity of token
+    String token = request.getHeader("X-Token");
+    if(userService.getUseridByToken(token) == 0) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
+    }
+
     // fetch all users in the internal representation
     List<User> users = userService.getUsers();
     List<UserGetDTO> userGetDTOs = new ArrayList<>();
@@ -78,32 +84,31 @@ public class UserController {
       return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user); //send back user
   }
 
-    @PostMapping("users/{userId}/logout")
-    @ResponseStatus(HttpStatus.NO_CONTENT) //OK is 200
-    @ResponseBody
-    public UserGetDTO logoutUser(@PathVariable Long id){
-        //get user by id
-        User user = userService.getUserById(id);
+  @PostMapping("users/{userId}/logout")
+  @ResponseStatus(HttpStatus.NO_CONTENT) //OK is 200
+  @ResponseBody
+  public UserGetDTO logoutUser(@PathVariable Long id){
+      //get user by id
+      User user = userService.getUserById(id);
 
-        //set offline
-        userService.logout(user.getId());
+      //set offline
+      userService.logout(user.getId());
 
-        return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user); //send back user
-    }
+      return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user); //send back user
+  }
 
+  @PutMapping("/users/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void updateUser(@PathVariable Long id,
+                         @RequestBody UserPutDTO userPutDTO,
+                         HttpServletRequest request)
+  {
+      userService.getUserById(id);
+      Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
+      if(tokenId != id) {
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to make changes to this profile."));
+      }
 
-    @PutMapping("/users/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateUser(@PathVariable Long id,
-                           @RequestBody UserPutDTO userPutDTO,
-                           HttpServletRequest request)
-    {
-        userService.getUserById(id);
-        Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
-        if(tokenId != id) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to make changes to this profile."));
-        }
-
-        userService.updateUser(id, userPutDTO);
-    }
+      userService.updateUser(id, userPutDTO);
+  }
 }
