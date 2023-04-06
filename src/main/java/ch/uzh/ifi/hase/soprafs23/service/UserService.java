@@ -109,6 +109,7 @@ public class UserService {
     }
 
     public void login(User user){
+        user.setToken(UUID.randomUUID().toString()); // set new token upon login
         user.setStatus(UserStatus.ONLINE);
         user = userRepository.save(user);
         userRepository.flush();

@@ -136,6 +136,7 @@ public class UserServiceTest {
         user.setStatus(UserStatus.OFFLINE);
         userService.login(user); // needs to be o set to online then
         assertEquals(user.getStatus(), UserStatus.ONLINE);
+        assertNotEquals("firstToken", user.getToken());
 
     }
 }

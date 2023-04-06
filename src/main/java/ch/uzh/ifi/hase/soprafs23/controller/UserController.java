@@ -90,7 +90,17 @@ public class UserController {
       //set online
       userService.login(user);
 
-      return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user); //send back user
+    // convert internal representation of user back to API
+    UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+
+    // create HttpHeaders object, add token in response header and make it accessible to the client
+    HttpHeaders headers = new org.springframework.http.HttpHeaders();
+    headers.add("X-Token", user.getToken());
+    List<String> customHeaders = new ArrayList<String>();
+    customHeaders.add("X-Token");
+    headers.setAccessControlExposeHeaders(customHeaders);
+
+    return userGetDTO; //send back user
   }
 
   @PostMapping("users/{userId}/logout")
