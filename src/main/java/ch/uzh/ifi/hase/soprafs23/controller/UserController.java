@@ -34,7 +34,7 @@ public class UserController {
   }
 
   @GetMapping("/users")
-  @ResponseStatus(HttpStatus.OK)
+  @ResponseStatus(HttpStatus.OK) // 200
   @ResponseBody
   public List<UserGetDTO> getAllUsers(HttpServletRequest request) {
     // check validity of token
@@ -55,7 +55,7 @@ public class UserController {
   }
 
   @PostMapping("/users")
-  @ResponseStatus(HttpStatus.CREATED)
+  @ResponseStatus(HttpStatus.CREATED) //201
   @ResponseBody
   public ResponseEntity<UserGetDTO> createUser(@RequestBody UserPostDTO userPostDTO) {
     // convert API user to internal representation
@@ -122,7 +122,7 @@ public class UserController {
   }
 
   @PutMapping("/users/{id}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @ResponseStatus(HttpStatus.NO_CONTENT) // 204
   public void updateUser(@PathVariable Long id,
                          @RequestBody UserPutDTO userPutDTO,
                          HttpServletRequest request)

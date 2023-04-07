@@ -197,29 +197,6 @@ public class UserControllerTest {
                 .andExpect(status().isNotFound()); // has to map again with above http status
     }
 
-    // is this not testing the same as putUsersUsernameLogin_valid??
-    @Test
-    public void loginUser_DTOTest() throws Exception {
-        User user = new User();
-        user.setId(2L);
-        user.setUsername("testName");
-        user.setToken("123");
-        user.setStatus(UserStatus.ONLINE);
-
-        UserPutDTO userPutDTO = new UserPutDTO();
-        userPutDTO.setUsername("testName");
-
-        given(userService.getUserByUsername(Mockito.any())).willReturn(user);
-
-        MockHttpServletRequestBuilder postRequest = post("/users/"+user.getUsername()+"/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(userPutDTO));
-
-        mockMvc.perform(postRequest)
-                .andExpect(status().isOk())
-                .andExpect(header().string("X-Token", notNullValue()));
-    }
-
     @Test
     public void testLoginUser_PasswordInvalid() throws Exception {
         // create a User object
