@@ -6,11 +6,14 @@ import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,9 +34,15 @@ public class UserController {
   }
 
   @GetMapping("/users")
-  @ResponseStatus(HttpStatus.OK)
+  @ResponseStatus(HttpStatus.OK) // 200
   @ResponseBody
-  public List<UserGetDTO> getAllUsers() {
+  public List<UserGetDTO> getAllUsers(HttpServletRequest request) {
+    // check validity of token
+    String token = request.getHeader("X-Token");
+    if(userService.getUseridByToken(token) == 0) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
+    }
+
     // fetch all users in the internal representation
     List<User> users = userService.getUsers();
     List<UserGetDTO> userGetDTOs = new ArrayList<>();
@@ -46,9 +55,9 @@ public class UserController {
   }
 
   @PostMapping("/users")
-  @ResponseStatus(HttpStatus.CREATED)
+  @ResponseStatus(HttpStatus.CREATED) //201
   @ResponseBody
-  public UserGetDTO createUser(@RequestBody UserPostDTO userPostDTO) {
+  public ResponseEntity<UserGetDTO> createUser(@RequestBody UserPostDTO userPostDTO) {
     // convert API user to internal representation
     User userInput = DTOMapper.INSTANCE.convertUserPostDTOtoEntity(userPostDTO);
 
@@ -58,13 +67,20 @@ public class UserController {
     // convert internal representation of user back to API
     UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(createdUser);
 
-    return userGetDTO;
+    // create HttpHeaders object, add token in response header and make it accessible to the client
+    HttpHeaders headers = new org.springframework.http.HttpHeaders();
+    headers.add("X-Token", createdUser.getToken());
+    List<String> customHeaders = new ArrayList<String>();
+    customHeaders.add("X-Token");
+    headers.setAccessControlExposeHeaders(customHeaders);
+
+    return ResponseEntity.status(HttpStatus.CREATED).headers(headers).body(userGetDTO);
   }
 
-  @PutMapping("users/{username}/login")
+  @PostMapping("users/{username}/login")
   @ResponseStatus(HttpStatus.OK) //OK is 200
   @ResponseBody
-  public UserGetDTO loginUser(@RequestBody UserPostDTO userPostDTO, @PathVariable String username){
+  public ResponseEntity<UserGetDTO> loginUser(@RequestBody UserPostDTO userPostDTO, @PathVariable String username){
       //get user by username
       User user = userService.getUserByUsername(username);
 
@@ -75,35 +91,48 @@ public class UserController {
       //set online
       userService.login(user);
 
-      return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user); //send back user
+    // convert internal representation of user back to API
+    UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+
+    // create HttpHeaders object, add token in response header and make it accessible to the client
+    HttpHeaders headers = new org.springframework.http.HttpHeaders();
+    headers.add("X-Token", user.getToken());
+    List<String> customHeaders = new ArrayList<String>();
+    customHeaders.add("X-Token");
+    headers.setAccessControlExposeHeaders(customHeaders);
+
+    return ResponseEntity.status(HttpStatus.OK).headers(headers).body(userGetDTO);
   }
 
-    @PostMapping("users/{userId}/logout")
-    @ResponseStatus(HttpStatus.NO_CONTENT) //OK is 200
-    @ResponseBody
-    public UserGetDTO logoutUser(@PathVariable Long id){
-        //get user by id
-        User user = userService.getUserById(id);
-
-        //set offline
-        userService.logout(user.getId());
-
-        return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user); //send back user
+  @PostMapping("users/{userId}/logout")
+  @ResponseStatus(HttpStatus.NO_CONTENT) //OK is 200
+  @ResponseBody
+  public void logoutUser(@PathVariable Long id, HttpServletRequest request){
+    // check if user is trying to log themselves out
+    Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
+    if(tokenId != id) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
     }
 
+      //get user by id
+      User user = userService.getUserById(id);
 
-    @PutMapping("/users/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateUser(@PathVariable Long id,
-                           @RequestBody UserPutDTO userPutDTO,
-                           HttpServletRequest request)
-    {
-        userService.getUserById(id);
-        Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
-        if(tokenId != id) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to make changes to this profile."));
-        }
+      //set offline
+      userService.logout(user.getId());
+  }
 
-        userService.updateUser(id, userPutDTO);
-    }
+  @PutMapping("/users/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT) // 204
+  public void updateUser(@PathVariable Long id,
+                         @RequestBody UserPutDTO userPutDTO,
+                         HttpServletRequest request)
+  {
+      userService.getUserById(id);
+      Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
+      if(tokenId != id) {
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to make changes to this profile."));
+      }
+
+      userService.updateUser(id, userPutDTO);
+  }
 }

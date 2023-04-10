@@ -15,6 +15,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class UserServiceTest {
 
     @Mock
@@ -34,9 +37,25 @@ public class UserServiceTest {
         user.setId(1L);
         user.setUsername("fisrtUsername");
         user.setPassword("firstPassword");
+        user.setToken("firstToken");
 
         // mocks the save() method of UserRepository
         Mockito.when(userRepository.save(Mockito.any())).thenReturn(user);
+    }
+
+    @Test
+    public void getUseridByToken_test() {
+        // mocks the findByToken(String token) method of UserRepository
+        List<User> listWithTheUser = new ArrayList<User>();
+        listWithTheUser.add(user);
+        Mockito.when(userRepository.findByToken(user.getToken())).thenReturn(listWithTheUser);
+        List<User> listWithNoUser = new ArrayList<User>();
+        Mockito.when(userRepository.findByToken("newToken")).thenReturn(listWithNoUser);
+
+
+        assertEquals(1L, userService.getUserByToken(user.getToken()));
+        assertEquals(0L, userService.getUserByToken("newToken"));
+
     }
 
     @Test
@@ -117,6 +136,7 @@ public class UserServiceTest {
         user.setStatus(UserStatus.OFFLINE);
         userService.login(user); // needs to be o set to online then
         assertEquals(user.getStatus(), UserStatus.ONLINE);
+        assertNotEquals("firstToken", user.getToken());
 
     }
 }

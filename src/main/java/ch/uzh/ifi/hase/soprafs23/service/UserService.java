@@ -42,6 +42,22 @@ public class UserService {
     return this.userRepository.findAll();
   }
 
+  // returns the userid of the user with the given token
+  // returns 0L if no user has the given token
+  public Long getUseridByToken(String token) {
+    if(token == null) {
+      return 0L;
+    }
+
+    List<User> users = userRepository.findByToken(token);
+    assert users.size() <= 1; // if this is not the case, there is duplicate tokens!!!
+
+    if(users.size() == 1) {
+      return users.get(0).getId();
+    }
+
+    return 0L; 
+  }
 
   // creates a new user, throws CONFLICT (409) if something goes wrong
   public User createUser(User newUser) {
@@ -93,6 +109,7 @@ public class UserService {
     }
 
     public void login(User user){
+        user.setToken(UUID.randomUUID().toString()); // set new token upon login
         user.setStatus(UserStatus.ONLINE);
         user = userRepository.save(user);
         userRepository.flush();

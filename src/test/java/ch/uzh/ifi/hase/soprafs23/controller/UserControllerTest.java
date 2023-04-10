@@ -18,7 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+//import org.springframework.test.web.servlet.setup.MockMvcBuilders; //unused
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
@@ -26,6 +26,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -33,6 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 /**
  * UserControllerTest
@@ -59,10 +61,13 @@ public class UserControllerTest {
     user.setPassword("firstPassword");
     user.setToken("firstToken");
     user.setStatus(UserStatus.ONLINE);
+
+    // mocks the getUserIdByTokem(token) method in UserService
+    given(userService.getUseridByToken(user.getToken())).willReturn(user.getId());
   }
 
   @Test
-  public void getUsers_returnsJsonArrayOfExistingUsers() throws Exception {
+  public void getUsers_returnsJsonArrayOfExistingUsers_whenAuthenticated() throws Exception {
     // given
     List<User> allUsers = Collections.singletonList(user);
 
@@ -72,13 +77,29 @@ public class UserControllerTest {
 
     // when
     MockHttpServletRequestBuilder getRequest = get("/users")
-                                                .contentType(MediaType.APPLICATION_JSON);
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .header("X-Token", user.getToken());
 
     // then
     mockMvc.perform(getRequest).andExpect(status().isOk())
         .andExpect(jsonPath("$", hasSize(1)))
         .andExpect(jsonPath("$[0].username", is(user.getUsername())))
         .andExpect(jsonPath("$[0].status", is(user.getStatus().toString())));
+  }
+
+  @Test
+  public void getUsers_returnsErrorUNAUTHORIZED_whenNotAuthenticated() throws Exception {
+    // mocks the getUserIdByTokem(token) method in UserService
+    given(userService.getUseridByToken("newToken")).willReturn(0L);
+
+    // when
+    MockHttpServletRequestBuilder getRequest = get("/users")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .header("X-Token", "newToken");
+
+    // then
+    mockMvc.perform(getRequest).andExpect(status().isUnauthorized());
+    verify(userService, times(1)).getUseridByToken("newToken");
   }
 
   @Test
@@ -99,6 +120,7 @@ public class UserControllerTest {
     // then
     mockMvc.perform(postRequest)
         .andExpect(status().isCreated())
+        .andExpect(header().string("X-Token", notNullValue()))
         .andExpect(jsonPath("$.id", is(user.getId().intValue())))
         .andExpect(jsonPath("$.username", is(user.getUsername())))
         .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
@@ -134,26 +156,28 @@ public class UserControllerTest {
 
 
     @Test
-    public void putUser_valid() throws Exception {
+    public void putUsersUsernameLogin_valid() throws Exception {
         // create new User
         User user = new User();
         user.setId(3L);
         user.setUsername("testUsername");
+        user.setToken("testToken");
 
-        //don't need comparison with internal representation here
+        given(userService.getUserByUsername(user.getUsername())).willReturn(user);
 
         // when/then -> do the request - just trying to put (=update) sth.
-        MockHttpServletRequestBuilder putRequest = put("/users/testUsername/login")
+        MockHttpServletRequestBuilder postRequest = post("/users/testUsername/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(user));
 
         // then
-        mockMvc.perform(putRequest)
-                .andExpect(status().isOk());
+        mockMvc.perform(postRequest)
+                .andExpect(status().isOk())
+                .andExpect(header().string("X-Token", notNullValue()));
     }
 
     @Test
-    public void putUser_INVALID() throws Exception {
+    public void putUsersUsernameLogin_invalid() throws Exception {
         User user = new User();
         user.setId(4L);
         user.setUsername("test");
@@ -164,33 +188,13 @@ public class UserControllerTest {
         given(userService.getUserByUsername("testUsername")).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no user with this username."));
 
         // when/then -> do the request
-        MockHttpServletRequestBuilder putRequest = put("/users/testUsername/login")
+        MockHttpServletRequestBuilder postRequest = post("/users/testUsername/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(user));
 
         // then
-        mockMvc.perform(putRequest)
+        mockMvc.perform(postRequest)
                 .andExpect(status().isNotFound()); // has to map again with above http status
-    }
-
-    @Test
-    public void loginUser_DTOTest() throws Exception {
-        User user = new User();
-        user.setId(2L);
-        user.setUsername("testName");
-        user.setToken("123");
-        user.setStatus(UserStatus.ONLINE);
-
-        UserPutDTO userPutDTO = new UserPutDTO();
-        userPutDTO.setUsername("testName");
-
-        given(userService.getUserByUsername(Mockito.any())).willReturn(user);
-
-        MockHttpServletRequestBuilder putRequest = put("/users/"+user.getUsername()+"/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(asJsonString(userPutDTO));
-
-        mockMvc.perform(putRequest).andExpect(status().isOk());
     }
 
     @Test
@@ -209,7 +213,7 @@ public class UserControllerTest {
 
         doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is wrong. Check the spelling")).when(userService).correctPassword(Mockito.any(String.class), Mockito.any(String.class));
 
-        mockMvc.perform(put("/users/" + user.getUsername() + "/login").contentType(MediaType.APPLICATION_JSON).content(asJsonString(userPostDTO)))
+        mockMvc.perform(post("/users/" + user.getUsername() + "/login").contentType(MediaType.APPLICATION_JSON).content(asJsonString(userPostDTO)))
                 .andExpect(status().isBadRequest());
     }
 
