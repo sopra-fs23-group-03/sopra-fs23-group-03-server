@@ -11,8 +11,17 @@ import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 //import ch.uzh.ifi.hase.soprafs23.service.UserService; // unused
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+
+
 
 @RestController
 public class GroupController {
@@ -44,4 +53,23 @@ public class GroupController {
 //
 //        return groupGetDTO;
 //    }
+
+    @PutMapping("/groups/{groupId}/invitations/reject")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void rejectInvitation(@PathVariable Long gtoupId,
+                                 //@RequestBody InvitationPutDTO InvitationPutDTO,
+                                 HttpServletRequest request) {
+        //TODO: create InvitationPutDTO, should only have guestId<long>
+        //TODO: write rejectInvitation
+    }
+
+    @PutMapping("/groups/{groupId}/invitations/accept")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void acceptInvitation(@PathVariable Long gtoupId,
+                                 //@RequestBody InvitationPutDTO InvitationPutDTO,
+                                 HttpServletRequest request) {
+        //TODO: create InvitationPutDTO, should only have guestId<long>
+        //TODO: write acceptInvitation
+    }
+    
 }
