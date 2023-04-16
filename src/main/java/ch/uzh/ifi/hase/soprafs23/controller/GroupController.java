@@ -2,17 +2,13 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
-//import ch.uzh.ifi.hase.soprafs23.entity.User; // unused
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationPutDTO;
-//import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO; // unused
-//import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO; // unused
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
-//import ch.uzh.ifi.hase.soprafs23.service.UserService; // unused
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -99,9 +95,13 @@ public class GroupController {
         // 404 - group, guest, and/or invitation not found
         groupService.getGroupById(groupId);
         userService.getUserById(invitationPutDTO.getGuestId());
-        invitationService.getInvitationByGroupIdAndGuestId(groupId, guestId);
+        Invitation invitation = invitationService.getInvitationByGroupIdAndGuestId(groupId, guestId);
 
-        //TODO: write acceptInvitation
+        // TODO: add guest to group
+        
+
+        // delete invitation
+        invitationService.deleteInvitation(invitation);
     }
     
 }
