@@ -66,8 +66,6 @@ public class GroupController {
     public void rejectInvitation(@PathVariable Long groupId,
                                  @RequestBody InvitationPutDTO invitationPutDTO,
                                  HttpServletRequest request) {
-        //TODO: write rejectInvitation
-
         Long guestId = invitationPutDTO.getGuestId();
         
         // 401 - not authorized
@@ -90,16 +88,20 @@ public class GroupController {
     public void acceptInvitation(@PathVariable Long groupId,
                                  @RequestBody InvitationPutDTO invitationPutDTO,
                                  HttpServletRequest request) {
-        //TODO: write acceptInvitation
-
         Long guestId = invitationPutDTO.getGuestId();
+
+        // 401 - not authorized
+        Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
+        if(tokenId != guestId) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to reject this invitation."));
+        }
 
         // 404 - group, guest, and/or invitation not found
         groupService.getGroupById(groupId);
         userService.getUserById(invitationPutDTO.getGuestId());
         invitationService.getInvitationByGroupIdAndGuestId(groupId, guestId);
 
-        // 401 - not authorized
+        //TODO: write acceptInvitation
     }
     
 }
