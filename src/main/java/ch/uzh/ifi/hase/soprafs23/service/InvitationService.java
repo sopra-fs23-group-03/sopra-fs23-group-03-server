@@ -40,5 +40,10 @@ public class InvitationService {
 
         return intersection.iterator().next();
     }
+
+    public void deleteInvitation(Invitation invitation) {
+        invitationRepository.delete(invitation);
+        invitationRepository.flush();
+    }
     
 }

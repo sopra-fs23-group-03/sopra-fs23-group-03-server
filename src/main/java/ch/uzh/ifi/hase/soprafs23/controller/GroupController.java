@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 //import ch.uzh.ifi.hase.soprafs23.entity.User; // unused
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupGetDTO;
@@ -20,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -68,12 +70,19 @@ public class GroupController {
 
         Long guestId = invitationPutDTO.getGuestId();
         
+        // 401 - not authorized
+        Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
+        if(tokenId != guestId) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to reject this invitation."));
+        }
+        
         // 404 - group, guest, and/or invitation not found
         groupService.getGroupById(groupId);
         userService.getUserById(guestId);
-        invitationService.getInvitationByGroupIdAndGuestId(groupId, guestId);
+        Invitation invitation = invitationService.getInvitationByGroupIdAndGuestId(groupId, guestId);
 
-        // 401 - not authorized
+        // delete invitation
+        invitationService.deleteInvitation(invitation);
     }
 
     @PutMapping("/groups/{groupId}/invitations/accept")
