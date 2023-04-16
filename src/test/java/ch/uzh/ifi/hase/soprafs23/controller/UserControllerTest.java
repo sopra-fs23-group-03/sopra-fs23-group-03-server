@@ -19,14 +19,17 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 //import org.springframework.test.web.servlet.setup.MockMvcBuilders; //unused
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -221,6 +224,45 @@ public class UserControllerTest {
 
 
     // TODO: add logout test?
+    @Test
+    public void postUsersUserIdLogout_valid() throws Exception {
+        // Set up mock userService method
+        given(userService.getUseridByToken("testToken")).willReturn(3L);
+
+        // Create request to logout user
+        MockHttpServletRequestBuilder postRequest = post("/users/3/logout")
+                .header("X-Token", "testToken")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        // Send request and check response
+        mockMvc.perform(postRequest)
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+    @Test
+    public void postUsersUserIdLogout_notFound() throws Exception {
+        // given
+        given(userService.getUseridByToken("testToken")).willReturn(0L);
+
+        // when/then -> do the request
+        mockMvc.perform(post("/users/1/logout")
+                        .header("X-Token", "testToken")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void postUsersUserIdLogout_unauthorized() throws Exception {
+        // given
+        when(userService.getUseridByToken("testToken")).thenReturn(0L);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        // when/then -> do the request
+        mockMvc.perform(post("/users/0/logout")
+                        .header("X-Token", "testToken")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResponseStatusException));
+    }
 
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
