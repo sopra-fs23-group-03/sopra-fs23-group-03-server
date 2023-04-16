@@ -10,6 +10,7 @@ import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationPutDTO;
 //import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO; // unused
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
+import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 //import ch.uzh.ifi.hase.soprafs23.service.UserService; // unused
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 
@@ -30,9 +31,12 @@ public class GroupController {
 
     private final UserService userService;
 
-    GroupController(GroupService groupService, UserService userService) {
+    private final InvitationService invitationService;
+
+    GroupController(GroupService groupService, UserService userService, InvitationService invitationService) {
         this.groupService = groupService;
         this.userService = userService;
+        this.invitationService = invitationService;
     }
 
 
@@ -61,10 +65,13 @@ public class GroupController {
                                  @RequestBody InvitationPutDTO invitationPutDTO,
                                  HttpServletRequest request) {
         //TODO: write rejectInvitation
+
+        Long guestId = invitationPutDTO.getGuestId();
         
-        // 404 - group and/or guest not found
+        // 404 - group, guest, and/or invitation not found
         groupService.getGroupById(groupId);
-        userService.getUserById(invitationPutDTO.getGuestId());
+        userService.getUserById(guestId);
+        invitationService.getInvitationByGroupIdAndGuestId(groupId, guestId);
 
         // 401 - not authorized
     }
@@ -76,9 +83,12 @@ public class GroupController {
                                  HttpServletRequest request) {
         //TODO: write acceptInvitation
 
-        // 404 - group and/or guest not found
+        Long guestId = invitationPutDTO.getGuestId();
+
+        // 404 - group, guest, and/or invitation not found
         groupService.getGroupById(groupId);
         userService.getUserById(invitationPutDTO.getGuestId());
+        invitationService.getInvitationByGroupIdAndGuestId(groupId, guestId);
 
         // 401 - not authorized
     }
