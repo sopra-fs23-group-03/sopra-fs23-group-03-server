@@ -34,3 +34,19 @@
 
 </p>         
 
+## **Week 2** 
+
+<p>
+
+| Name        | Issues | Description                                                                      | Done |
+|-------------|--------|----------------------------------------------------------------------------------|------|
+| Lany        | #115   | Create put call /groups/{groupId}/invitations/reject                             |      |
+|             | #117   | Create put call /groups/{groupId}/invitations/accept                             |      |
+|             | #118   | Check if user is authorized to accept/reject invitation else return error        |      |
+|             | #119   | Check if user exists when accepting/rejecting the invitation else return error   |      |
+| Orestis     |        |                                                                                  |      |
+| Kalliopi    |        |                                                                                  |      |
+| Ann-Kathrin |        |                                                                                  |      |
+| Chiara      |        |                                                                                  |      |
+
+</p>
