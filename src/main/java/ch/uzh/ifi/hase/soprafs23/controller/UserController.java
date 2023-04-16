@@ -104,22 +104,21 @@ public class UserController {
     return ResponseEntity.status(HttpStatus.OK).headers(headers).body(userGetDTO);
   }
 
-  @PostMapping("users/{userId}/logout")
-  @ResponseStatus(HttpStatus.NO_CONTENT) //OK is 200
-  @ResponseBody
-  public void logoutUser(@PathVariable Long id, HttpServletRequest request){
-    // check if user is trying to log themselves out
-    Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
-    if(tokenId != id) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
+    @PostMapping("users/{userId}/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logoutUser(HttpServletRequest request, @PathVariable Long userId) {
+        String token = request.getHeader("X-Token");
+        Long id = userService.getUseridByToken(token);
+
+        if (!id.equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
+        if(userService.getUseridByToken(token) == 0) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
+        }
+        userService.logout(id);
     }
-
-      //get user by id
-      User user = userService.getUserById(id);
-
-      //set offline
-      userService.logout(user.getId());
-  }
 
   @PutMapping("/users/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT) // 204
@@ -135,4 +134,20 @@ public class UserController {
 
       userService.updateUser(id, userPutDTO);
   }
+    @GetMapping("/users/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public UserGetDTO getUserById(@PathVariable Long id, HttpServletRequest request) {
+        // check validity of token
+        String token = request.getHeader("X-Token");
+        if(userService.getUseridByToken(token) == 0) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
+        }
+
+        // fetch all users in the internal representation
+        User user = userService.getUserById(id);
+        UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+
+        return userGetDTO;
+    }
 }
