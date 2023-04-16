@@ -93,7 +93,7 @@ public class GroupController {
         // 401 - not authorized
         Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
         if(tokenId != guestId) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to reject this invitation."));
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to accept this invitation."));
         }
 
         // 404 - group, guest, and/or invitation not found
