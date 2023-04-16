@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupPostDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationPutDTO;
 //import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO; // unused
 //import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO; // unused
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
@@ -55,21 +56,31 @@ public class GroupController {
 //    }
 
     @PutMapping("/groups/{groupId}/invitations/reject")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.NO_CONTENT) // 204
     public void rejectInvitation(@PathVariable Long groupId,
-                                 //@RequestBody InvitationPutDTO InvitationPutDTO,
+                                 @RequestBody InvitationPutDTO invitationPutDTO,
                                  HttpServletRequest request) {
-        //TODO: create InvitationPutDTO, should only have guestId<long>
         //TODO: write rejectInvitation
+        
+        // 404 - group and/or guest not found
+        groupService.getGroupById(groupId);
+        userService.getUserById(invitationPutDTO.getGuestId());
+
+        // 401 - not authorized
     }
 
     @PutMapping("/groups/{groupId}/invitations/accept")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.NO_CONTENT) // 204
     public void acceptInvitation(@PathVariable Long groupId,
-                                 //@RequestBody InvitationPutDTO InvitationPutDTO,
+                                 @RequestBody InvitationPutDTO invitationPutDTO,
                                  HttpServletRequest request) {
-        //TODO: create InvitationPutDTO, should only have guestId<long>
         //TODO: write acceptInvitation
+
+        // 404 - group and/or guest not found
+        groupService.getGroupById(groupId);
+        userService.getUserById(invitationPutDTO.getGuestId());
+
+        // 401 - not authorized
     }
     
 }
