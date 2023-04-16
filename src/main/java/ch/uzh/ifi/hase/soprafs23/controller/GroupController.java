@@ -56,7 +56,7 @@ public class GroupController {
 
     @PutMapping("/groups/{groupId}/invitations/reject")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void rejectInvitation(@PathVariable Long gtoupId,
+    public void rejectInvitation(@PathVariable Long groupId,
                                  //@RequestBody InvitationPutDTO InvitationPutDTO,
                                  HttpServletRequest request) {
         //TODO: create InvitationPutDTO, should only have guestId<long>
@@ -65,7 +65,7 @@ public class GroupController {
 
     @PutMapping("/groups/{groupId}/invitations/accept")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void acceptInvitation(@PathVariable Long gtoupId,
+    public void acceptInvitation(@PathVariable Long groupId,
                                  //@RequestBody InvitationPutDTO InvitationPutDTO,
                                  HttpServletRequest request) {
         //TODO: create InvitationPutDTO, should only have guestId<long>
