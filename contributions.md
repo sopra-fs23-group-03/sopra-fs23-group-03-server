@@ -44,9 +44,24 @@
 |             | #117   | Create put call /groups/{groupId}/invitations/accept                             |      |
 |             | #118   | Check if user is authorized to accept/reject invitation else return error        |      |
 |             | #119   | Check if user exists when accepting/rejecting the invitation else return error   |      |
+|             |        |                                                                                  |      |
 | Orestis     |        |                                                                                  |      |
+|             |        |                                                                                  |      |
 | Kalliopi    |        |                                                                                  |      |
+|             |        |                                                                                  |      |
 | Ann-Kathrin |        |                                                                                  |      |
-| Chiara      |        |                                                                                  |      |
+|             |        |                                                                                  |      |
+| Chiara      | #45    | Create profile page with fields for allergies, favourite cuisine and special diet|  X   |
+|             | #46    | Create API calls with body for backend communication                             |      |
+|             | #47    | Display username, allergies, favorite cuisine, and special diet on user profile  |      |
+|             | #48    | Create edit button to allow user to edit fields of his/her own profile           |  X   |
+|             | #49    | Create save button to save the edited fields                                     |      |
+|             | #50    | Create cancel button to cancel the edits                                         |  X   |
+|             | #51    | Create path to be redirected to user profile                                     |      |
+|             | #70    | Redirect user to Group Creation page when pressing on Form Group button          |  X   |
+
+
+
+
 
 </p>
