@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
@@ -19,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 //import org.springframework.test.web.servlet.setup.MockMvcBuilders; //unused
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
@@ -264,6 +266,59 @@ public class UserControllerTest {
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResponseStatusException));
     }
 
+    @Test
+    public void testGetUserByIdReturns200() throws Exception {
+        // mocks the getUserById(id) method in UserService
+        given(userService.getUserById(user.getId())).willReturn(user);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}", user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(user.getId().intValue())));
+
+        // verifies that the correct calls on userService were made
+        verify(userService, times(1)).getUseridByToken(user.getToken());
+        verify(userService, times(1)).getUserById(user.getId());
+    }
+    @Test
+    public void testGetUserByIdReturns404() throws Exception {
+        Long secondUserId = 2L;
+        String errorMessage = String.format("User with id %s does not exist.", secondUserId);
+
+        // mocks the getUserById(id) method in UserService
+        given(userService.getUserById(secondUserId))
+                .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, errorMessage));
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}", secondUserId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+                .andExpect(status().isNotFound());
+        //.andExpect(jsonPath("$.message", is(errorMessage)));
+
+        // verifies that the correct calls on userService were made
+        verify(userService, times(1)).getUseridByToken(user.getToken());
+        verify(userService, times(1)).getUserById(secondUserId);
+    }
+
+    @Test
+    public void testGetUserByIdReturns401() throws Exception {
+        Long userId = 1L;
+        String token = "invalid-token";
+        Mockito.when(userService.getUseridByToken(token)).thenReturn(0L);
+        mockMvc.perform(MockMvcRequestBuilders.get("/users/" + userId)
+                        .header("X-Token", token)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
    * can be processed

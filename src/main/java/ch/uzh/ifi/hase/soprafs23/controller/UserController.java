@@ -137,7 +137,7 @@ public class UserController {
     @GetMapping("/users/{userId}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public UserGetDTO getUserById(@PathVariable Long id, HttpServletRequest request) {
+    public UserGetDTO getUserById(@PathVariable Long userId, HttpServletRequest request) {
         // check validity of token
         String token = request.getHeader("X-Token");
         if(userService.getUseridByToken(token) == 0) {
@@ -145,7 +145,7 @@ public class UserController {
         }
 
         // fetch all users in the internal representation
-        User user = userService.getUserById(id);
+        User user = userService.getUserById(userId);
         UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
 
         return userGetDTO;
