@@ -135,4 +135,12 @@ public class UserController {
 
       userService.updateUser(id, userPutDTO);
   }
+
+  @GetMapping("/users/{userId}/invitations")
+  @ResponseStatus(HttpStatus.OK) // 200
+  @ResponseBody
+  public void getOpenInvitationsByGuest(@PathVariable Long userId, HttpServletRequest request) {
+    // TODO: create this get request
+  }
+
 }
