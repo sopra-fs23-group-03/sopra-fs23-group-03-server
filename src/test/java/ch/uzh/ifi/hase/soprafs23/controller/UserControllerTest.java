@@ -3,7 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
+//import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO; //unused
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,7 +31,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put; //unused
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -156,7 +156,7 @@ public class UserControllerTest {
 
 
     @Test
-    public void putUsersUsernameLogin_valid() throws Exception {
+    public void postUsersUsernameLogin_valid() throws Exception {
         // create new User
         User user = new User();
         user.setId(3L);
@@ -177,7 +177,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void putUsersUsernameLogin_invalid() throws Exception {
+    public void postUsersUsernameLogin_invalid() throws Exception {
         User user = new User();
         user.setId(4L);
         user.setUsername("test");
