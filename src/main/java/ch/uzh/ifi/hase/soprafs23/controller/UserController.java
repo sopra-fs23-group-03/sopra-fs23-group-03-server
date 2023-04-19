@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
@@ -144,9 +145,7 @@ public class UserController {
   @GetMapping("/users/{userId}/invitations")
   @ResponseStatus(HttpStatus.OK) // 200
   @ResponseBody
-  public void getOpenInvitationsByGuest(@PathVariable Long userId, HttpServletRequest request) {
-    // TODO: create this get request
-
+  public List<InvitationGetDTO> getOpenInvitationsByGuest(@PathVariable Long userId, HttpServletRequest request) {
     // 404 - user not found
     userService.getUserById(userId);
     
@@ -161,11 +160,18 @@ public class UserController {
 
     // 204 - no open invitations
     if(invitations.size() == 0) {
-      // 204
+      throw new ResponseStatusException(HttpStatus.NO_CONTENT);
     }
 
     // convert to InvitationGetDTOs and return them
+    List<InvitationGetDTO> invitationGetDTOs = new ArrayList<>();
+    for(Invitation invitation : invitations) {
+      InvitationGetDTO invitationGetDTO = new InvitationGetDTO();
+      invitationGetDTO.setGroupId(invitation.getGroupId());
+      invitationGetDTOs.add(invitationGetDTO);
+    }
 
+    return invitationGetDTOs;
   }
 
 }
