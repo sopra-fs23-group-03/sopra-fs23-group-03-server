@@ -10,9 +10,7 @@
 |             | #30    | Check for unique username                                                        |  X   |
 |             | #29    | Implement RegEx to check valid username                                          |  X   |
 |             | #144   | Create new registration method                                                   |  X   |
-| Orestis     | #47    | Create Logout Method which sets User to offline                                  |  X   |
-|             | #106   | Create new fields for allergies, favorite cuisine and special diet in user class |  X   |
-|             | #88    | Create method for updating the user profile                                      |  X   |
+| Orestis     | #106   | Create new fields for allergies, favorite cuisine and special diet in user class |  X   |
 |             | #124   | Make sure there's only one host per group                                        |  X   |
 |             | #125   | Make a function to assign name to group                                          |  X   |
 |             | #127   | Create method checking if group name already exists                              |  X   |
@@ -45,11 +43,13 @@
 |             | #118   | Check if user is authorized to accept/reject invitation else return error        |      |
 |             | #119   | Check if user exists when accepting/rejecting the invitation else return error   |      |
 |             | #157   | create GET /users/{userId}/invitations request                                   |      |
-| Orestis     |        |                                                                                  |      |
-|             |        |                                                                                  |      |
+| Orestis     | #47    | Create Logout Method which sets User to offline                                  |      |
+|             | #88    | Create method for updating the user profile                                      |      |
+|             | #87    | Create method for returning the user profile                                     |      |    
 | Kalliopi    |        |                                                                                  |      |
 |             |        |                                                                                  |      |
-| Ann-Kathrin |        |                                                                                  |      |
+| Ann-Kathrin | #101/102| Create method to retrieve active groups / active users                          |   X  |
+|             | #124   | Create function to check that one user is only in one group                      |      |
 |             |        |                                                                                  |      |
 | Chiara      | #45    | Create profile page with fields for allergies, favourite cuisine and special diet|  X   |
 |             | #46    | Create API calls with body for backend communication                             |      |
