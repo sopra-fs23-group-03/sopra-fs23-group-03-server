@@ -77,16 +77,12 @@ public class GroupControllerTest {
     @Test
     public void getGroups_returnsJsonArrayOfExistingGroups_whenAuthenticated() throws Exception {
 
-        user = new User();
-        user.setId(2L);
-        user.setToken("testtoken");
-        user.setStatus(UserStatus.ONLINE);
-
         // given
         List<Group> allGroups = Collections.singletonList(group);
 
         // this mocksGroupService
-        given(userService.getUserById(user.getId())).willReturn(user);
+        given(userService.getUseridByToken(user.getToken())).willReturn(user.getId()); // first get User ID by Token
+        given(userService.getUserById(user.getId())).willReturn(user); // then get User by ID
         given(groupService.getGroups()).willReturn(allGroups);
 
         // when
@@ -100,6 +96,25 @@ public class GroupControllerTest {
                 .andExpect(jsonPath("$[0].groupName", is(group.getGroupName())));
     }
 
+
+    @Test
+    public void getGroups_returnsErrorUNAUTHORIZED_whenNotAuthenticated() throws Exception {
+        // given
+        List<Group> allGroups = Collections.singletonList(group);
+
+        // mocks the getUserIdByToken(token) method in UserService
+        given(userService.getUseridByToken("newToken")).willReturn(0L);
+        given(groupService.getGroups()).willReturn(allGroups);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", "newToken");
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isUnauthorized());
+        verify(userService, times(1)).getUseridByToken("newToken");
+    }
 
     @Test
     public void invitationReject_validInput() throws Exception {
@@ -125,7 +140,7 @@ public class GroupControllerTest {
         // then
         mockMvc.perform(rejectRequest).andExpect(status().isNoContent());
 
-        // verify that the correct calls toservices were made
+        // verify that the correct calls to services were made
         verify(userService, times(1)).getUserByToken(user.getToken());
         verify(groupService, times(1)).getGroupById(group.getId());
         verify(userService, times(1)).getUserById(user.getId());

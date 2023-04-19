@@ -130,32 +130,4 @@ public class GroupController {
     }
 
 
-    @PostMapping("groups/{groupId}/invitations")
-    @ResponseStatus(HttpStatus.CREATED) //CREATED is 201
-    @ResponseBody
-    public ResponseEntity<GroupGetDTO> sendInvitation(@RequestBody GroupPostDTO groupPostDTO, @PathVariable Long groupId){
-        //get group by groupId
-        Group group = groupService.getGroupById(groupId);
-
-        //convert info to internal representation
-
-
-        // do stuff
-
-
-
-        // convert internal representation of user back to API
-
-
-        // create HttpHeaders object, add token in response header and make it accessible to the client
-       /* HttpHeaders headers = new org.springframework.http.HttpHeaders();
-        headers.add("X-Token", user.getToken());
-        List<String> customHeaders = new ArrayList<String>();
-        customHeaders.add("X-Token");
-        headers.setAccessControlExposeHeaders(customHeaders);*/
-
-        return ResponseEntity.status(HttpStatus.CREATED).headers(headers).body(groupGetDTO);
-    }
-
-    
 }
