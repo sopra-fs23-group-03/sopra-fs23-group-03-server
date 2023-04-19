@@ -220,7 +220,7 @@ public class UserControllerTest {
 
 
 
-    // TODO: add logout test?
+    // TODO: add add more get invitation tests
 
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
