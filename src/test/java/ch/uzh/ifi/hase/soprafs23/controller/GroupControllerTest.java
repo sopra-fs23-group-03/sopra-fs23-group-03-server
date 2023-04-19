@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
+import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
@@ -23,10 +24,18 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.web.server.ResponseStatusException;
 
 
+import java.util.Collections;
+import java.util.List;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 @WebMvcTest(GroupController.class)
 public class GroupControllerTest {
@@ -59,10 +68,38 @@ public class GroupControllerTest {
         user = new User();
         user.setId(group.getHostId());
         user.setToken("testtoken");
+        user.setStatus(UserStatus.ONLINE);
 
         // mocks the getUserIdByToken(token) method in UserService
         given(userService.getUserByToken(user.getToken())).willReturn(user.getId());
     }
+
+    @Test
+    public void getGroups_returnsJsonArrayOfExistingGroups_whenAuthenticated() throws Exception {
+
+        user = new User();
+        user.setId(2L);
+        user.setToken("testtoken");
+        user.setStatus(UserStatus.ONLINE);
+
+        // given
+        List<Group> allGroups = Collections.singletonList(group);
+
+        // this mocksGroupService
+        given(userService.getUserById(user.getId())).willReturn(user);
+        given(groupService.getGroups()).willReturn(allGroups);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].groupName", is(group.getGroupName())));
+    }
+
 
     @Test
     public void invitationReject_validInput() throws Exception {

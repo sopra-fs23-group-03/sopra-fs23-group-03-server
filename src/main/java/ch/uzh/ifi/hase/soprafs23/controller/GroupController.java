@@ -3,10 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupGetDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupPostDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationPutDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
@@ -14,7 +11,9 @@ import ch.uzh.ifi.hase.soprafs23.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -129,5 +128,34 @@ public class GroupController {
         // delete invitation
         invitationService.deleteInvitation(invitation);
     }
+
+
+    @PostMapping("groups/{groupId}/invitations")
+    @ResponseStatus(HttpStatus.CREATED) //CREATED is 201
+    @ResponseBody
+    public ResponseEntity<GroupGetDTO> sendInvitation(@RequestBody GroupPostDTO groupPostDTO, @PathVariable Long groupId){
+        //get group by groupId
+        Group group = groupService.getGroupById(groupId);
+
+        //convert info to internal representation
+
+
+        // do stuff
+
+
+
+        // convert internal representation of user back to API
+
+
+        // create HttpHeaders object, add token in response header and make it accessible to the client
+       /* HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.add("X-Token", user.getToken());
+        List<String> customHeaders = new ArrayList<String>();
+        customHeaders.add("X-Token");
+        headers.setAccessControlExposeHeaders(customHeaders);*/
+
+        return ResponseEntity.status(HttpStatus.CREATED).headers(headers).body(groupGetDTO);
+    }
+
     
 }
