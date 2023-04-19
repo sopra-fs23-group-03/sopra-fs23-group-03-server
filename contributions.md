@@ -49,7 +49,11 @@
 | Kalliopi    |        |                                                                                  |      |
 |             |        |                                                                                  |      |
 | Ann-Kathrin | #101/102| Create method to retrieve active groups / active users                          |   X  |
-|             | #124   | Create function to check that one user is only in one group                      |      |
+|             | #135   | Create function to check that one user is only in one group                      |      |
+|             | #159   | create GET calls to retrieve group information                                   |    X |
+|             | #134   | Create function to check if group has at least one guest                         |      |
+|             | #131   | Create a method that checks that person being in creation page is a host         |      |
+|             | #132   | Create POST /groups/{groupId}/invitations                                        |      |
 |             |        |                                                                                  |      |
 | Chiara      | #45    | Create profile page with fields for allergies, favourite cuisine and special diet|  X   |
 |             | #46    | Create API calls with body for backend communication                             |      |
