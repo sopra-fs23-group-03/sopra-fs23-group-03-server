@@ -2,7 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
+//import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+//import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -22,15 +23,16 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 //import org.springframework.test.web.servlet.setup.MockMvcBuilders; //unused
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+//import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
+//import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+//import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -55,6 +57,8 @@ public class UserControllerTest {
 
   @MockBean
   private UserService userService;
+
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
   private User user;
 
@@ -222,10 +226,6 @@ public class UserControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-
-
-
-    // TODO: add logout test?
     @Test
     public void postUsersUserIdLogout_valid() throws Exception {
         // Set up mock userService method
@@ -256,7 +256,6 @@ public class UserControllerTest {
     public void postUsersUserIdLogout_unauthorized() throws Exception {
         // given
         when(userService.getUseridByToken("testToken")).thenReturn(0L);
-        HttpServletRequest request = mock(HttpServletRequest.class);
 
         // when/then -> do the request
         mockMvc.perform(post("/users/0/logout")
@@ -324,11 +323,89 @@ public class UserControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
+    @Test
+    public void putTestUpdateUser_204() throws Exception {
+        // Arrange
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("testuser");
+        user.setToken("valid-token");
+        Mockito.when(userService.getUserById(1L)).thenReturn(user);
+        Mockito.when(userService.getUserByToken("valid-token")).thenReturn(1L);
+
+        UserPutDTO userPutDTO = new UserPutDTO();
+        userPutDTO.setUsername("new-username");
+        userPutDTO.setAllergies("peanuts");
+        userPutDTO.setFavoriteCuisine("Italian");
+        userPutDTO.setSpecialDiet("vegan");
+
+        MockHttpServletRequestBuilder requestBuilder = put("/users/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", "valid-token")
+                .content(objectMapper.writeValueAsString(userPutDTO));
+
+        // Act & Assert
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void putUsersId_whenUserDoesntExist_404() throws Exception {
+        String newAllergies = "secondAllergies";
+        String newUsername = "secondUsername";
+        String newFavoriteCuisine = "secondFavoriteCuisine";
+        String newSpecialDiet = "secondSpecialDiet";
+
+        Long secondUserId = 2L;
+        String errorMessage = String.format("User with id %s does not exist.", secondUserId);
+
+        // create UserPutDTO for the request body
+        UserPutDTO userPutDTO = new UserPutDTO();
+        userPutDTO.setUsername(newUsername);
+        userPutDTO.setAllergies(newAllergies);
+        userPutDTO.setFavoriteCuisine(newFavoriteCuisine);
+        userPutDTO.setSpecialDiet(newSpecialDiet);
+
+        // mocks the getUserById(id) method in UserService
+        given(userService.getUserById(secondUserId))
+                .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, errorMessage));
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/users/{id}", secondUserId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(asJsonString(userPutDTO))
+                .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(putRequest)
+                .andExpect(status().isNotFound());
+
+        // verifies that there were the correct calls on userService
+        verify(userService, times(1)).getUserById(secondUserId);
+    }
+
+
+    @Test
+    public void PutUdateUser_whenUserUnauthorized_401() throws Exception {
+        Long userId = 1L;
+        String token = "invalid-token";
+        User user = new User();
+        user.setId(userId);
+        Mockito.when(userService.getUserById(userId)).thenReturn(user); // modify the mock response to return null
+        Mockito.when(userService.getUseridByToken(token)).thenReturn(0L);
+        mockMvc.perform(MockMvcRequestBuilders.put("/users/" + userId)
+                        .header("X-Token", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\": \"newUsername\"}")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
    * can be processed
    * Input will look like this: {"name": "Test User", "username": "testUsername"}
-   * 
+   *
    * @param object
    * @return string
    */

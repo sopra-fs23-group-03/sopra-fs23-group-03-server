@@ -122,17 +122,22 @@ public class UserController {
 
   @PutMapping("/users/{userId}")
   @ResponseStatus(HttpStatus.NO_CONTENT) //NO CONTENT IS 204
-  public void updateUser(@PathVariable Long id,
+  public void updateUser(@PathVariable Long userId,
                          @RequestBody UserPutDTO userPutDTO,
                          HttpServletRequest request)
   {
-      userService.getUserById(id);
+      User user = userService.getUserById(userId);
+
+      if (user == null){
+          throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User not found with ID: %d", userId));
+      }
+
       Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
-      if(tokenId != id) {
+      if(tokenId != userId) {
           throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to make changes to this profile."));
       }
 
-      userService.updateUser(id, userPutDTO);
+      userService.updateUser(userId, userPutDTO);
   }
     @GetMapping("/users/{userId}")
     @ResponseStatus(HttpStatus.OK) // OK IS 200
