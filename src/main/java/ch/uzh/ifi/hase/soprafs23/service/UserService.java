@@ -150,6 +150,22 @@ public class UserService {
         userRepository.flush();
     }
 
+    public Long getUserByToken(String token) {
+        if(token == null) {
+            return 0L;
+        }
+
+        List<User> users = userRepository.findByToken(token);
+        assert users.size() <= 1;
+
+        if(users.size() == 1) {
+            return users.get(0).getId();
+        }
+        return 0L;
+    }
+
+    // creates a new user, throws CONFLICT (409) if something goes wrong
+
 
 
   /**
