@@ -6,6 +6,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationPutDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
@@ -21,6 +22,8 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
+import java.util.ArrayList;
+import java.util.List;
 
 
 @RestController
@@ -37,6 +40,29 @@ public class GroupController {
         this.invitationService = invitationService;
     }
 
+    @GetMapping("/groups")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
+    public List<GroupGetDTO> getAllGroups(HttpServletRequest request) {
+
+        // check validity of token
+        String token = request.getHeader("X-Token");
+        if(userService.getUseridByToken(token) == 0) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized.")); // 401 - not authorized
+        }
+
+        // fetch all groups in the internal representation
+        List<Group> groups = groupService.getGroups();
+        List<GroupGetDTO> groupGetDTOs = new ArrayList<>();
+
+        // convert each group to the API representation
+        for (Group group : groups) {
+            groupGetDTOs.add(DTOMapper.INSTANCE.convertEntityToGroupGetDTO(group));
+        }
+        return groupGetDTOs;
+
+
+    }
 
 //    @PostMapping("/groups")
 //    @ResponseStatus(HttpStatus.CREATED)
