@@ -1,10 +1,12 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
+import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
+import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -29,8 +31,11 @@ public class UserController {
 
   private final UserService userService;
 
-  public UserController(UserService userService) {
+  private final InvitationService invitationService;
+
+  public UserController(UserService userService, InvitationService invitationService) {
     this.userService = userService;
+    this.invitationService = invitationService;
   }
 
   @GetMapping("/users")
@@ -141,6 +146,26 @@ public class UserController {
   @ResponseBody
   public void getOpenInvitationsByGuest(@PathVariable Long userId, HttpServletRequest request) {
     // TODO: create this get request
+
+    // 404 - user not found
+    userService.getUserById(userId);
+    
+    // 401 - not authorized
+    Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
+    if(tokenId != userId) {
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
+    }
+
+    // retrieve the invitations
+    List<Invitation> invitations = invitationService.getInvitationsByGuestId(userId);
+
+    // 204 - no open invitations
+    if(invitations.size() == 0) {
+      // 204
+    }
+
+    // convert to InvitationGetDTOs and return them
+
   }
 
 }
