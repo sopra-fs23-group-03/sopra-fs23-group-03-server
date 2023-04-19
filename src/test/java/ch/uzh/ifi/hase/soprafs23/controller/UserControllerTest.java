@@ -279,7 +279,12 @@ public class UserControllerTest {
         // then
         mockMvc.perform(getRequest)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(user.getId().intValue())));
+                .andExpect(jsonPath("$.id", is(user.getId().intValue())))
+                .andExpect(jsonPath("$.username", is(user.getUsername())))
+                .andExpect(jsonPath("$.allergies", is(user.getAllergies())))
+                .andExpect(jsonPath("$.favoriteCuisine", is(user.getFavoriteCuisine())))
+                .andExpect(jsonPath("$.specialDiet", is(user.getSpecialDiet())))
+                .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
 
         // verifies that the correct calls on userService were made
         verify(userService, times(1)).getUseridByToken(user.getToken());
