@@ -105,7 +105,7 @@ public class UserController {
   }
 
     @PostMapping("users/{userId}/logout")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.NO_CONTENT) // NO CONTENT IS 204
     public void logoutUser(HttpServletRequest request, @PathVariable Long userId) {
         String token = request.getHeader("X-Token");
         Long id = userService.getUseridByToken(token);
@@ -120,8 +120,8 @@ public class UserController {
         userService.logout(id);
     }
 
-  @PutMapping("/users/{id}")
-  @ResponseStatus(HttpStatus.NO_CONTENT) // 204
+  @PutMapping("/users/{userId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT) //NO CONTENT IS 204
   public void updateUser(@PathVariable Long id,
                          @RequestBody UserPutDTO userPutDTO,
                          HttpServletRequest request)
@@ -135,7 +135,7 @@ public class UserController {
       userService.updateUser(id, userPutDTO);
   }
     @GetMapping("/users/{userId}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.OK) // OK IS 200
     @ResponseBody
     public UserGetDTO getUserById(@PathVariable Long userId, HttpServletRequest request) {
         // check validity of token
