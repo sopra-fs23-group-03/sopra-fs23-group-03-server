@@ -109,8 +109,6 @@ public class UserServiceTest {
         assertThrows(ResponseStatusException.class, () -> userService.getUserByUsername("new"));
     }
 
-
-// TODO: delete above or below --> just to show that it works
     @Test
     public void testCorrectPassword() {
         user.setUsername("testuser");

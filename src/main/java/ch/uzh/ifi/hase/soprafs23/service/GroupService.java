@@ -3,6 +3,9 @@ package ch.uzh.ifi.hase.soprafs23.service;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
+
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -47,5 +50,15 @@ public class GroupService {
         if (groupByGroupName != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("The Group Name %s is already taken!", groupName));
         }
+    }
+
+    public Group getGroupById(Long id) {
+        Optional<Group> group = this.groupRepository.findById(id);
+
+        if (!group.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Group with id %s does not exist", id));
+        }
+
+        return group.get();
     }
 }
