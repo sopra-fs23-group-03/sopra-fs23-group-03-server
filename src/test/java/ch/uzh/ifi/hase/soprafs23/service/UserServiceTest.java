@@ -53,8 +53,8 @@ public class UserServiceTest {
         Mockito.when(userRepository.findByToken("newToken")).thenReturn(listWithNoUser);
 
 
-        assertEquals(1L, userService.getUserByToken(user.getToken()));
-        assertEquals(0L, userService.getUserByToken("newToken"));
+        assertEquals(1L, userService.getUseridByToken(user.getToken()));
+        assertEquals(0L, userService.getUseridByToken("newToken"));
 
     }
 
