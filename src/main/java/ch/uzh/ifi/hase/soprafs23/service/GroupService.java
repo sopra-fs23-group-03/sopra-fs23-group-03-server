@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,9 @@ public class GroupService {
         this.groupRepository = groupRepository;
     }
 
+    public List<Group> getGroups() {
+        return this.groupRepository.findAll();
+    }
 
     // creates a new user, throws CONFLICT (409) if something goes wrong
     public Group createGroup(Group newGroup, User host) {
@@ -60,5 +64,11 @@ public class GroupService {
         }
 
         return group.get();
+    }
+
+
+    public void invite(Long groupId, List <String> members ){
+
+
     }
 }

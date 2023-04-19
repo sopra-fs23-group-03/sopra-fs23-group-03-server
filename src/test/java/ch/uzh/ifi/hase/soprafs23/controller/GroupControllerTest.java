@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
+import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
@@ -23,10 +24,18 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.web.server.ResponseStatusException;
 
 
+import java.util.Collections;
+import java.util.List;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 @WebMvcTest(GroupController.class)
 public class GroupControllerTest {
@@ -59,9 +68,52 @@ public class GroupControllerTest {
         user = new User();
         user.setId(group.getHostId());
         user.setToken("testtoken");
+        user.setStatus(UserStatus.ONLINE);
 
         // mocks the getUserIdByToken(token) method in UserService
         given(userService.getUserByToken(user.getToken())).willReturn(user.getId());
+    }
+
+    @Test
+    public void getGroups_returnsJsonArrayOfExistingGroups_whenAuthenticated() throws Exception {
+
+        // given
+        List<Group> allGroups = Collections.singletonList(group);
+
+        // this mocksGroupService
+        given(userService.getUseridByToken(user.getToken())).willReturn(user.getId()); // first get User ID by Token
+        given(userService.getUserById(user.getId())).willReturn(user); // then get User by ID
+        given(groupService.getGroups()).willReturn(allGroups);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].groupName", is(group.getGroupName())));
+    }
+
+
+    @Test
+    public void getGroups_returnsErrorUNAUTHORIZED_whenNotAuthenticated() throws Exception {
+        // given
+        List<Group> allGroups = Collections.singletonList(group);
+
+        // mocks the getUserIdByToken(token) method in UserService
+        given(userService.getUseridByToken("newToken")).willReturn(0L);
+        given(groupService.getGroups()).willReturn(allGroups);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", "newToken");
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isUnauthorized());
+        verify(userService, times(1)).getUseridByToken("newToken");
     }
 
     @Test
@@ -88,7 +140,7 @@ public class GroupControllerTest {
         // then
         mockMvc.perform(rejectRequest).andExpect(status().isNoContent());
 
-        // verify that the correct calls toservices were made
+        // verify that the correct calls to services were made
         verify(userService, times(1)).getUserByToken(user.getToken());
         verify(groupService, times(1)).getGroupById(group.getId());
         verify(userService, times(1)).getUserById(user.getId());
