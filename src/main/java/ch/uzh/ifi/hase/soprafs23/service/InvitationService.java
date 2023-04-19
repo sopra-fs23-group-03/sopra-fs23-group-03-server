@@ -41,10 +41,6 @@ public class InvitationService {
         return intersection.iterator().next();
     }
 
-    public List<Invitation> getInvitationsByGuestId(Long guestId) {
-        return invitationRepository.findByGuestId(guestId);
-    }
-
     public void deleteInvitation(Invitation invitation) {
         invitationRepository.delete(invitation);
         invitationRepository.flush();

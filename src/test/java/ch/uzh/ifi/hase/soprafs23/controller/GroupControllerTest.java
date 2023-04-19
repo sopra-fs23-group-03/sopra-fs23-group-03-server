@@ -71,7 +71,7 @@ public class GroupControllerTest {
         user.setStatus(UserStatus.ONLINE);
 
         // mocks the getUserIdByToken(token) method in UserService
-        given(userService.getUseridByToken(user.getToken())).willReturn(user.getId());
+        given(userService.getUserByToken(user.getToken())).willReturn(user.getId());
     }
 
     @Test
@@ -140,12 +140,8 @@ public class GroupControllerTest {
         // then
         mockMvc.perform(rejectRequest).andExpect(status().isNoContent());
 
-
-        // verify that the correct calls toservices were made
-        verify(userService, times(1)).getUseridByToken(user.getToken());
-
-       
-
+        // verify that the correct calls to services were made
+        verify(userService, times(1)).getUserByToken(user.getToken());
         verify(groupService, times(1)).getGroupById(group.getId());
         verify(userService, times(1)).getUserById(user.getId());
         verify(invitationService, times(1)).getInvitationByGroupIdAndGuestId(group.getId(), user.getId());
