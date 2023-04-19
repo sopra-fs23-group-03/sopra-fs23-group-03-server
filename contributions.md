@@ -49,7 +49,8 @@
 |             |        |                                                                                  |      |
 | Kalliopi    |        |                                                                                  |      |
 |             |        |                                                                                  |      |
-| Ann-Kathrin |        |                                                                                  |      |
+| Ann-Kathrin | #101/102| Create method to retrieve active groups / active users                          |   X  |
+|             | #124   | Create function to check that one user is only in one group                      |      |
 |             |        |                                                                                  |      |
 | Chiara      | #45    | Create profile page with fields for allergies, favourite cuisine and special diet|  X   |
 |             | #46    | Create API calls with body for backend communication                             |      |
