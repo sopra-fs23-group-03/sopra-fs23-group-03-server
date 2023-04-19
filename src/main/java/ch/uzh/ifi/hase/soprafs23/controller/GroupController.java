@@ -65,7 +65,7 @@ public class GroupController {
         Long guestId = invitationPutDTO.getGuestId();
         
         // 401 - not authorized
-        Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
         if(tokenId != guestId) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to reject this invitation."));
         }
@@ -87,7 +87,7 @@ public class GroupController {
         Long guestId = invitationPutDTO.getGuestId();
 
         // 401 - not authorized
-        Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
         if(tokenId != guestId) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to accept this invitation."));
         }

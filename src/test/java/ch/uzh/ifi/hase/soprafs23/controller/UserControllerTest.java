@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 //import org.springframework.test.web.servlet.setup.MockMvcBuilders; //unused
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -221,7 +223,35 @@ public class UserControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    public void getInvitations_valid() throws Exception {
+      // TODO: create this test
+      List<Invitation> invitations = new ArrayList<>();
 
+      Invitation invitation = new Invitation();
+      invitation.setGroupId(5L);
+      invitation.setGuestId(user.getId());
+      invitations.add(invitation);
+
+      // mock getInvitationsByGuestId(guestId) method in InvitationService
+      given(invitationService.getInvitationsByGuestId(user.getId())).willReturn(invitations);
+
+      // when
+      MockHttpServletRequestBuilder getRequest = get("/users/{userId}/invitations", user.getId())
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .header("X-Token", user.getToken());
+
+      // then
+      mockMvc.perform(getRequest)
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$", hasSize(1)));
+          //.andExpect(jsonPath("$[0].groupId", is(invitation.getGroupId())));
+
+      // verify the correct calls were made
+      verify(userService, times(1)).getUserById(user.getId());
+      verify(userService, times(1)).getUseridByToken(user.getToken());
+      verify(invitationService, times(1)).getInvitationsByGuestId(user.getId());
+    }
 
 
     // TODO: add logout test?

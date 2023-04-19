@@ -115,7 +115,7 @@ public class UserController {
   @ResponseBody
   public void logoutUser(@PathVariable Long id, HttpServletRequest request){
     // check if user is trying to log themselves out
-    Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
+    Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
     if(tokenId != id) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
     }
@@ -134,7 +134,7 @@ public class UserController {
                          HttpServletRequest request)
   {
       userService.getUserById(id);
-      Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
+      Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
       if(tokenId != id) {
           throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to make changes to this profile."));
       }
@@ -150,7 +150,7 @@ public class UserController {
     userService.getUserById(userId);
     
     // 401 - not authorized
-    Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
+    Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
     if(tokenId != userId) {
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
     }
