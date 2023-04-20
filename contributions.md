@@ -19,7 +19,7 @@
 | Kalliopi    | #4     | Create Login page                                                                |  X   |
 |             | #6     | Create path to be directed to Landing page after login                           |  X   |
 |             | #7     | Create API call with body for backend communication                              |  X   |
-|             | #8     | Create path to be redirected to register page in case of error                   |  X   |
+|             | #8     | Create path to be redirected to login page in case of error                      |  X   |
 | Ann-Kathrin | #36    | Create LogIn Method                                                              |  X   |
 |             | #40    | Change Status                                                                    |  X   |
 |             | #39    | Check for valid password                                                         |  X   |
@@ -43,11 +43,22 @@
 |             | #118   | Check if user is authorized to accept/reject invitation else return error        |  X   |
 |             | #119   | Check if user exists when accepting/rejecting the invitation else return error   |  X   |
 |             | #157   | create GET /users/{userId}/invitations request                                   |      |
+|             |        |                                                                                  |      |    
 | Orestis     | #47    | Create Logout Method which sets User to offline                                  |      |
 |             | #88    | Create method for updating the user profile                                      |      |
-|             | #87    | Create method for returning the user profile                                     |      |    
-| Kalliopi    |        |                                                                                  |      |
-|             |        |                                                                                  |      |
+|             | #87    | Create method for returning the user profile                                     |      |
+|             |        |                                                                                  |      |    
+| Kalliopi    | #80    | Create navigation bar                                                            |  X   |
+|             | #52    | Create a landing page with sections for displaying the users and active groups.  |  X   |
+|             | #9     | Display user as logged in                                                        |  X   | 
+|             | #11    | Set user to offline and delete localStorage                                      |      |
+|             | #10    | Make Logout Button accessible                                                    |  X   |                                       |             | #79    | Implement method to sort the users based on their online/offline status          |  X   |  
+|             | #68    | Create the Form Group button in the Landing Page                                 |  X   | 
+|             | #56    | Νavigation to the respective user profile page when a username is clicked        |      |    
+|             | #53    | API calls to retrieve registered users and active groups from the backend        |      |
+|             | #54    | Display all users with online users at the beginning of the list                 |      |
+|             | #55    | Display all active planning groups with their group name, host and guests        |      |
+|             |        |                                                                                  |      |    
 | Ann-Kathrin | #101/102| Create method to retrieve active groups / active users                          |   X  |
 |             | #135   | Create function to check that one user is only in one group                      |      |
 |             | #159   | create GET calls to retrieve group information                                   |    X |
