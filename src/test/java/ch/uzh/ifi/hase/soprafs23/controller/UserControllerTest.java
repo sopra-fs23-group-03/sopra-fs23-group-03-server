@@ -225,7 +225,6 @@ public class UserControllerTest {
 
     @Test
     public void getInvitations_valid() throws Exception {
-      // TODO: create this test
       List<Invitation> invitations = new ArrayList<>();
 
       Invitation invitation = new Invitation();
@@ -233,7 +232,8 @@ public class UserControllerTest {
       invitation.setGuestId(user.getId());
       invitations.add(invitation);
 
-      // mock getInvitationsByGuestId(guestId) method in InvitationService
+      // mocks
+      given(userService.getUserById(user.getId())).willReturn(user);
       given(invitationService.getInvitationsByGuestId(user.getId())).willReturn(invitations);
 
       // when
@@ -244,8 +244,8 @@ public class UserControllerTest {
       // then
       mockMvc.perform(getRequest)
           .andExpect(status().isOk())
-          .andExpect(jsonPath("$", hasSize(1)));
-          //.andExpect(jsonPath("$[0].groupId", is(invitation.getGroupId())));
+          .andExpect(jsonPath("$", hasSize(1)))
+          .andExpect(jsonPath("$[0].groupId", is(invitation.getGroupId().intValue())));
 
       // verify the correct calls were made
       verify(userService, times(1)).getUserById(user.getId());
@@ -253,8 +253,75 @@ public class UserControllerTest {
       verify(invitationService, times(1)).getInvitationsByGuestId(user.getId());
     }
 
+    @Test
+    public void getInvitations_noOpenInvitations() throws Exception {
+      List<Invitation> invitations = new ArrayList<>();
 
-    // TODO: add add more get invitation tests
+      // mocks
+      given(userService.getUserById(user.getId())).willReturn(user);
+      given(invitationService.getInvitationsByGuestId(user.getId())).willReturn(invitations);
+
+      // when
+      MockHttpServletRequestBuilder getRequest = get("/users/{userId}/invitations", user.getId())
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .header("X-Token", user.getToken());
+
+      // then
+      mockMvc.perform(getRequest)
+          .andExpect(status().isNoContent());
+
+      // verify the correct calls were made
+      verify(userService, times(1)).getUserById(user.getId());
+      verify(userService, times(1)).getUseridByToken(user.getToken());
+      verify(invitationService, times(1)).getInvitationsByGuestId(user.getId());
+    }
+
+    @Test
+    public void getInvitations_userNotFound() throws Exception {
+      Long anotherUserId = 4L;
+
+      // mocks
+      given(userService.getUserById(anotherUserId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "error message"));
+
+      // when
+      MockHttpServletRequestBuilder getRequest = get("/users/{userId}/invitations", anotherUserId)
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .header("X-Token", user.getToken());
+
+      // then
+      mockMvc.perform(getRequest)
+          .andExpect(status().isNotFound());
+
+      // verify the correct calls were made
+      verify(userService, times(1)).getUserById(anotherUserId);
+      verify(userService, times(0)).getUseridByToken(any());
+      verify(invitationService, times(0)).getInvitationsByGuestId(any());
+    }
+
+    @Test
+    public void getInvitations_notValidToken() throws Exception {
+      List<Invitation> invitations = new ArrayList<>();
+      String anotherToken = "anotherToken";
+
+      // mocks
+      given(userService.getUserById(user.getId())).willReturn(user);
+      given(userService.getUseridByToken(anotherToken)).willReturn(0L);
+      given(invitationService.getInvitationsByGuestId(user.getId())).willReturn(invitations);
+
+      // when
+      MockHttpServletRequestBuilder getRequest = get("/users/{userId}/invitations", user.getId())
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .header("X-Token", anotherToken);
+
+      // then
+      mockMvc.perform(getRequest)
+          .andExpect(status().isUnauthorized());
+
+      // verify the correct calls were made
+      verify(userService, times(1)).getUserById(user.getId());
+      verify(userService, times(1)).getUseridByToken(anotherToken);
+      verify(invitationService, times(0)).getInvitationsByGuestId(any());
+    }
 
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
