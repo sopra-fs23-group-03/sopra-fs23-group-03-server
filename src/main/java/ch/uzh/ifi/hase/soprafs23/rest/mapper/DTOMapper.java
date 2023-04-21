@@ -20,11 +20,11 @@ import org.mapstruct.factory.Mappers;
 @Mapper
 public interface DTOMapper {
 
-  DTOMapper INSTANCE = Mappers.getMapper(DTOMapper.class);
+    DTOMapper INSTANCE = Mappers.getMapper(DTOMapper.class);
 
-  @Mapping(source = "username", target = "username")
-  @Mapping(source = "password", target = "password")
-  User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
+    @Mapping(source = "username", target = "username")
+    @Mapping(source = "password", target = "password")
+    User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
 
   @Mapping(source = "id", target = "id")
   @Mapping(source = "username", target = "username")
@@ -34,12 +34,16 @@ public interface DTOMapper {
   @Mapping(source = "specialDiet", target = "specialDiet")
   UserGetDTO convertEntityToUserGetDTO(User user);
 
-  @Mapping(source = "groupName", target = "groupName")
-  @Mapping(source = "hostId", target = "hostId")
-  Group convertGroupPostDTOtoEntity(GroupPostDTO groupPostDTO);
+    @Mapping(source = "groupName", target = "groupName")
+    @Mapping(source = "hostId", target = "hostId")
+    Group convertGroupPostDTOtoEntity(GroupPostDTO groupPostDTO);
 
-  @Mapping(source = "id", target = "id")
-  @Mapping(source = "groupName", target = "groupName")
-  @Mapping(source = "hostId",target = "hostId")
-  GroupGetDTO convertEntityToGroupGetDTO(Group group);
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "groupName", target = "groupName")
+    @Mapping(source = "hostId", target = "hostId")
+    GroupGetDTO convertEntityToGroupGetDTO(Group group);
+
+    @Mapping(source = "id", target = "id")
+    User convertInvitationPostDTOtoEntity(InvitationPostDTO invitationPostDTO);
+
 }
