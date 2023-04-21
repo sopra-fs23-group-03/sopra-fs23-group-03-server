@@ -3,7 +3,10 @@ package ch.uzh.ifi.hase.soprafs23.service;
 
 import java.util.HashSet;
 import java.util.List;
+import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
 
+import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationPostDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -23,6 +26,22 @@ public class InvitationService {
     @Autowired
     public InvitationService(@Qualifier("invitationRepository") InvitationRepository invitationRepository) {
         this.invitationRepository = invitationRepository;
+    }
+
+
+    public Invitation createInvitation(Long groupId, Long guestId) {
+        // TODO: check that there is no other invitation of the same group, same newGuest already
+
+        // assign guestId and groupId to invite
+        Invitation newInvite = new Invitation();
+        newInvite.setGuestId(guestId);
+        newInvite.setGroupId(groupId);
+
+        // save the invite
+        newInvite = invitationRepository.save(newInvite);
+        invitationRepository.flush();
+
+        return newInvite;
     }
 
     public Invitation getInvitationByGroupIdAndGuestId(Long groupId, Long guestId) {
