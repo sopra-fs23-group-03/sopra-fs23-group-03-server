@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 
 @RestController
@@ -59,6 +60,33 @@ public class GroupController {
             groupGetDTOs.add(DTOMapper.INSTANCE.convertEntityToGroupGetDTO(group));
         }
         return groupGetDTOs;
+    }
+
+    @PostMapping("/groups/{groupId}/invitations")
+    @ResponseStatus(HttpStatus.CREATED) // 201
+    @ResponseBody
+    public void sendInvitation(@PathVariable Long groupId, @RequestBody List<Long> ListGuestIds, HttpServletRequest request) {
+
+        // only HOST can send invitation: check host token
+        Group currentGroup = groupService.getGroupById(groupId);  // 404 - group not found
+        Long currentGroupHostId = currentGroup.getHostId(); // get host of the group in db
+
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));  // check if its the same one sending the invites
+        if(tokenId != currentGroupHostId) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized.")); // 401 - not authorized
+        }
+        // TODO: error 409- conlfict: Dieser Code wird in Situationen genutzt, bei denen der Benutzer den Konflikt lösen und die Anfrage erneut abschicken kann.
+        // user sends invitation to user which is already invited
+
+
+        // convert invites to internal representation
+        for (ListIterator<Long> iter = ListGuestIds.listIterator(); ((ListIterator<?>) iter).hasNext(); ) {
+            Long element = iter.next();
+            Invitation newInvite = invitationService.createInvitation(groupId, element);
+            DTOMapper.INSTANCE.convertInvitationPostDTOtoEntity(newInvite);
+            //TODO: check if order makes sense. Create invite then convert to
+            // no entityToInvitationGetDTO needed bc no retunr?
+        }
 
 
     }
@@ -81,6 +109,11 @@ public class GroupController {
 //
 //        return groupGetDTO;
 //    }
+
+
+
+
+
 
     @PutMapping("/groups/{groupId}/invitations/reject")
     @ResponseStatus(HttpStatus.NO_CONTENT) // 204
@@ -128,6 +161,8 @@ public class GroupController {
         // delete invitation
         invitationService.deleteInvitation(invitation);
     }
+
+
 
 
 

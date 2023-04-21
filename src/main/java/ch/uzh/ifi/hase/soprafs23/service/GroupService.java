@@ -66,9 +66,4 @@ public class GroupService {
         return group.get();
     }
 
-
-    public void invite(Long groupId, List <String> members ){
-
-
-    }
 }

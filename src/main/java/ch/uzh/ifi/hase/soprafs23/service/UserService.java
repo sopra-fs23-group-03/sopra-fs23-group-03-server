@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,6 +41,12 @@ public class UserService {
 
   public List<User> getUsers() {
     return this.userRepository.findAll();
+  }
+
+  public List getUsersFreeToInvite(){
+      // TODO: List with users which are not in a group yet
+      List L = new ArrayList<>();
+    return L;
   }
 
   // returns the userid of the user with the given token

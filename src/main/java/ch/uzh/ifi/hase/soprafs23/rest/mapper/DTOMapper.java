@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.rest.mapper;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.*;
 import org.mapstruct.*;
@@ -41,6 +42,11 @@ public interface DTOMapper {
     GroupGetDTO convertEntityToGroupGetDTO(Group group);
 
     @Mapping(source = "id", target = "id")
-    User convertInvitationPostDTOtoEntity(InvitationPostDTO invitationPostDTO);
+    Invitation convertInvitationPostDTOtoEntity(Invitation invitationPostDTO);
+
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "groupId", target = "groupId")
+    @Mapping(source = "guestId", target = "guestId")
+    Invitation convertEntityToInvitationGetDTO(Invitation invitation);
 
 }
