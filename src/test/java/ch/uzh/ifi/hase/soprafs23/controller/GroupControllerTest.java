@@ -256,6 +256,162 @@ public class GroupControllerTest {
         verify(invitationService, times(0)).deleteInvitation(any());
     }
 
+    @Test
+    public void invitationsAccept_valid() throws Exception {
+        invitation = new Invitation();
+        invitation.setId(15L);
+        invitation.setGroupId(group.getId());
+        invitation.setGuestId(user.getId());
+
+        InvitationPutDTO invitationPutDTO = new InvitationPutDTO();
+        invitationPutDTO.setGuestId(user.getId());
+        
+        // mocks
+        given(groupService.getGroupById(group.getId())).willReturn(group);
+        given(userService.getUserById(user.getId())).willReturn(user);
+        given(invitationService.getInvitationByGroupIdAndGuestId(group.getId(), user.getId())).willReturn(invitation);
+
+        // when
+        MockHttpServletRequestBuilder acceptRequest = put("/groups/{groupId}/invitations/accept", group.getId())
+                                                        .contentType(MediaType.APPLICATION_JSON)
+                                                        .content(asJsonString(invitationPutDTO))
+                                                        .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(acceptRequest).andExpect(status().isNoContent());
+
+
+        // verify that all calls to services were made
+        verify(groupService, times(1)).getGroupById(group.getId());
+        verify(userService, times(1)).getUserById(user.getId());
+        verify(invitationService, times(1)).getInvitationByGroupIdAndGuestId(group.getId(), user.getId());
+
+        verify(userService, times(1)).getUseridByToken(user.getToken());
+
+        verify(groupService, times(1)).addGuestToGroupMembers(user.getId(), group.getId());
+        verify(userService, times(1)).joinGroup(user.getId(), group.getId());
+
+        verify(invitationService, times(1)).deleteInvitation(invitation);
+    }
+
+    @Test
+    public void invitationsAccept_groupNotFound() throws Exception {
+        Long anotherGroupId = 4L;
+
+        InvitationPutDTO invitationPutDTO = new InvitationPutDTO();
+        invitationPutDTO.setGuestId(user.getId());
+        
+        // mocks
+        given(groupService.getGroupById(anotherGroupId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "error message"));
+
+        // when
+        MockHttpServletRequestBuilder acceptRequest = put("/groups/{groupId}/invitations/accept", anotherGroupId)
+                                                        .contentType(MediaType.APPLICATION_JSON)
+                                                        .content(asJsonString(invitationPutDTO))
+                                                        .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(acceptRequest).andExpect(status().isNotFound());
+
+
+        // verify the important calls to service
+        verify(groupService, times(1)).getGroupById(anotherGroupId);
+
+        verify(groupService, times(0)).addGuestToGroupMembers(any(), any());
+        verify(userService, times(0)).joinGroup(any(), any());
+
+        verify(invitationService, times(0)).deleteInvitation(any());
+    }
+
+    @Test
+    public void invitationsAccept_guestNotFound() throws Exception {
+        Long anotherGuestId = 4L;
+
+        InvitationPutDTO invitationPutDTO = new InvitationPutDTO();
+        invitationPutDTO.setGuestId(anotherGuestId);
+        
+        // mocks
+        given(groupService.getGroupById(group.getId())).willReturn(group);
+        given(userService.getUserById(anotherGuestId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "error message"));
+
+        // when
+        MockHttpServletRequestBuilder acceptRequest = put("/groups/{groupId}/invitations/accept", group.getId())
+                                                        .contentType(MediaType.APPLICATION_JSON)
+                                                        .content(asJsonString(invitationPutDTO))
+                                                        .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(acceptRequest).andExpect(status().isNotFound());
+
+
+        // verify the important calls to service
+        verify(userService, times(1)).getUserById(anotherGuestId);
+
+        verify(groupService, times(0)).addGuestToGroupMembers(any(), any());
+        verify(userService, times(0)).joinGroup(any(), any());
+
+        verify(invitationService, times(0)).deleteInvitation(invitation);
+    }
+
+    @Test
+    public void invitationsAccept_invitationNotFound() throws Exception {
+        InvitationPutDTO invitationPutDTO = new InvitationPutDTO();
+        invitationPutDTO.setGuestId(user.getId());
+        
+        // mocks
+        given(groupService.getGroupById(group.getId())).willReturn(group);
+        given(userService.getUserById(user.getId())).willReturn(user);
+        given(invitationService.getInvitationByGroupIdAndGuestId(group.getId(), user.getId())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "error message"));
+
+        // when
+        MockHttpServletRequestBuilder acceptRequest = put("/groups/{groupId}/invitations/accept", group.getId())
+                                                        .contentType(MediaType.APPLICATION_JSON)
+                                                        .content(asJsonString(invitationPutDTO))
+                                                        .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(acceptRequest).andExpect(status().isNotFound());
+
+
+        // verify the important calls to service
+        verify(invitationService, times(1)).getInvitationByGroupIdAndGuestId(group.getId(), user.getId());
+
+        verify(groupService, times(0)).addGuestToGroupMembers(any(), any());
+        verify(userService, times(0)).joinGroup(any(), any());
+
+        verify(invitationService, times(0)).deleteInvitation(any());
+    }
+
+    @Test
+    public void invitationsAccept_notValidToken() throws Exception {
+        String anotherToken = "anotherToken";
+
+        InvitationPutDTO invitationPutDTO = new InvitationPutDTO();
+        invitationPutDTO.setGuestId(user.getId());
+        
+        // mocks
+        given(userService.getUseridByToken(anotherToken)).willReturn(0L);
+
+        // when
+        MockHttpServletRequestBuilder acceptRequest = put("/groups/{groupId}/invitations/accept", group.getId())
+                                                        .contentType(MediaType.APPLICATION_JSON)
+                                                        .content(asJsonString(invitationPutDTO))
+                                                        .header("X-Token", anotherToken);
+
+        // then
+        mockMvc.perform(acceptRequest).andExpect(status().isUnauthorized());
+
+
+        // verify the important calls to service
+        verify(userService, times(1)).getUseridByToken(anotherToken);
+
+        verify(groupService, times(0)).addGuestToGroupMembers(any(), any());
+        verify(userService, times(0)).joinGroup(any(), any());
+
+        verify(invitationService, times(0)).deleteInvitation(any());
+    }
+
+
     /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
    * can be processed
