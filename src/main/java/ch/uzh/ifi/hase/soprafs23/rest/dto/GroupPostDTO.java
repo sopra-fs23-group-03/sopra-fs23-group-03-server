@@ -17,7 +17,6 @@ public class GroupPostDTO {
     public Long getHostId() {
         return hostId;
     }
-
     public void setHostId(Long hostId) {
         this.hostId = hostId;
     }
