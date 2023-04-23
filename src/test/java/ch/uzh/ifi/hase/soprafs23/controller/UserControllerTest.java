@@ -300,13 +300,11 @@ public class UserControllerTest {
 
     @Test
     public void getInvitations_notValidToken() throws Exception {
-      List<Invitation> invitations = new ArrayList<>();
       String anotherToken = "anotherToken";
 
       // mocks
       given(userService.getUserById(user.getId())).willReturn(user);
       given(userService.getUseridByToken(anotherToken)).willReturn(0L);
-      given(invitationService.getInvitationsByGuestId(user.getId())).willReturn(invitations);
 
       // when
       MockHttpServletRequestBuilder getRequest = get("/users/{userId}/invitations", user.getId())
