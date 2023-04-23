@@ -122,9 +122,10 @@ public class GroupController {
         userService.getUserById(invitationPutDTO.getGuestId());
         Invitation invitation = invitationService.getInvitationByGroupIdAndGuestId(groupId, guestId);
 
-        // TODO: add guest to group
+        // create link between guest and group
+        groupService.addGuestToGroupMembers(guestId, groupId);
+        userService.joinGroup(guestId, groupId); 
         
-
         // delete invitation
         invitationService.deleteInvitation(invitation);
     }
