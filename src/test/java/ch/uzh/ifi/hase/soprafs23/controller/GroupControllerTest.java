@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
+import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationPutDTO;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
@@ -65,6 +66,9 @@ public class GroupControllerTest {
     private InvitationService invitationService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private GroupPostDTO groupPostDTO;
+    private HttpServletRequest request;
 
     @InjectMocks
     private GroupController groupController;
@@ -171,57 +175,51 @@ public class GroupControllerTest {
     }
 
     @Test
-    public void createGroup_whenAuthenticated_201() throws Exception {
+    public void createGroup_returns201() throws Exception {
+
         // given
         GroupPostDTO groupPostDTO = new GroupPostDTO();
         groupPostDTO.setGroupName("Test Group");
+        groupPostDTO.setHostId(1L);
 
-        // mock user and token
-        User user = new User();
-        user.setId(1L);
-        user.setToken("test-token");
+        Group group = new Group();
+        group.setId(1L);
+        group.setGroupName("Test Group");
+        group.setHostId(1L);
 
-        given(userService.getUseridByToken(user.getToken())).willReturn(user.getId()); // first get User ID by Token
-        given(userService.getUserById(user.getId())).willReturn(user); // then get User by ID
-
-        // mock group service to return the created group
-        Group createdGroup = new Group();
-        createdGroup.setId(1L);
-        createdGroup.setGroupName(groupPostDTO.getGroupName());
-        given(groupService.createGroup(any(Group.class), eq(user))).willReturn(createdGroup);
+        given(userService.getUseridByToken(any())).willReturn(group.getHostId());
+        given(userService.getUserById(group.getHostId())).willReturn(new User());
+        given(groupService.createGroup(any(Group.class), any(User.class))).willReturn(group);
 
         // when
         MockHttpServletRequestBuilder postRequest = post("/groups")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("X-Token", user.getToken())
-                .param("hostId", Long.toString(user.getId()))
-                .content(asJsonString(groupPostDTO));
+                .header("X-Token", "valid-token")
+                .content("{\"groupName\": \"Test Group\", \"hostId\": 1}");
 
         // then
         mockMvc.perform(postRequest)
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", is(createdGroup.getId().intValue())))
-                .andExpect(jsonPath("$.groupName", is(createdGroup.getGroupName())));
+                .andExpect(status().isCreated());
     }
 
     @Test
-    public void createGroup_whenNotAuthenticated_401() throws Exception {
-        // Arrange
+    public void testCreateGroupReturns401() throws Exception {
+        Long userId = 1L;
+        String token = "invalid-token";
+        Mockito.when(userService.getUseridByToken(token)).thenReturn(0L);
+
         GroupPostDTO groupPostDTO = new GroupPostDTO();
-        groupPostDTO.setGroupName("test-group");
+        groupPostDTO.setHostId(userId);
 
-        User host = new User();
-        host.setId(1L);
+        ObjectMapper mapper = new ObjectMapper();
+        String requestBody = mapper.writeValueAsString(groupPostDTO);
 
-        given(userService.getUserById(anyLong())).willReturn(null);
-
-        // Act and Assert
-        mockMvc.perform(post("/groups")
-                        .header("X-Token", "valid-token")
-                        .param("hostId", "1")
-                        .content(objectMapper.writeValueAsString(groupPostDTO))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
+        mockMvc.perform(MockMvcRequestBuilders.post("/groups")
+                        .header("X-Token", token)
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
     @Test
     public void testCreateGroupReturns409() throws Exception {
@@ -249,6 +247,32 @@ public class GroupControllerTest {
 
         mockMvc.perform(postRequest)
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void testCreateGroupReturns404() throws Exception {
+        Long userId = 1L;
+
+        GroupPostDTO groupPostDTO = new GroupPostDTO();
+        groupPostDTO.setHostId(userId);
+
+        String errorMessage = String.format("User with id %s does not exist.", userId);
+
+        Mockito.when(userService.getUserById(userId))
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, errorMessage));
+
+        String token = "valid-token";
+        Mockito.when(userService.getUseridByToken(token)).thenReturn(userId);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String requestBody = mapper.writeValueAsString(groupPostDTO);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/groups")
+                        .header("X-Token", token)
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
 

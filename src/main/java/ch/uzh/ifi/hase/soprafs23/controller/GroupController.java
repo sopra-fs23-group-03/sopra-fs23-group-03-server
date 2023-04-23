@@ -69,12 +69,16 @@ public class GroupController {
     public GroupGetDTO createGroup(@RequestBody GroupPostDTO groupPostDTO, HttpServletRequest request) {
         // check validity of token
         String token = request.getHeader("X-Token");
-        if(token == null || userService.getUseridByToken(token) == 0) {
+        Long userId = userService.getUseridByToken(token);
+        User user = userService.getUserById(userId);
+        if(user == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized.")); // 401 - not authorized
         }
 
-        // check if the user with the token is the same as hostId
-        User user = userService.getUserById(userService.getUseridByToken(token));
+        // check if the user with the token exist
+        if (!userId.equals(groupPostDTO.getHostId())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User not found.")); // 404 - user not found
+        }
 
         // convert API user to internal representation
         Group groupInput = DTOMapper.INSTANCE.convertGroupPostDTOtoEntity(groupPostDTO);
