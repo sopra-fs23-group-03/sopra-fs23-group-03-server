@@ -2,10 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.rest.mapper;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupGetDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupPostDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -32,6 +29,9 @@ public interface DTOMapper {
   @Mapping(source = "id", target = "id")
   @Mapping(source = "username", target = "username")
   @Mapping(source = "status", target = "status")
+  @Mapping(source = "allergies", target = "allergies")
+  @Mapping(source = "favoriteCuisine", target = "favoriteCuisine")
+  @Mapping(source = "specialDiet", target = "specialDiet")
   UserGetDTO convertEntityToUserGetDTO(User user);
 
   @Mapping(source = "groupName", target = "groupName")

@@ -7,6 +7,9 @@ public class UserGetDTO {
   private Long id;
   private String username;
   private UserStatus status;
+  private String allergies;
+  private String favoriteCuisine;
+  private String specialDiet;
 
   public Long getId() {
     return id;
@@ -32,4 +35,26 @@ public class UserGetDTO {
     this.status = status;
   }
 
+  public String getAllergies() {
+      return allergies;
+  }
+
+  public void setAllergies(String allergies) {
+      this.allergies = allergies;
+  }
+  public String getFavoriteCuisine() {
+      return favoriteCuisine;
+  }
+
+  public void setFavoriteCuisine(String favoriteCuisine) {
+      this.favoriteCuisine = favoriteCuisine;
+  }
+
+  public String getSpecialDiet() {
+      return specialDiet;
+  }
+
+  public void setSpecialDiet(String specialDiet) {
+      this.specialDiet = specialDiet;
+  }
 }

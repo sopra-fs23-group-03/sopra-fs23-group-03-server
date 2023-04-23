@@ -11,9 +11,9 @@ import ch.uzh.ifi.hase.soprafs23.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.http.HttpHeaders;
+//import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+// import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -63,24 +63,34 @@ public class GroupController {
 
     }
 
-//    @PostMapping("/groups")
-//    @ResponseStatus(HttpStatus.CREATED)
-//    @ResponseBody
-//    public GroupGetDTO createGroup(@RequestBody GroupPostDTO groupPostDTO, @RequestParam Long hostId) {
-//        // convert API user to internal representation
-//        GroupGetDTO groupInput = DTOMapper.INSTANCE.convertGroupPostDTOtoEntity(groupPostDTO);
-//
-//        // get the user creating the group
-//        User host = userService.getUserById(hostId);
-//
-//        // create group
-//        GroupGetDTO createdGroup = groupService.createGroup(groupInput, host);
-//
-//        // convert internal representation of user back to API
-//        GroupGetDTO groupGetDTO = DTOMapper.INSTANCE.convertEntityToGroupGetDTO(createdGroup);
-//
-//        return groupGetDTO;
-//    }
+    @PostMapping("/groups")
+    @ResponseStatus(HttpStatus.CREATED) // 201
+    @ResponseBody
+    public GroupGetDTO createGroup(@RequestBody GroupPostDTO groupPostDTO, HttpServletRequest request) {
+        // check validity of token
+        String token = request.getHeader("X-Token");
+        Long userId = userService.getUseridByToken(token);
+        User user = userService.getUserById(userId);
+        if(user == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized.")); // 401 - not authorized
+        }
+
+        // check if the user with the token exist
+        if (!userId.equals(groupPostDTO.getHostId())) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User not found.")); // 404 - user not found
+        }
+
+        // convert API user to internal representation
+        Group groupInput = DTOMapper.INSTANCE.convertGroupPostDTOtoEntity(groupPostDTO);
+
+        // create group
+        Group createdGroup = groupService.createGroup(groupInput, user);
+
+        // convert internal representation of user back to API
+        GroupGetDTO groupGetDTO = DTOMapper.INSTANCE.convertEntityToGroupGetDTO(createdGroup);
+
+        return groupGetDTO;
+    }
 
     @PutMapping("/groups/{groupId}/invitations/reject")
     @ResponseStatus(HttpStatus.NO_CONTENT) // 204
