@@ -1,10 +1,13 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
+import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
+import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -29,8 +32,11 @@ public class UserController {
 
   private final UserService userService;
 
-  public UserController(UserService userService) {
+  private final InvitationService invitationService;
+
+  public UserController(UserService userService, InvitationService invitationService) {
     this.userService = userService;
+    this.invitationService = invitationService;
   }
 
   @GetMapping("/users")
@@ -132,7 +138,7 @@ public class UserController {
           throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User not found with ID: %d", userId));
       }
 
-      Long tokenId = userService.getUserByToken(request.getHeader("X-Token"));
+      Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
       if(tokenId != userId) {
           throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to make changes to this profile."));
       }
@@ -155,4 +161,37 @@ public class UserController {
 
         return userGetDTO;
     }
+
+  @GetMapping("/users/{userId}/invitations")
+  @ResponseStatus(HttpStatus.OK) // 200
+  @ResponseBody
+  public List<InvitationGetDTO> getOpenInvitationsByGuest(@PathVariable Long userId, HttpServletRequest request) {
+    // 404 - user not found
+    userService.getUserById(userId);
+
+    // 401 - not authorized
+    Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+    if(tokenId != userId) {
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
+    }
+
+    // retrieve the invitations
+    List<Invitation> invitations = invitationService.getInvitationsByGuestId(userId);
+
+    // 204 - no open invitations
+    if(invitations.size() == 0) {
+      throw new ResponseStatusException(HttpStatus.NO_CONTENT);
+    }
+
+    // convert to InvitationGetDTOs and return them
+    List<InvitationGetDTO> invitationGetDTOs = new ArrayList<>();
+    for(Invitation invitation : invitations) {
+      InvitationGetDTO invitationGetDTO = new InvitationGetDTO();
+      invitationGetDTO.setGroupId(invitation.getGroupId());
+      invitationGetDTOs.add(invitationGetDTO);
+    }
+
+    return invitationGetDTOs;
+  }
+
 }

@@ -1,10 +1,12 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 //import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
+//import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO; //unused
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +28,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 //import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 //import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
@@ -38,7 +41,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put; //unused
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -59,6 +62,9 @@ public class UserControllerTest {
   private UserService userService;
 
   private final ObjectMapper objectMapper = new ObjectMapper();
+
+  @MockBean
+  private InvitationService invitationService;
 
   private User user;
 
@@ -165,7 +171,7 @@ public class UserControllerTest {
 
 
     @Test
-    public void putUsersUsernameLogin_valid() throws Exception {
+    public void postUsersUsernameLogin_valid() throws Exception {
         // create new User
         User user = new User();
         user.setId(3L);
@@ -186,7 +192,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void putUsersUsernameLogin_invalid() throws Exception {
+    public void postUsersUsernameLogin_invalid() throws Exception {
         User user = new User();
         user.setId(4L);
         user.setUsername("test");
@@ -400,12 +406,110 @@ public class UserControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
+    @Test
+    public void getInvitations_valid() throws Exception {
+        List<Invitation> invitations = new ArrayList<>();
 
+        Invitation invitation = new Invitation();
+        invitation.setGroupId(5L);
+        invitation.setGuestId(user.getId());
+        invitations.add(invitation);
+
+        // mocks
+        given(userService.getUserById(user.getId())).willReturn(user);
+        given(invitationService.getInvitationsByGuestId(user.getId())).willReturn(invitations);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/invitations", user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].groupId", is(invitation.getGroupId().intValue())));
+
+        // verify the correct calls were made
+        verify(userService, times(1)).getUserById(user.getId());
+        verify(userService, times(1)).getUseridByToken(user.getToken());
+        verify(invitationService, times(1)).getInvitationsByGuestId(user.getId());
+    }
+
+    @Test
+    public void getInvitations_noOpenInvitations() throws Exception {
+        List<Invitation> invitations = new ArrayList<>();
+
+        // mocks
+        given(userService.getUserById(user.getId())).willReturn(user);
+        given(invitationService.getInvitationsByGuestId(user.getId())).willReturn(invitations);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/invitations", user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+                .andExpect(status().isNoContent());
+
+        // verify the correct calls were made
+        verify(userService, times(1)).getUserById(user.getId());
+        verify(userService, times(1)).getUseridByToken(user.getToken());
+        verify(invitationService, times(1)).getInvitationsByGuestId(user.getId());
+    }
+
+    @Test
+    public void getInvitations_userNotFound() throws Exception {
+        Long anotherUserId = 4L;
+
+        // mocks
+        given(userService.getUserById(anotherUserId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "error message"));
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/invitations", anotherUserId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+                .andExpect(status().isNotFound());
+
+        // verify the correct calls were made
+        verify(userService, times(1)).getUserById(anotherUserId);
+        verify(userService, times(0)).getUseridByToken(any());
+        verify(invitationService, times(0)).getInvitationsByGuestId(any());
+    }
+
+    @Test
+    public void getInvitations_notValidToken() throws Exception {
+        List<Invitation> invitations = new ArrayList<>();
+        String anotherToken = "anotherToken";
+
+        // mocks
+        given(userService.getUserById(user.getId())).willReturn(user);
+        given(userService.getUseridByToken(anotherToken)).willReturn(0L);
+        given(invitationService.getInvitationsByGuestId(user.getId())).willReturn(invitations);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/invitations", user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", anotherToken);
+
+        // then
+        mockMvc.perform(getRequest)
+                .andExpect(status().isUnauthorized());
+
+        // verify the correct calls were made
+        verify(userService, times(1)).getUserById(user.getId());
+        verify(userService, times(1)).getUseridByToken(anotherToken);
+        verify(invitationService, times(0)).getInvitationsByGuestId(any());
+    }
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
    * can be processed
    * Input will look like this: {"name": "Test User", "username": "testUsername"}
-   *
+   * 
    * @param object
    * @return string
    */

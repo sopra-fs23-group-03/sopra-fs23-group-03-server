@@ -53,8 +53,8 @@ public class UserServiceTest {
         Mockito.when(userRepository.findByToken("newToken")).thenReturn(listWithNoUser);
 
 
-        assertEquals(1L, userService.getUserByToken(user.getToken()));
-        assertEquals(0L, userService.getUserByToken("newToken"));
+        assertEquals(1L, userService.getUseridByToken(user.getToken()));
+        assertEquals(0L, userService.getUseridByToken("newToken"));
 
     }
 
@@ -109,8 +109,6 @@ public class UserServiceTest {
         assertThrows(ResponseStatusException.class, () -> userService.getUserByUsername("new"));
     }
 
-
-// TODO: delete above or below --> just to show that it works
     @Test
     public void testCorrectPassword() {
         user.setUsername("testuser");
