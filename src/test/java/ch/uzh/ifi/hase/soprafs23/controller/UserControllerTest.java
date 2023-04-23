@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 //import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 //import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO; //unused
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
@@ -39,9 +40,8 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 //import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put; //unused
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -337,7 +337,7 @@ public class UserControllerTest {
         user.setUsername("testuser");
         user.setToken("valid-token");
         Mockito.when(userService.getUserById(1L)).thenReturn(user);
-        Mockito.when(userService.getUserByToken("valid-token")).thenReturn(1L);
+        Mockito.when(userService.getUseridByToken("valid-token")).thenReturn(1L);
 
         UserPutDTO userPutDTO = new UserPutDTO();
         userPutDTO.setUsername("new-username");
@@ -399,7 +399,7 @@ public class UserControllerTest {
         user.setId(userId);
         Mockito.when(userService.getUserById(userId)).thenReturn(user); // modify the mock response to return null
         Mockito.when(userService.getUseridByToken(token)).thenReturn(0L);
-        mockMvc.perform(MockMvcRequestBuilders.put("/users/" + userId)
+        mockMvc.perform(put("/users/" + userId)
                         .header("X-Token", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\": \"newUsername\"}")

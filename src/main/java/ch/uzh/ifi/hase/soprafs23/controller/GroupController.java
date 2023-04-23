@@ -11,9 +11,9 @@ import ch.uzh.ifi.hase.soprafs23.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.http.HttpHeaders;
+//import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+// import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -64,17 +64,23 @@ public class GroupController {
     }
 
     @PostMapping("/groups")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.CREATED) // 201
     @ResponseBody
-    public GroupGetDTO createGroup(@RequestBody GroupPostDTO groupPostDTO, @RequestParam Long hostId) {
+    public GroupGetDTO createGroup(@RequestBody GroupPostDTO groupPostDTO, HttpServletRequest request) {
+        // check validity of token
+        String token = request.getHeader("X-Token");
+        if(token == null || userService.getUseridByToken(token) == 0) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized.")); // 401 - not authorized
+        }
+
+        // check if the user with the token is the same as hostId
+        User user = userService.getUserById(userService.getUseridByToken(token));
+
         // convert API user to internal representation
         Group groupInput = DTOMapper.INSTANCE.convertGroupPostDTOtoEntity(groupPostDTO);
 
-        // get the user creating the group
-        User host = userService.getUserById(hostId);
-
         // create group
-        Group createdGroup = groupService.createGroup(groupInput, host);
+        Group createdGroup = groupService.createGroup(groupInput, user);
 
         // convert internal representation of user back to API
         GroupGetDTO groupGetDTO = DTOMapper.INSTANCE.convertEntityToGroupGetDTO(createdGroup);
