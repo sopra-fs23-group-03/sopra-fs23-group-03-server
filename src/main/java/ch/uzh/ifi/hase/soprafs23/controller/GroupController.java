@@ -106,8 +106,6 @@ public class GroupController {
         if(tokenId != currentGroupHostId) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized.")); // 401 - not authorized
         }
-        // TODO: error 409- conflict: Dieser Code wird in Situationen genutzt, bei denen der Benutzer den Konflikt lösen und die Anfrage erneut abschicken kann.
-        // user sends invitation to user which is already invited
 
         // Loop through each guest id and create an invitation for them: idea--> create InvitationPostDTO object for each guest id, set guest id in it, then use DTOMapper to convert it to an Invit entity
         for (Long guestId : ListGuestIds) {
@@ -117,7 +115,7 @@ public class GroupController {
             Invitation invitation = DTOMapper.INSTANCE.convertInvitationPostDTOtoEntity(invitationPostDTO);
             invitation.setGroupId(groupId);
             // Create invitation using invitation service
-            invitationService.createInvitation(groupId, guestId);
+            invitationService.createInvitation(groupId, guestId); // conflict - 409 error checked in here: user sends invitation to user which is already invited
         }
 
 
