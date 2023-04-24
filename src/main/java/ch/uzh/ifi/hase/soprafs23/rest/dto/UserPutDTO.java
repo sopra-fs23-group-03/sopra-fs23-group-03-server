@@ -6,6 +6,7 @@ public class UserPutDTO {
     private String allergies;
     private String favoriteCuisine;
     private String specialDiet;
+    private String password;
 
 
     public String getUsername() {
@@ -38,5 +39,13 @@ public class UserPutDTO {
 
     public void setSpecialDiet(String specialDiet) {
         this.specialDiet = specialDiet;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

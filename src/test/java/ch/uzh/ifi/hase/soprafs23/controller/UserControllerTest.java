@@ -336,6 +336,7 @@ public class UserControllerTest {
         user.setId(1L);
         user.setUsername("testuser");
         user.setToken("valid-token");
+        user.setPassword("test-password");
         Mockito.when(userService.getUserById(1L)).thenReturn(user);
         Mockito.when(userService.getUseridByToken("valid-token")).thenReturn(1L);
 
@@ -344,6 +345,7 @@ public class UserControllerTest {
         userPutDTO.setAllergies("peanuts");
         userPutDTO.setFavoriteCuisine("Italian");
         userPutDTO.setSpecialDiet("vegan");
+        userPutDTO.setPassword("new-password");
 
         MockHttpServletRequestBuilder requestBuilder = put("/users/1")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -361,6 +363,7 @@ public class UserControllerTest {
         String newUsername = "secondUsername";
         String newFavoriteCuisine = "secondFavoriteCuisine";
         String newSpecialDiet = "secondSpecialDiet";
+        String newPassword = "secondPassword";
 
         Long secondUserId = 2L;
         String errorMessage = String.format("User with id %s does not exist.", secondUserId);
@@ -371,6 +374,7 @@ public class UserControllerTest {
         userPutDTO.setAllergies(newAllergies);
         userPutDTO.setFavoriteCuisine(newFavoriteCuisine);
         userPutDTO.setSpecialDiet(newSpecialDiet);
+        userPutDTO.setPassword(newPassword);
 
         // mocks the getUserById(id) method in UserService
         given(userService.getUserById(secondUserId))
