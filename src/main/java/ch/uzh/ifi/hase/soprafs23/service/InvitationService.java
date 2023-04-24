@@ -36,6 +36,7 @@ public class InvitationService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Invitation already exists for the given group and guest."));
         }
 
+
         // assign guestId and groupId to invite
         Invitation newInvite = new Invitation();
         newInvite.setGuestId(guestId);
