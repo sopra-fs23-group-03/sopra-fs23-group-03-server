@@ -35,9 +35,9 @@ public interface DTOMapper {
   @Mapping(source = "specialDiet", target = "specialDiet")
   UserGetDTO convertEntityToUserGetDTO(User user);
 
-    @Mapping(source = "groupName", target = "groupName")
-    @Mapping(source = "hostId", target = "hostId")
-    Group convertGroupPostDTOtoEntity(GroupPostDTO groupPostDTO);
+  @Mapping(source = "groupName", target = "groupName")
+  @Mapping(source = "hostId", target = "hostId")
+  Group convertGroupPostDTOtoEntity(GroupPostDTO groupPostDTO);
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "groupName", target = "groupName")
