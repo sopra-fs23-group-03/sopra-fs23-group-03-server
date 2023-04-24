@@ -28,7 +28,7 @@ public class GroupService {
         return this.groupRepository.findAll();
     }
 
-    // creates a new user, throws CONFLICT (409) if something goes wrong
+    // creates a new group, throws CONFLICT (409) if something goes wrong
     public Group createGroup(Group newGroup, User host) {
         // check that the username is still free
         checkIfGroupNameExists(newGroup.getGroupName());
@@ -70,5 +70,13 @@ public class GroupService {
     public void invite(Long groupId, List <String> members ){
 
 
+    }
+
+    public void addGuestToGroupMembers(Long guestId, Long groupId) {
+        Group group = getGroupById(groupId);
+        group.addGuestId(guestId);
+
+        group = groupRepository.save(group);
+        groupRepository.flush();
     }
 }
