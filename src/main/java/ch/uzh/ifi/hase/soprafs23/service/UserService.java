@@ -135,6 +135,7 @@ public class UserService {
         String newAllergies = userPutDTO.getAllergies();
         String newFavoriteCuisine = userPutDTO.getFavoriteCuisine();
         String newSpecialDiet = userPutDTO.getSpecialDiet();
+        String newPassword = userPutDTO.getPassword();
 
         if(newUsername != null) {
             checkIfUsernameExists(newUsername);
@@ -151,6 +152,10 @@ public class UserService {
 
         if(newSpecialDiet != null){
             user.setSpecialDiet(newSpecialDiet);
+        }
+
+        if(newPassword != null){
+            user.setPassword(newPassword);
         }
 
         user = userRepository.save(user);

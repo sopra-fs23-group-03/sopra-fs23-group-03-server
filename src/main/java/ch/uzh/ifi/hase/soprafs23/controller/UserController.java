@@ -110,37 +110,57 @@ public class UserController {
     return ResponseEntity.status(HttpStatus.OK).headers(headers).body(userGetDTO);
   }
 
-  @PostMapping("users/{userId}/logout")
-  @ResponseStatus(HttpStatus.NO_CONTENT) //OK is 200
-  @ResponseBody
-  public void logoutUser(@PathVariable Long id, HttpServletRequest request){
-    // check if user is trying to log themselves out
-    Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
-    if(tokenId != id) {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
+    @PostMapping("users/{userId}/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT) // NO CONTENT IS 204
+    public void logoutUser(HttpServletRequest request, @PathVariable Long userId) {
+        String token = request.getHeader("X-Token");
+        Long id = userService.getUseridByToken(token);
+
+        if (!id.equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
+        if(userService.getUseridByToken(token) == 0) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
+        }
+        userService.logout(id);
     }
 
-      //get user by id
-      User user = userService.getUserById(id);
-
-      //set offline
-      userService.logout(user.getId());
-  }
-
-  @PutMapping("/users/{id}")
-  @ResponseStatus(HttpStatus.NO_CONTENT) // 204
-  public void updateUser(@PathVariable Long id,
+  @PutMapping("/users/{userId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT) //NO CONTENT IS 204
+  public void updateUser(@PathVariable Long userId,
                          @RequestBody UserPutDTO userPutDTO,
                          HttpServletRequest request)
   {
-      userService.getUserById(id);
+      User user = userService.getUserById(userId);
+
+      if (user == null){
+          throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User not found with ID: %d", userId));
+      }
+
       Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
-      if(tokenId != id) {
+      if(tokenId != userId) {
           throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to make changes to this profile."));
       }
 
-      userService.updateUser(id, userPutDTO);
+      userService.updateUser(userId, userPutDTO);
   }
+    @GetMapping("/users/{userId}")
+    @ResponseStatus(HttpStatus.OK) // OK IS 200
+    @ResponseBody
+    public UserGetDTO getUserById(@PathVariable Long userId, HttpServletRequest request) {
+        // check validity of token
+        String token = request.getHeader("X-Token");
+        if(userService.getUseridByToken(token) == 0) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
+        }
+
+        // fetch all users in the internal representation
+        User user = userService.getUserById(userId);
+        UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+
+        return userGetDTO;
+    }
 
   @GetMapping("/users/{userId}/invitations")
   @ResponseStatus(HttpStatus.OK) // 200
@@ -148,7 +168,7 @@ public class UserController {
   public List<InvitationGetDTO> getOpenInvitationsByGuest(@PathVariable Long userId, HttpServletRequest request) {
     // 404 - user not found
     userService.getUserById(userId);
-    
+
     // 401 - not authorized
     Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
     if(tokenId != userId) {
