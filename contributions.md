@@ -75,8 +75,19 @@
 |             | #51    | Create path to be redirected to user profile                                     |      |
 |             | #70    | Redirect user to Group Creation page when pressing on Form Group button          |  X   |
 
+</p>
 
+## **Week 3** 
 
+<p>
+
+| Name        | Issues | Description                                                                      | Done |
+|-------------|--------|----------------------------------------------------------------------------------|------|
+| Lany        |        |                                                                                  |      |
+| Orestis     |        |                                                                                  |      |
+| Kalliopi    |        |                                                                                  |      |
+| Ann-Kathrin |        |                                                                                  |      |
+| Chiara      |        |                                                                                  |      |
 
 
 </p>
