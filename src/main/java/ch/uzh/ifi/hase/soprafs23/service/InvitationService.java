@@ -31,6 +31,10 @@ public class InvitationService {
 
     public Invitation createInvitation(Long groupId, Long guestId) {
         // TODO: check that there is no other invitation of the same group, same newGuest already
+        List<Invitation> existingInvites = invitationRepository.findByGroupIdAndGuestId(groupId, guestId);
+        if (!existingInvites.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Invitation already exists for the given group and guest."));
+        }
 
         // assign guestId and groupId to invite
         Invitation newInvite = new Invitation();

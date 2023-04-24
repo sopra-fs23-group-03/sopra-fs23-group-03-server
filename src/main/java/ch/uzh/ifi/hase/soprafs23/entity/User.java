@@ -20,95 +20,96 @@ import java.io.Serializable;
 @Table(name = "USER")
 public class User implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  @Id
-  @GeneratedValue
-  private Long id;
+    @Id
+    @GeneratedValue
+    private Long id;
 
-  @Column(nullable = false, unique = true)
-  private String username;
+    @Column(nullable = false, unique = true)
+    private String username;
 
-  @Column(nullable = false)
-  private String password;
+    @Column(nullable = false)
+    private String password;
 
-  @Column(nullable = false, unique = true)
-  private String token;
+    @Column(nullable = false, unique = true)
+    private String token;
 
-  @Column(nullable = false)
-  private UserStatus status;
+    @Column(nullable = false)
+    private UserStatus status;
 
-  @Column(nullable = true)
-  private String allergies;
+    @Column(nullable = true)
+    private String allergies;
 
-  @Column(nullable = true)
-  private String favoriteCuisine;
+    @Column(nullable = true)
+    private String favoriteCuisine;
 
-  @Column(nullable = true)
-  private String specialDiet;
+    @Column(nullable = true)
+    private String specialDiet;
 
-  @Column(nullable = true)
-  private Long groupId;
+    @Column(nullable = true)
+    private Long groupId;
 
-  //Methods
+    //Methods
 
-  public Long getId() {
-    return id;
-  }
+    public Long getId() {
+        return id;
+    }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-  public String getUsername() {
-    return username;
-  }
+    public String getUsername() {
+        return username;
+    }
 
-  public void setUsername(String username) {
-    this.username = username;
-  }
-  
-  public String getPassword() {
-    return password;
-  }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-  public void setPassword(String password) {
-    this.password = password;
-  }
+    public String getPassword() {
+        return password;
+    }
 
-  public String getToken() {
-    return token;
-  }
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-  public void setToken(String token) {
-    this.token = token;
-  }
+    public String getToken() {
+        return token;
+    }
 
-  public UserStatus getStatus() {
-    return status;
-  }
+    public void setToken(String token) {
+        this.token = token;
+    }
 
-  public void setStatus(UserStatus status) {
-    this.status = status;
-  }
+    public UserStatus getStatus() {
+        return status;
+    }
 
-  public String getAllergies() {
-      return allergies;
-  }
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
 
-  public void setAllergies(String allergies){
-      this.allergies = allergies;
-  }
+    public String getAllergies() {
+        return allergies;
+    }
 
-  public String getFavoriteCuisine(){
-      return favoriteCuisine;
-  }
+    public void setAllergies(String allergies) {
+        this.allergies = allergies;
+    }
+
+    public String getFavoriteCuisine() {
+        return favoriteCuisine;
+    }
 
     public void setFavoriteCuisine(String favoriteCuisine) {
         this.favoriteCuisine = favoriteCuisine;
     }
-    public String getSpecialDiet(){
-      return specialDiet;
+
+    public String getSpecialDiet() {
+        return specialDiet;
     }
 
     public void setSpecialDiet(String specialDiet) {
@@ -116,11 +117,11 @@ public class User implements Serializable {
     }
 
     public Long getGroupId() {
-      return groupId;
+        return groupId;
     }
 
     public void setGroupId(Long groupId) {
-      this.groupId = groupId;
+        this.groupId = groupId;
     }
 
 }

@@ -6,6 +6,9 @@ public class InvitationPostDTO {
 
     private Long invitationId;
 
+
+    private Long guestId;
+
     public Long getGroupId() {
         return groupId;
     }
@@ -20,5 +23,13 @@ public class InvitationPostDTO {
 
     public void setInvitationId(Long invitationId) {
         this.invitationId = invitationId;
+    }
+
+    public Long getGuestId() {
+        return guestId;
+    }
+
+    public void setGuestId(Long guestId) {
+        this.guestId = guestId;
     }
 }
