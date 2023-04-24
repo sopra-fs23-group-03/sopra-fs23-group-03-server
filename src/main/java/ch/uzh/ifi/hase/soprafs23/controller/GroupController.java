@@ -10,6 +10,8 @@ import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 
 //import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,10 +97,12 @@ public class GroupController {
     }
 
 
+
     @PostMapping("/groups/{groupId}/invitations")
     @ResponseStatus(HttpStatus.CREATED) // 201
     @ResponseBody
     public void sendInvitation(@PathVariable Long groupId, @RequestBody List<Long> ListGuestIds, HttpServletRequest request) {
+
 
         // only HOST can send invitation: check host token
         Group currentGroup = groupService.getGroupById(groupId);  // 404 - group not found
@@ -114,11 +120,21 @@ public class GroupController {
             invitationPostDTO.setGuestId(guestId);
             Invitation invitation = DTOMapper.INSTANCE.convertInvitationPostDTOtoEntity(invitationPostDTO);
             invitation.setGroupId(groupId);
-            // Create invitation using invitation service
-            invitationService.createInvitation(groupId, guestId); // conflict - 409 error checked in here: user sends invitation to user which is already invited
+
+            try {
+                // Create invitation using invitation service
+                invitationService.createInvitation(groupId, guestId);
+            } catch (ResponseStatusException e) {
+                if (e.getStatus() == HttpStatus.CONFLICT) {
+                    String errorMessage = String.format("An invitation has already been sent to guest with id %d.", guestId); // 409 - conflict
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, errorMessage, e);
+                } else {
+                    throw e;
+                }
+            }
+
+
         }
-
-
     }
 
     @PutMapping("/groups/{groupId}/invitations/reject")

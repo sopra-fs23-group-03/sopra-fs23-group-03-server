@@ -32,7 +32,7 @@ public class InvitationService {
     public Invitation createInvitation(Long groupId, Long guestId) {
         List<Invitation> existingInvites = invitationRepository.findByGroupIdAndGuestId(groupId, guestId);
         if (!existingInvites.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Invitation already exists for the given group and guest.")); //409-error
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Invitation already exists for the given group and guest.")); // 409-error
         }
 
         // assign guestId and groupId to invite

@@ -66,4 +66,15 @@ public class GroupService {
         return group.get();
     }
 
+    public Group updateGroup(Long groupId, String newGroupName) {
+        Group groupToUpdate = groupRepository.findById(groupId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
+        groupToUpdate.setGroupName(newGroupName);
+        return groupRepository.save(groupToUpdate);
+    }
+
+
+
+
+
 }
