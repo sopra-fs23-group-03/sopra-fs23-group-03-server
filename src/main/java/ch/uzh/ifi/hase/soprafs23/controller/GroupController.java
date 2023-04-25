@@ -161,13 +161,15 @@ public class GroupController {
         }
 
         // get the members of the group
-        List<User> members; // TODO: groupService.getAllMemberIdsOfGroup(group);
+        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
         List<UserGetDTO> userGetDTOs = new ArrayList<>();
 
         // convert each user to the API representation
-        // for (User user : members) {
-        //     userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
-        // }
+        for (Long userId : memberIds) {
+            User user = userService.getUserById(userId);
+            userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
+        }
+        
         return userGetDTOs;
     }
     
