@@ -534,6 +534,67 @@ public class GroupControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
+    @Test
+    public void testGetGroupById_valid() throws Exception {
+        // mocks
+        given(groupService.getGroupById(group.getId())).willReturn(group);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id", is(group.getId().intValue())))
+            .andExpect(jsonPath("$.groupName", is(group.getGroupName())))
+            .andExpect(jsonPath("$.hostId", is(group.getHostId().intValue())));
+            
+        // verifies
+        verify(groupService, times(1)).getGroupById(group.getId());
+        verify(userService, times(1)).getUseridByToken(user.getToken());
+    }
+
+    @Test
+    public void testGetGroupById_groupNotFound() throws Exception {
+        Long anotherGroupId = 8L;
+
+        // mocks
+        given(groupService.getGroupById(anotherGroupId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "error message"));
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}", anotherGroupId)
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isNotFound());
+            
+        // verifies
+        verify(groupService, times(1)).getGroupById(anotherGroupId);
+        verify(userService, times(0)).getUseridByToken(any());
+    }
+
+    @Test void testGetGroupById_notValidToken() throws Exception {
+        String anotherToken = "anotherToken";
+
+        // mocks
+        given(userService.getUseridByToken(anotherToken)).willReturn(0L);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", anotherToken);
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isUnauthorized());
+            
+        // verifies
+        verify(userService, times(1)).getUseridByToken(anotherToken);
+    }
+    
     // TODO: add tests for GET /groups/{groupId}/members
 
 
