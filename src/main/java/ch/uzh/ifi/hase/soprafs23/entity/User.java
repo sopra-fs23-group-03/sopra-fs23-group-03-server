@@ -46,6 +46,7 @@ public class User implements Serializable {
   private Set<String> allergies = new HashSet<>(); // important to initialize as an empty set
 
 
+
     @Column(nullable = true)
     private String favoriteCuisine;
 

@@ -261,6 +261,8 @@ public class UserServiceTest {
         assertEquals("New password cannot be empty.", exception.getReason());
     }
 
+
+
     @Test
     void updateUser_withIncorrectCurrentPassword_throwsException() {
         user = new User();

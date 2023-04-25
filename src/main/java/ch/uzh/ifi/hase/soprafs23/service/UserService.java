@@ -146,6 +146,7 @@ public class UserService {
             user.setAllergiesSet(allergiesSet);
         }
 
+
         if(newFavoriteCuisine != null){
             user.setFavoriteCuisine(newFavoriteCuisine);
         }

@@ -58,6 +58,7 @@ public class Group implements Serializable {
         this.hostId = hostId;
     }
 
+
     public VotingType getVotingType() {
         return votingType;
     }
