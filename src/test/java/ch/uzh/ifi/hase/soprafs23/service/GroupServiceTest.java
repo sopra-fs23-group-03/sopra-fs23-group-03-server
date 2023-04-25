@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
+import javassist.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -48,5 +49,24 @@ public class GroupServiceTest {
         assertThrows(ResponseStatusException.class, () -> groupService.getGroupById(2L));
     }
 
-    
+    @Test
+    public void countGuests_test() throws NotFoundException {
+        Group group = new Group();
+        group.setId(1L);
+        group.setGroupName("Test Group");
+        group.setHostId(12L);
+        group.addGuestId(34L);
+        group.addGuestId(86L);
+        groupRepository.save(group);
+
+        Mockito.when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+        assertEquals(2, groupService.countGuests(group.getId()));
+
+        Mockito.when(groupRepository.findById(2L)).thenReturn(Optional.empty());
+        assertThrows(ResponseStatusException.class, () -> groupService.countGuests(2L));
+    }
+
+
+
+
 }

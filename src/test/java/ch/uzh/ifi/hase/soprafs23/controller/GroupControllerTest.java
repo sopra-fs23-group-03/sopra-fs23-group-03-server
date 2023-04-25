@@ -5,7 +5,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
-import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs23.repository.InvitationRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationPutDTO;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -36,6 +37,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -65,6 +67,10 @@ public class GroupControllerTest {
     @MockBean
     private InvitationService invitationService;
 
+
+    @Mock
+    //private InvitationRepository invitationRepository;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private GroupPostDTO groupPostDTO;
@@ -93,7 +99,9 @@ public class GroupControllerTest {
 
         // mocks the getUserIdByToken(token) method in UserService
         given(userService.getUseridByToken(user.getToken())).willReturn(user.getId());
+
     }
+
 
     @Test
     public void getGroups_returnsJsonArrayOfExistingGroups_whenAuthenticated() throws Exception {
@@ -508,6 +516,7 @@ public class GroupControllerTest {
                 .andExpect(status().isConflict());
     }
 
+
     @Test
     public void testCreateGroupReturns404() throws Exception {
         Long userId = 1L;
@@ -534,6 +543,108 @@ public class GroupControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
+    @Test
+    public void sendInvitation_returns404_whenGroupNotFound() throws Exception {
+        // given
+        Long groupId = 1L;
+        List<Long> guestIds = Arrays.asList(2L, 3L);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        Mockito.when(groupService.getGroupById(groupId)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Group with id %d not found.", groupId)));
+
+        String token = "valid-token";
+        Mockito.when(request.getHeader("X-Token")).thenReturn(token);
+
+        // when and then
+        mockMvc.perform(MockMvcRequestBuilders.post("/groups/" + groupId + "/invitations")
+                        .header("X-Token", token)
+                        .content(new ObjectMapper().writeValueAsString(guestIds))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+
+    @Test
+    public void sendInvitation_returns401_whenUnauthorized() throws Exception {
+        // given
+        Long groupId = 1L;
+        List<Long> guestIds = Arrays.asList(2L, 3L);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        Group currentGroup = new Group();
+        currentGroup.setId(groupId);
+        currentGroup.setHostId(4L);
+
+        String token = "valid-token";
+        Long tokenId = 5L;
+
+        Mockito.when(groupService.getGroupById(groupId)).thenReturn(currentGroup);
+        Mockito.when(userService.getUseridByToken(request.getHeader("X-Token"))).thenReturn(tokenId);
+
+        // when and then
+        mockMvc.perform(MockMvcRequestBuilders.post("/groups/" + groupId + "/invitations")
+                        .header("X-Token", token)
+                        .content(new ObjectMapper().writeValueAsString(guestIds))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+   /* @Test
+    public void testSendInvitation_409Conflict() throws Exception {
+        // Set up test data
+        Long hostId = 1L;
+        Group testGroup = new Group();
+        testGroup.setId(1L);
+        testGroup.setGroupName("Test Group");
+        testGroup.setHostId(hostId);
+        testGroup.addGuestId(2L);
+
+        Invitation existingInvitation = new Invitation();
+        existingInvitation.setGroupId(testGroup.getId());
+        existingInvitation.setGuestId(2L);
+
+        Mockito.when(groupService.getGroupById(Mockito.anyLong())).thenReturn(testGroup);
+        Mockito.when(userService.getUseridByToken(Mockito.anyString())).thenReturn(hostId);
+        Mockito.when(invitationService.createInvitation(Mockito.anyLong(), Mockito.anyLong())).thenThrow(new ResponseStatusException(HttpStatus.CONFLICT, "An invitation has already been sent."));
+
+        // Perform POST request
+        mockMvc.perform(MockMvcRequestBuilders.post("/groups/{groupId}/invitations", 1L)
+                        .header("X-Token", "testToken")
+                        .content("[2]")
+                        .contentType(MediaType.APPLICATION_JSON))
+                // Validate response code
+                .andExpect(MockMvcResultMatchers.status().isConflict())
+                // Validate response body
+                .andExpect(MockMvcResultMatchers.header().string("Content-Type", "application/json;charset=UTF-8"))
+                .andExpect(jsonPath("$.error", is("An invitation has already been sent.")));
+    }
+
+*/
+
+
+    @Test
+    public void sendInvitation_returns201_whenSuccessful() throws Exception {
+        // given
+        Long groupId = 1L;
+        List<Long> guestIds = Arrays.asList(2L, 3L);
+        HttpServletRequest request = mock(HttpServletRequest.class);
+
+        Group currentGroup = new Group();
+        currentGroup.setId(groupId);
+        currentGroup.setHostId(4L);
+
+        String token = "valid-token";
+        Long tokenId = 4L;
+
+        Mockito.when(groupService.getGroupById(groupId)).thenReturn(currentGroup);
+        Mockito.when(userService.getUseridByToken(request.getHeader("X-Token"))).thenReturn(tokenId);
+
+        // when and then
+        mockMvc.perform(MockMvcRequestBuilders.post("/groups/" + groupId + "/invitations")
+                        .header("X-Token", token));
+    }
 
 
     /**

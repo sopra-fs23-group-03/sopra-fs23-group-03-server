@@ -7,6 +7,7 @@ import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 import java.util.List;
 import java.util.Optional;
 
+import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -66,11 +67,22 @@ public class GroupService {
         return group.get();
     }
 
-
-    public void invite(Long groupId, List <String> members ){
-
-
+    public Group updateGroup(Long groupId, String newGroupName) {
+        Group groupToUpdate = groupRepository.findById(groupId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
+        groupToUpdate.setGroupName(newGroupName);
+        return groupRepository.save(groupToUpdate);
     }
+
+
+    public int countGuests(Long groupId) {
+        Group group = groupRepository.findById(groupId).orElse(null);
+        if (group == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
+        }
+        return group.getGuestIds().size();
+    }
+
 
     public void addGuestToGroupMembers(Long guestId, Long groupId) {
         Group group = getGroupById(groupId);
@@ -79,4 +91,5 @@ public class GroupService {
         group = groupRepository.save(group);
         groupRepository.flush();
     }
+
 }
