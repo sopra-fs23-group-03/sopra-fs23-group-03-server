@@ -147,8 +147,14 @@ public class UserService {
             user.setSpecialDiet(newSpecialDiet);
         }
 
-        if(newPassword != null){
-            user.setPassword(newPassword);
+        if(newPassword != null && !newPassword.isEmpty()){
+            if(!user.getPassword().equals(newPassword)){
+                user.setPassword(newPassword);
+            } else {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "New password cannot be the same as the current password.");
+            }
+        } else if (newPassword != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password cannot be empty.");
         }
 
         user = userRepository.save(user);
