@@ -1,9 +1,13 @@
 package ch.uzh.ifi.hase.soprafs23.rest.dto;
+import java.util.Collections;
+import java.util.Arrays;
+import java.util.Set;
+
 
 public class UserPutDTO {
 
     private String username;
-    private String allergies;
+    private Set<String> allergies;
     private String favoriteCuisine;
     private String specialDiet;
     private String password;
@@ -17,13 +21,18 @@ public class UserPutDTO {
         this.username = username;
     }
 
-    public String getAllergies() {
+    public Set<String> getAllergies() {
         return allergies;
     }
 
-    public void setAllergies(String allergies) {
-        this.allergies = allergies;
+    public void setAllergies(Set<String> allergies) {
+        if (allergies != null && !allergies.isEmpty()) {
+            this.allergies = Collections.singleton(String.join(",", allergies));
+        } else {
+            this.allergies = null;
+        }
     }
+
 
     public String getFavoriteCuisine() {
         return favoriteCuisine;

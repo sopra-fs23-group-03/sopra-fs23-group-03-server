@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
+import java.util.Set;
 
 /**
  * DTOMapper
@@ -29,7 +30,7 @@ public interface DTOMapper {
   @Mapping(source = "id", target = "id")
   @Mapping(source = "username", target = "username")
   @Mapping(source = "status", target = "status")
-  @Mapping(source = "allergies", target = "allergies")
+  @Mapping(source = "allergiesSet", target = "allergies", qualifiedByName = "map")
   @Mapping(source = "favoriteCuisine", target = "favoriteCuisine")
   @Mapping(source = "specialDiet", target = "specialDiet")
   UserGetDTO convertEntityToUserGetDTO(User user);
@@ -42,4 +43,8 @@ public interface DTOMapper {
   @Mapping(source = "groupName", target = "groupName")
   @Mapping(source = "hostId",target = "hostId")
   GroupGetDTO convertEntityToGroupGetDTO(Group group);
+
+    default String map(Set<String> value) {
+        return String.join(",", value);
+    }
 }

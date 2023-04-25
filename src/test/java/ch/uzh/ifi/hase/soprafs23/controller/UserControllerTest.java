@@ -30,6 +30,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.HashSet;
 //import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
@@ -273,6 +276,13 @@ public class UserControllerTest {
 
     @Test
     public void testGetUserByIdReturns200() throws Exception {
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("firstUsername");
+        user.setPassword("firstPassword");
+        user.setToken("firstToken");
+        user.setStatus(UserStatus.ONLINE);
+        user.setAllergiesSet(new HashSet<>(Arrays.asList("garlic", "nuts")));
         // mocks the getUserById(id) method in UserService
         given(userService.getUserById(user.getId())).willReturn(user);
 
@@ -286,7 +296,7 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(user.getId().intValue())))
                 .andExpect(jsonPath("$.username", is(user.getUsername())))
-                .andExpect(jsonPath("$.allergies", is(user.getAllergies())))
+                .andExpect(jsonPath("$.allergies", containsInAnyOrder("garlic", "nuts")))
                 .andExpect(jsonPath("$.favoriteCuisine", is(user.getFavoriteCuisine())))
                 .andExpect(jsonPath("$.specialDiet", is(user.getSpecialDiet())))
                 .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
@@ -342,7 +352,7 @@ public class UserControllerTest {
 
         UserPutDTO userPutDTO = new UserPutDTO();
         userPutDTO.setUsername("new-username");
-        userPutDTO.setAllergies("peanuts");
+        userPutDTO.setAllergies(Collections.singleton("Nuts"));
         userPutDTO.setFavoriteCuisine("Italian");
         userPutDTO.setSpecialDiet("vegan");
         userPutDTO.setPassword("new-password");
@@ -359,7 +369,7 @@ public class UserControllerTest {
 
     @Test
     public void putUsersId_whenUserDoesntExist_404() throws Exception {
-        String newAllergies = "secondAllergies";
+        //String newAllergies = "secondAllergies";
         String newUsername = "secondUsername";
         String newFavoriteCuisine = "secondFavoriteCuisine";
         String newSpecialDiet = "secondSpecialDiet";
@@ -371,7 +381,7 @@ public class UserControllerTest {
         // create UserPutDTO for the request body
         UserPutDTO userPutDTO = new UserPutDTO();
         userPutDTO.setUsername(newUsername);
-        userPutDTO.setAllergies(newAllergies);
+        userPutDTO.setAllergies(Collections.singleton("Nuts"));
         userPutDTO.setFavoriteCuisine(newFavoriteCuisine);
         userPutDTO.setSpecialDiet(newSpecialDiet);
         userPutDTO.setPassword(newPassword);

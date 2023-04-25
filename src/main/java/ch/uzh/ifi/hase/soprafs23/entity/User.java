@@ -4,6 +4,9 @@ import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Set;
+import java.util.HashSet;
+
 
 /**
  * Internal User Representation
@@ -39,7 +42,8 @@ public class User implements Serializable {
   private UserStatus status;
 
   @Column(nullable = true)
-  private String allergies;
+  @ElementCollection
+  private Set<String> allergies = new HashSet<>(); // important to initialize as an empty set
 
   @Column(nullable = true)
   private String favoriteCuisine;
@@ -92,13 +96,26 @@ public class User implements Serializable {
     this.status = status;
   }
 
-  public String getAllergies() {
-      return allergies;
-  }
+    public Set<String> getAllergiesSet() {
+        return allergies;
+    }
 
-  public void setAllergies(String allergies){
-      this.allergies = allergies;
-  }
+    public void setAllergiesSet(Set<String> allergies) {
+        this.allergies = allergies;
+    }
+
+    public void addAllergy(String allergy) {
+        if (allergies == null) {
+            allergies = new HashSet<>();
+        }
+        allergies.add(allergy);
+    }
+
+    public void removeAllergies() {
+        if (allergies != null) {
+            allergies.clear();
+        }
+    }
 
   public String getFavoriteCuisine(){
       return favoriteCuisine;
