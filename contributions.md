@@ -43,7 +43,6 @@
 |             | #118   | Check if user is authorized to accept/reject invitation else return error        |  X   |
 |             | #119   | Check if user exists when accepting/rejecting the invitation else return error   |  X   |
 |             | #157   | create GET /users/{userId}/invitations request                                   |  X   |
-|             |        |                                                                                  |      |    
 | Orestis     | #47    | Create Logout Method which sets User to offline                                  |      |
 |             | #88    | Create method for updating the user profile                                      |      |
 |             | #87    | Create method for returning the user profile                                     |      |
