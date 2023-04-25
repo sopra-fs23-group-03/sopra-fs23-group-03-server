@@ -143,7 +143,7 @@ public class GroupController {
     @GetMapping("/groups/{groupId}")
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
-    public void getGroupById(@PathVariable Long groupId, HttpServletRequest request) {
+    public GroupGetDTO getGroupById(@PathVariable Long groupId, HttpServletRequest request) {
         // 404 - group not found
         Group group = groupService.getGroupById(groupId);
 
@@ -153,7 +153,7 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
         }
 
-        // TODO: convert group to GroupGetDTO and return it
+        return DTOMapper.INSTANCE.convertEntityToGroupGetDTO(group);
     }
 
     @GetMapping("/groups/{groupId}/members")
