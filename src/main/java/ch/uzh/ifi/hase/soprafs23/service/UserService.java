@@ -1,11 +1,8 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
-//import ch.uzh.ifi.hase.soprafs23.entity.Group; // unused
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
-//import org.slf4j.Logger; // unused
-//import org.slf4j.LoggerFactory; // unused
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
