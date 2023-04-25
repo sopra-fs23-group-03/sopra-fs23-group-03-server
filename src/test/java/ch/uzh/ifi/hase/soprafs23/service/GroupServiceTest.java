@@ -12,6 +12,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class GroupServiceTest {
@@ -48,5 +50,21 @@ public class GroupServiceTest {
         assertThrows(ResponseStatusException.class, () -> groupService.getGroupById(2L));
     }
 
+    @Test
+    public void getAllMemberIdsOfGroup_test() {
+        List<Long> expectedMembers = new ArrayList<>();
+        expectedMembers.add(group.getHostId());
+        assertEquals(expectedMembers, groupService.getAllMemberIdsOfGroup(group));
+
+        Long firstGuestId = 4L;
+        group.addGuestId(firstGuestId);
+        expectedMembers.add(firstGuestId);
+        assertEquals(expectedMembers, groupService.getAllMemberIdsOfGroup(group));
+
+        Long secondGuestId = 7L;
+        group.addGuestId(secondGuestId);
+        expectedMembers.add(secondGuestId);
+        assertEquals(expectedMembers, groupService.getAllMemberIdsOfGroup(group));
+    }
     
 }

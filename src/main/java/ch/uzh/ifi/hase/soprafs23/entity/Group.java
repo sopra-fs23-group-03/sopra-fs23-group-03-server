@@ -20,7 +20,7 @@ public class Group implements Serializable {
     private Long hostId;
 
     @ElementCollection
-    private Set<Long> guestIds;
+    private Set<Long> guestIds = new HashSet<Long>();
 
     public Long getId() {
         return id;
@@ -51,9 +51,6 @@ public class Group implements Serializable {
     }
 
     public void addGuestId(Long guestId) {
-        if(this.guestIds == null) {
-            this.guestIds = new HashSet<Long>();
-        }
         this.guestIds.add(guestId);
     }
 

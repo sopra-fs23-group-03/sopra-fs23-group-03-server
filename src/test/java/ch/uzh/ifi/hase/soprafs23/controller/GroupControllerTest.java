@@ -576,7 +576,8 @@ public class GroupControllerTest {
         verify(userService, times(0)).getUseridByToken(any());
     }
 
-    @Test void testGetGroupById_notValidToken() throws Exception {
+    @Test
+    public void testGetGroupById_notValidToken() throws Exception {
         String anotherToken = "anotherToken";
 
         // mocks
@@ -596,7 +597,20 @@ public class GroupControllerTest {
     }
     
     // TODO: add tests for GET /groups/{groupId}/members
+    @Test
+    public void testGetGroupMembersById_valid() throws Exception {
 
+    }
+
+    @Test
+    public void testGetGroupMembersById_groupNotFound() throws Exception {
+
+    }
+
+    @Test
+    public void testGetGroupMembersById_notValidToken() throws Exception {
+
+    }
 
     /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
