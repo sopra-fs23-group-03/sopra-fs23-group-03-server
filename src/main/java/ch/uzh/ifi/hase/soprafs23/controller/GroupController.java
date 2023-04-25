@@ -144,7 +144,16 @@ public class GroupController {
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
     public void getGroupById(@PathVariable Long groupId, HttpServletRequest request) {
-        // TODO: create this request
+        // 404 - group not found
+        Group group = groupService.getGroupById(groupId);
+
+        // 401 - not authorized
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if(tokenId == 0L) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
+        }
+
+        // TODO: convert group to GroupGetDTO and return it
     }
 
     @GetMapping("/groups/{groupId}/members")
@@ -169,7 +178,7 @@ public class GroupController {
             User user = userService.getUserById(userId);
             userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
         }
-        
+
         return userGetDTOs;
     }
     
