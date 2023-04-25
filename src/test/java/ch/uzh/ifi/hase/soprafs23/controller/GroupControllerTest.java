@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
@@ -83,6 +84,7 @@ public class GroupControllerTest {
         group.setId(1L);
         group.setGroupName("firstGroupName");
         group.setHostId(2L);
+        group.setVotingType(VotingType.MAJORITYVOTE);
 
         user = new User();
         user.setId(group.getHostId());
@@ -114,7 +116,11 @@ public class GroupControllerTest {
         // then
         mockMvc.perform(getRequest)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].groupName", is(group.getGroupName())));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(group.getId().intValue())))
+                .andExpect(jsonPath("$[0].groupName", is(group.getGroupName())))
+                .andExpect(jsonPath("$[0].hostId", is(group.getHostId().intValue())))
+                .andExpect(jsonPath("$[0].votingType", is(group.getVotingType().toString())));
     }
 
 
@@ -440,11 +446,13 @@ public class GroupControllerTest {
         GroupPostDTO groupPostDTO = new GroupPostDTO();
         groupPostDTO.setGroupName("Test Group");
         groupPostDTO.setHostId(1L);
+        groupPostDTO.setVotingType("MAJORITYVOTE");
 
         Group group = new Group();
         group.setId(1L);
         group.setGroupName("Test Group");
         group.setHostId(1L);
+        group.setVotingType(VotingType.MAJORITYVOTE);
 
         given(userService.getUseridByToken(any())).willReturn(group.getHostId());
         given(userService.getUserById(group.getHostId())).willReturn(new User());
@@ -454,7 +462,7 @@ public class GroupControllerTest {
         MockHttpServletRequestBuilder postRequest = post("/groups")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-Token", "valid-token")
-                .content("{\"groupName\": \"Test Group\", \"hostId\": 1}");
+                .content(asJsonString(groupPostDTO));
 
         // then
         mockMvc.perform(postRequest)
@@ -652,7 +660,8 @@ public class GroupControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id", is(group.getId().intValue())))
             .andExpect(jsonPath("$.groupName", is(group.getGroupName())))
-            .andExpect(jsonPath("$.hostId", is(group.getHostId().intValue())));
+            .andExpect(jsonPath("$.hostId", is(group.getHostId().intValue())))
+            .andExpect(jsonPath("$.votingType", is(group.getVotingType().toString())));
             
         // verifies
         verify(groupService, times(1)).getGroupById(group.getId());

@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
+import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 import javassist.NotFoundException;
@@ -36,6 +37,7 @@ public class GroupServiceTest {
         group.setId(1L);
         group.setGroupName("firstGroupName");
         group.setHostId(2L);
+        group.setVotingType(VotingType.MAJORITYVOTE);
 
         // mocks the save() method of GroupRepository
         Mockito.when(groupRepository.save(Mockito.any())).thenReturn(group);

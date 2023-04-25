@@ -27,21 +27,23 @@ public interface DTOMapper {
     @Mapping(source = "password", target = "password")
     User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
 
-  @Mapping(source = "id", target = "id")
-  @Mapping(source = "username", target = "username")
-  @Mapping(source = "status", target = "status")
-  @Mapping(source = "allergies", target = "allergies")
-  @Mapping(source = "favoriteCuisine", target = "favoriteCuisine")
-  @Mapping(source = "specialDiet", target = "specialDiet")
-  UserGetDTO convertEntityToUserGetDTO(User user);
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "username", target = "username")
+    @Mapping(source = "status", target = "status")
+    @Mapping(source = "allergies", target = "allergies")
+    @Mapping(source = "favoriteCuisine", target = "favoriteCuisine")
+    @Mapping(source = "specialDiet", target = "specialDiet")
+    UserGetDTO convertEntityToUserGetDTO(User user);
 
-  @Mapping(source = "groupName", target = "groupName")
-  @Mapping(source = "hostId", target = "hostId")
-  Group convertGroupPostDTOtoEntity(GroupPostDTO groupPostDTO);
+    @Mapping(source = "groupName", target = "groupName")
+    @Mapping(source = "hostId", target = "hostId")
+    @Mapping(source = "votingType", target = "votingType")
+    Group convertGroupPostDTOtoEntity(GroupPostDTO groupPostDTO);
 
     @Mapping(source = "id", target = "id")
     @Mapping(source = "groupName", target = "groupName")
     @Mapping(source = "hostId", target = "hostId")
+    @Mapping(source = "votingType", target = "votingType")
     GroupGetDTO convertEntityToGroupGetDTO(Group group);
 
 
