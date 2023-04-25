@@ -144,16 +144,16 @@ public class GroupController {
                                  HttpServletRequest request) {
         Long guestId = invitationPutDTO.getGuestId();
 
+        // 404 - group, guest, and/or invitation not found
+        groupService.getGroupById(groupId);
+        userService.getUserById(guestId);
+        Invitation invitation = invitationService.getInvitationByGroupIdAndGuestId(groupId, guestId);
+        
         // 401 - not authorized
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
         if(tokenId != guestId) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to reject this invitation."));
         }
-
-        // 404 - group, guest, and/or invitation not found
-        groupService.getGroupById(groupId);
-        userService.getUserById(guestId);
-        Invitation invitation = invitationService.getInvitationByGroupIdAndGuestId(groupId, guestId);
 
         // delete invitation
         invitationService.deleteInvitation(invitation);
@@ -166,23 +166,23 @@ public class GroupController {
                                  HttpServletRequest request) {
         Long guestId = invitationPutDTO.getGuestId();
 
+        // 404 - group, guest, and/or invitation not found
+        groupService.getGroupById(groupId);
+        userService.getUserById(invitationPutDTO.getGuestId());
+        Invitation invitation = invitationService.getInvitationByGroupIdAndGuestId(groupId, guestId);
+
         // 401 - not authorized
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
         if(tokenId != guestId) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to accept this invitation."));
         }
 
-        // 404 - group, guest, and/or invitation not found
-        groupService.getGroupById(groupId);
-        userService.getUserById(invitationPutDTO.getGuestId());
-        Invitation invitation = invitationService.getInvitationByGroupIdAndGuestId(groupId, guestId);
-
-        // TODO: add guest to group
-
+        // create link between guest and group
+        groupService.addGuestToGroupMembers(guestId, groupId);
+        userService.joinGroup(guestId, groupId); 
 
         // delete invitation
         invitationService.deleteInvitation(invitation);
     }
-
 
 }

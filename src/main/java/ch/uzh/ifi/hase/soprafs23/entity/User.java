@@ -47,8 +47,10 @@ public class User implements Serializable {
     @Column(nullable = true)
     private String specialDiet;
 
+
     @Column(nullable = true)
     private Long groupId;
+
 
     //Methods
 
@@ -123,5 +125,6 @@ public class User implements Serializable {
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
     }
+
 
 }
