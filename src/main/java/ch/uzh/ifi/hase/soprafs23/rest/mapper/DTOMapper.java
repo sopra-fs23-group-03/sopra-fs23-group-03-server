@@ -52,5 +52,4 @@ public interface DTOMapper {
 
     Invitation convertInvitationPostDTOtoEntity(Long groupId, Long guestId);
 
-
 }

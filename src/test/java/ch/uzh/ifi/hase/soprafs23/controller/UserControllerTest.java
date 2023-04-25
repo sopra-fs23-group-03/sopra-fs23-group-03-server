@@ -93,6 +93,7 @@ public class UserControllerTest {
         .andExpect(jsonPath("$[0].status", is(user.getStatus().toString())));
   }
 
+
   @Test
   public void getUsers_returnsErrorUNAUTHORIZED_whenNotAuthenticated() throws Exception {
     // mocks the getUserIdByTokem(token) method in UserService

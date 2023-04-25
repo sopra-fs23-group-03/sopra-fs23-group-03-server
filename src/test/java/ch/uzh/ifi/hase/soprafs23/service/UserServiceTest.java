@@ -282,11 +282,11 @@ public class UserServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(java.util.Optional.of(user));
 
-        // Act
+
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> userService.updateUser(1L, userPutDTO, "incorrectPassword"));
 
-        // Assert
+
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
         assertEquals("Current password is incorrect.", exception.getReason());
     }

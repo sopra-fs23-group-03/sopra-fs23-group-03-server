@@ -172,6 +172,7 @@ public class UserService {
         return storedPassword.equals(providedPassword);
     }
 
+
     public void joinGroup(Long guestId, Long groupId) {
         User guest = getUserById(guestId);
         guest.setGroupId(groupId);
