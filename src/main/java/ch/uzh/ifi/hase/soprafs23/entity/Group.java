@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,7 +21,12 @@ public class Group implements Serializable {
     private Long hostId;
 
     @ElementCollection
-    private Set<Long> guestIds = new HashSet<Long>();
+    private Set<Long> guestIds;
+
+
+    public Group() {
+        this.guestIds = new HashSet<>(); //guestIds set will be initialized with an empty HashSet when a new Group object is created.
+    }
 
     public Long getId() {
         return id;
@@ -57,4 +63,5 @@ public class Group implements Serializable {
     public void removeGuestId(Long guestId) {
         this.guestIds.remove(guestId);
     }
+
 }
