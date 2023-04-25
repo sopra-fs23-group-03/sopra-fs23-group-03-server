@@ -11,15 +11,15 @@ import ch.uzh.ifi.hase.soprafs23.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 
-//import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-// import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,6 +92,47 @@ public class GroupController {
         return groupGetDTO;
     }
 
+
+
+    @PostMapping("/groups/{groupId}/invitations")
+    @ResponseStatus(HttpStatus.CREATED) // 201
+    @ResponseBody
+    public void sendInvitation(@PathVariable Long groupId, @RequestBody List<Long> ListGuestIds, HttpServletRequest request) {
+
+
+        // only HOST can send invitation: check host token
+        Group currentGroup = groupService.getGroupById(groupId);  // 404 - group not found
+        Long currentGroupHostId = currentGroup.getHostId(); // get host of the group in db
+
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));  // check if its the same one sending the invites
+        if(tokenId != currentGroupHostId) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized.")); // 401 - not authorized
+        }
+
+        // Loop through each guest id and create an invitation for them: idea--> create InvitationPostDTO object for each guest id, set guest id in it, then use DTOMapper to convert it to an Invit entity
+        for (Long guestId : ListGuestIds) {
+            // Convert guest id to invitation entity
+            InvitationPostDTO invitationPostDTO = new InvitationPostDTO();
+            invitationPostDTO.setGuestId(guestId);
+            Invitation invitation = DTOMapper.INSTANCE.convertInvitationPostDTOtoEntity(invitationPostDTO);
+            invitation.setGroupId(groupId);
+
+            try {
+                // Create invitation using invitation service
+                invitationService.createInvitation(groupId, guestId);
+            } catch (ResponseStatusException e) {
+                if (e.getStatus() == HttpStatus.CONFLICT) {
+                    String errorMessage = String.format("An invitation has already been sent to guest with id %d.", guestId); // 409 - conflict
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, errorMessage, e);
+                } else {
+                    throw e;
+                }
+            }
+
+
+        }
+    }
+
     @PutMapping("/groups/{groupId}/invitations/reject")
     @ResponseStatus(HttpStatus.NO_CONTENT) // 204
     public void rejectInvitation(@PathVariable Long groupId,
@@ -140,4 +181,46 @@ public class GroupController {
         invitationService.deleteInvitation(invitation);
     }
 
+    @GetMapping("/groups/{groupId}")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
+    public GroupGetDTO getGroupById(@PathVariable Long groupId, HttpServletRequest request) {
+        // 404 - group not found
+        Group group = groupService.getGroupById(groupId);
+
+        // 401 - not authorized
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if(tokenId == 0L) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
+        }
+
+        return DTOMapper.INSTANCE.convertEntityToGroupGetDTO(group);
+    }
+
+    @GetMapping("/groups/{groupId}/members")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
+    public List<UserGetDTO> getGroupMembersById(@PathVariable Long groupId, HttpServletRequest request) {
+        // 404 - group not found
+        Group group = groupService.getGroupById(groupId);
+
+        // 401 - not authorized
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if(tokenId == 0L) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
+        }
+
+        // get the members of the group
+        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
+        List<UserGetDTO> userGetDTOs = new ArrayList<>();
+
+        // convert each user to the API representation
+        for (Long userId : memberIds) {
+            User user = userService.getUserById(userId);
+            userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
+        }
+
+        return userGetDTOs;
+    }
+    
 }

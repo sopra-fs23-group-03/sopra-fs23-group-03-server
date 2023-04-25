@@ -23,79 +23,81 @@ import java.util.HashSet;
 @Table(name = "USER")
 public class User implements Serializable {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  @Id
-  @GeneratedValue
-  private Long id;
+    @Id
+    @GeneratedValue
+    private Long id;
 
-  @Column(nullable = false, unique = true)
-  private String username;
+    @Column(nullable = false, unique = true)
+    private String username;
 
-  @Column(nullable = false)
-  private String password;
+    @Column(nullable = false)
+    private String password;
 
-  @Column(nullable = false, unique = true)
-  private String token;
+    @Column(nullable = false, unique = true)
+    private String token;
 
-  @Column(nullable = false)
-  private UserStatus status;
+    @Column(nullable = false)
+    private UserStatus status;
 
   @Column(nullable = true)
   @ElementCollection
   private Set<String> allergies = new HashSet<>(); // important to initialize as an empty set
 
 
-  @Column(nullable = true)
-  private String favoriteCuisine;
+    @Column(nullable = true)
+    private String favoriteCuisine;
 
-  @Column(nullable = true)
-  private String specialDiet;
+    @Column(nullable = true)
+    private String specialDiet;
 
-  @Column(nullable = true)
-  private Long groupId;
 
-  //Methods
+    @Column(nullable = true)
+    private Long groupId;
 
-  public Long getId() {
-    return id;
-  }
 
-  public void setId(Long id) {
-    this.id = id;
-  }
+    //Methods
 
-  public String getUsername() {
-    return username;
-  }
+    public Long getId() {
+        return id;
+    }
 
-  public void setUsername(String username) {
-    this.username = username;
-  }
-  
-  public String getPassword() {
-    return password;
-  }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-  public void setPassword(String password) {
-    this.password = password;
-  }
+    public String getUsername() {
+        return username;
+    }
 
-  public String getToken() {
-    return token;
-  }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-  public void setToken(String token) {
-    this.token = token;
-  }
+    public String getPassword() {
+        return password;
+    }
 
-  public UserStatus getStatus() {
-    return status;
-  }
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-  public void setStatus(UserStatus status) {
-    this.status = status;
-  }
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
+    }
 
     public Set<String> getAllergiesSet() {
         return allergies;

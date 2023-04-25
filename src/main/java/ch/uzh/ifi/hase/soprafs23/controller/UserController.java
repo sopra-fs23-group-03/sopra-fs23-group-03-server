@@ -130,6 +130,7 @@ public class UserController {
   @ResponseStatus(HttpStatus.NO_CONTENT) //NO CONTENT IS 204
   public void updateUser(@PathVariable Long userId,
                          @RequestBody UserPutDTO userPutDTO,
+                         @RequestParam String currentPassword,
                          HttpServletRequest request)
   {
       User user = userService.getUserById(userId);
@@ -143,7 +144,7 @@ public class UserController {
           throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to make changes to this profile."));
       }
 
-      userService.updateUser(userId, userPutDTO);
+      userService.updateUser(userId, userPutDTO, currentPassword);
   }
     @GetMapping("/users/{userId}")
     @ResponseStatus(HttpStatus.OK) // OK IS 200

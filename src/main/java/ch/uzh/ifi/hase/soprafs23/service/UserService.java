@@ -1,11 +1,8 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
-//import ch.uzh.ifi.hase.soprafs23.entity.Group; // unused
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
-//import org.slf4j.Logger; // unused
-//import org.slf4j.LoggerFactory; // unused
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.Optional;
@@ -42,6 +40,12 @@ public class UserService {
 
   public List<User> getUsers() {
     return this.userRepository.findAll();
+  }
+
+  public List getUsersFreeToInvite(){
+      // TODO: List with users which are not in a group yet
+      List L = new ArrayList<>();
+    return L;
   }
 
   // returns the userid of the user with the given token
@@ -123,7 +127,7 @@ public class UserService {
         userRepository.flush();
     }
 
-    public void updateUser(Long id, UserPutDTO userPutDTO) {
+    public void updateUser(Long id, UserPutDTO userPutDTO,String currentPassword) {
         User user = getUserById(id);
 
         String newUsername = userPutDTO.getUsername();
@@ -150,12 +154,25 @@ public class UserService {
             user.setSpecialDiet(newSpecialDiet);
         }
 
-        if(newPassword != null){
-            user.setPassword(newPassword);
+        if(newPassword != null && !newPassword.isEmpty()){
+            if (isPasswordCorrect(user.getPassword(), currentPassword)) {
+                if(!user.getPassword().equals(newPassword)){
+                    user.setPassword(newPassword);
+                } else {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "New password cannot be the same as the current password.");
+                }
+            } else {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Current password is incorrect.");
+            }
+        } else if (newPassword != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password cannot be empty.");
         }
 
         user = userRepository.save(user);
         userRepository.flush();
+    }
+    public boolean isPasswordCorrect(String storedPassword, String providedPassword) {
+        return storedPassword.equals(providedPassword);
     }
 
     public void joinGroup(Long guestId, Long groupId) {

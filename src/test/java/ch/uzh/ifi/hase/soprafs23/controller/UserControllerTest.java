@@ -3,18 +3,15 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
-//import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
-//import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO; //unused
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-//import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -23,10 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-//import org.springframework.test.web.servlet.setup.MockMvcBuilders; //unused
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-//import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -39,11 +34,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.*;
-//import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put; //unused
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -357,7 +350,7 @@ public class UserControllerTest {
         userPutDTO.setSpecialDiet("vegan");
         userPutDTO.setPassword("new-password");
 
-        MockHttpServletRequestBuilder requestBuilder = put("/users/1")
+        MockHttpServletRequestBuilder requestBuilder = put("/users/1?currentPassword=test-password")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-Token", "valid-token")
                 .content(objectMapper.writeValueAsString(userPutDTO));
@@ -391,7 +384,7 @@ public class UserControllerTest {
                 .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, errorMessage));
 
         // when
-        MockHttpServletRequestBuilder putRequest = put("/users/{id}", secondUserId)
+        MockHttpServletRequestBuilder putRequest = put("/users/{id}?currentPassword=test-password", secondUserId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(userPutDTO))
                 .header("X-Token", user.getToken());
@@ -413,7 +406,7 @@ public class UserControllerTest {
         user.setId(userId);
         Mockito.when(userService.getUserById(userId)).thenReturn(user); // modify the mock response to return null
         Mockito.when(userService.getUseridByToken(token)).thenReturn(0L);
-        mockMvc.perform(put("/users/" + userId)
+        mockMvc.perform(put("/users/" + userId + "?currentPassword=test-password")
                         .header("X-Token", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\": \"newUsername\"}")

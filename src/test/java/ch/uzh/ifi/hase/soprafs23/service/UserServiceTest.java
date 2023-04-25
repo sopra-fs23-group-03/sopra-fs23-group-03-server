@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,6 +25,7 @@ public class UserServiceTest {
 
     @InjectMocks
     private UserService userService;
+    private UserPutDTO userPutDTO;
 
     private User user; // so we will always take user as testuser
 
@@ -159,7 +161,7 @@ public class UserServiceTest {
         when(userRepository.findById(id)).thenReturn(java.util.Optional.of(existingUser));
 
         // when
-        userService.updateUser(id, userPutDTO);
+        userService.updateUser(id, userPutDTO,"oldPassword");
 
         // then
         assertEquals(userPutDTO.getUsername(), existingUser.getUsername());
@@ -178,7 +180,7 @@ public class UserServiceTest {
         when(userRepository.findById(invalidId)).thenReturn(Optional.empty());
 
         assertThrows(ResponseStatusException.class, () -> {
-            userService.updateUser(invalidId, userPutDTO);
+            userService.updateUser(invalidId, userPutDTO,"oldPassword");
         });
     }
 
@@ -197,7 +199,93 @@ public class UserServiceTest {
         when(userRepository.findByUsername(newUsername)).thenReturn(new User()); //this was before: new User()
 
         assertThrows(ResponseStatusException.class, () -> {
-            userService.updateUser(userId, userPutDTO);
+            userService.updateUser(userId, userPutDTO,"oldPassword");
         });
+    }
+
+    @Test
+    void updateUser_withSamePassword_throwsException() {
+        user = new User();
+        user.setId(1L);
+        user.setUsername("testUser");
+        user.setPassword("currentPassword");
+        user.setAllergiesSet(Collections.singleton("testAllergies"));
+        user.setFavoriteCuisine("testFavoriteCuisine");
+        user.setSpecialDiet("testSpecialDiet");
+
+        userPutDTO = new UserPutDTO();
+        userPutDTO.setUsername("newTestUser");
+        userPutDTO.setAllergies(Collections.singleton("newTestAllergies"));
+        userPutDTO.setFavoriteCuisine("newTestFavoriteCuisine");
+        userPutDTO.setSpecialDiet("newTestSpecialDiet");
+        
+        // Arrange
+        userPutDTO.setPassword("currentPassword");
+        when(userRepository.findById(1L)).thenReturn(java.util.Optional.of(user));
+
+        // Act
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.updateUser(1L, userPutDTO, user.getPassword()));
+
+        // Assert
+        assertEquals(HttpStatus.CONFLICT, exception.getStatus());
+        assertEquals("New password cannot be the same as the current password.", exception.getReason());
+    }
+
+    @Test
+    void updateUser_withEmptyPassword_throwsException() {
+        user = new User();
+        user.setId(1L);
+        user.setUsername("testUser");
+        user.setPassword("currentPassword");
+        user.setAllergiesSet(Collections.singleton("testAllergies"));
+        user.setFavoriteCuisine("testFavoriteCuisine");
+        user.setSpecialDiet("testSpecialDiet");
+
+        userPutDTO = new UserPutDTO();
+        userPutDTO.setUsername("newTestUser");
+        userPutDTO.setAllergies(Collections.singleton("newTestAllergies"));
+        userPutDTO.setFavoriteCuisine("newTestFavoriteCuisine");
+        userPutDTO.setSpecialDiet("newTestSpecialDiet");
+
+        // Arrange
+        userPutDTO.setPassword("");
+        when(userRepository.findById(1L)).thenReturn(java.util.Optional.of(user));
+
+        // Act
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.updateUser(1L, userPutDTO,"currentPassword"));
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("New password cannot be empty.", exception.getReason());
+    }
+
+    @Test
+    void updateUser_withIncorrectCurrentPassword_throwsException() {
+        user = new User();
+        user.setId(1L);
+        user.setUsername("testUser");
+        user.setPassword("currentPassword");
+        user.setAllergiesSet(Collections.singleton("testAllergies"));
+        user.setFavoriteCuisine("testFavoriteCuisine");
+        user.setSpecialDiet("testSpecialDiet");
+
+        userPutDTO = new UserPutDTO();
+        userPutDTO.setUsername("newTestUser");
+        userPutDTO.setAllergies(Collections.singleton("newTestAllergies"));
+        userPutDTO.setFavoriteCuisine("newTestFavoriteCuisine");
+        userPutDTO.setSpecialDiet("newTestSpecialDiet");
+        userPutDTO.setPassword("newPassword");
+
+        when(userRepository.findById(1L)).thenReturn(java.util.Optional.of(user));
+
+        // Act
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> userService.updateUser(1L, userPutDTO, "incorrectPassword"));
+
+        // Assert
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+        assertEquals("Current password is incorrect.", exception.getReason());
     }
 }

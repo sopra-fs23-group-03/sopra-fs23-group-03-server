@@ -38,34 +38,30 @@
 
 | Name        | Issues | Description                                                                      | Done |
 |-------------|--------|----------------------------------------------------------------------------------|------|
-| Lany        | #115   | Create put call /groups/{groupId}/invitations/reject                             |      |
-|             | #117   | Create put call /groups/{groupId}/invitations/accept                             |      |
+| Lany        | #115   | Create put call /groups/{groupId}/invitations/reject                             |  X   |
+|             | #117   | Create put call /groups/{groupId}/invitations/accept                             |  X   |
 |             | #118   | Check if user is authorized to accept/reject invitation else return error        |  X   |
 |             | #119   | Check if user exists when accepting/rejecting the invitation else return error   |  X   |
-|             | #157   | create GET /users/{userId}/invitations request                                   |      |
-|             |        |                                                                                  |      |    
+|             | #157   | create GET /users/{userId}/invitations request                                   |  X   |
 | Orestis     | #47    | Create Logout Method which sets User to offline                                  |      |
 |             | #88    | Create method for updating the user profile                                      |      |
 |             | #87    | Create method for returning the user profile                                     |      |
-|             |        |                                                                                  |      |    
 | Kalliopi    | #80    | Create navigation bar                                                            |  X   |
 |             | #52    | Create a landing page with sections for displaying the users and active groups.  |  X   |
 |             | #9     | Display user as logged in                                                        |  X   | 
 |             | #11    | Set user to offline and delete localStorage                                      |      |
-|             | #10    | Make Logout Button accessible                                                    |  X   |                                       |             | #79    | Implement method to sort the users based on their online/offline status          |  X   |  
+|             | #10    | Make Logout Button accessible                                                    |  X   |
+|             | #79    | Implement method to sort the users based on their online/offline status          |  X   |  
 |             | #68    | Create the Form Group button in the Landing Page                                 |  X   | 
 |             | #56    | Νavigation to the respective user profile page when a username is clicked        |      |    
 |             | #53    | API calls to retrieve registered users and active groups from the backend        |      |
 |             | #54    | Display all users with online users at the beginning of the list                 |      |
 |             | #55    | Display all active planning groups with their group name, host and guests        |      |
-|             |        |                                                                                  |      |    
 | Ann-Kathrin | #101/102| Create method to retrieve active groups / active users                          |   X  |
-|             | #135   | Create function to check that one user is only in one group                      |      |
+|             | #135   | Create function to check that one user is only in one group                      |    X |
 |             | #159   | create GET calls to retrieve group information                                   |    X |
-|             | #134   | Create function to check if group has at least one guest                         |      |
-|             | #131   | Create a method that checks that person being in creation page is a host         |      |
-|             | #132   | Create POST /groups/{groupId}/invitations                                        |      |
-|             |        |                                                                                  |      |
+|             | #134   | Create function to check if group has at least one guest                         |    X |
+|             | #131   | Create a method that checks that person is not already invited to another group  |   X  |
 | Chiara      | #45    | Create profile page with fields for allergies, favourite cuisine and special diet|  X   |
 |             | #46    | Create API calls with body for backend communication                             |      |
 |             | #47    | Display username, allergies, favorite cuisine, and special diet on user profile  |      |
@@ -83,10 +79,12 @@
 
 | Name        | Issues | Description                                                                      | Done |
 |-------------|--------|----------------------------------------------------------------------------------|------|
-| Lany        |        |                                                                                  |      |
+| Lany        | #84    | Create GET /groups/{id} request                                                  |   X  |
+|             | #187   | Create GET /groups/{id}/members request                                          |   X  |
 | Orestis     |        |                                                                                  |      |
 | Kalliopi    |        |                                                                                  |      |
-| Ann-Kathrin |        |                                                                                  |      |
+| Ann-Kathrin |  #106  |  Update fields for allergies to List/Set and adjust all tests                    |      |
+|             | #132   | Create POST /groups/{groupId}/invitations                                        |      |
 | Chiara      |        |                                                                                  |      |
 
 

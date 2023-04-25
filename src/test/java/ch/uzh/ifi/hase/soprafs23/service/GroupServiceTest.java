@@ -1,7 +1,9 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
+import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
+import javassist.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -12,6 +14,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class GroupServiceTest {
@@ -33,6 +37,7 @@ public class GroupServiceTest {
         group.setId(1L);
         group.setGroupName("firstGroupName");
         group.setHostId(2L);
+        group.setVotingType(VotingType.MAJORITYVOTE);
 
         // mocks the save() method of GroupRepository
         Mockito.when(groupRepository.save(Mockito.any())).thenReturn(group);
@@ -48,5 +53,40 @@ public class GroupServiceTest {
         assertThrows(ResponseStatusException.class, () -> groupService.getGroupById(2L));
     }
 
-    
+    @Test
+    public void countGuests_test() throws NotFoundException {
+        Group group = new Group();
+        group.setId(1L);
+        group.setGroupName("Test Group");
+        group.setHostId(12L);
+        group.addGuestId(34L);
+        group.addGuestId(86L);
+        groupRepository.save(group);
+
+        Mockito.when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+        assertEquals(2, groupService.countGuests(group.getId()));
+
+        Mockito.when(groupRepository.findById(2L)).thenReturn(Optional.empty());
+        assertThrows(ResponseStatusException.class, () -> groupService.countGuests(2L));
+    }
+
+
+
+    @Test
+    public void getAllMemberIdsOfGroup_test() {
+        List<Long> expectedMembers = new ArrayList<>();
+        expectedMembers.add(group.getHostId());
+        assertEquals(expectedMembers, groupService.getAllMemberIdsOfGroup(group));
+
+        Long firstGuestId = 4L;
+        group.addGuestId(firstGuestId);
+        expectedMembers.add(firstGuestId);
+        assertEquals(expectedMembers, groupService.getAllMemberIdsOfGroup(group));
+
+        Long secondGuestId = 7L;
+        group.addGuestId(secondGuestId);
+        expectedMembers.add(secondGuestId);
+        assertEquals(expectedMembers, groupService.getAllMemberIdsOfGroup(group));
+    }
+
 }

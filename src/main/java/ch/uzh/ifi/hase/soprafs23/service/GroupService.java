@@ -1,9 +1,11 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
+import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,6 +43,10 @@ public class GroupService {
         // assign the user creating the group as the host
         newGroup.setHostId(host.getId());
 
+        if(newGroup.getVotingType() != VotingType.MAJORITYVOTE && newGroup.getVotingType() != VotingType.POINTDISTRIBUTION) {
+            newGroup.setVotingType(VotingType.MAJORITYVOTE); // standard voting type
+        }
+
         // save the group
         newGroup = groupRepository.save(newGroup);
         groupRepository.flush();
@@ -66,11 +72,22 @@ public class GroupService {
         return group.get();
     }
 
-
-    public void invite(Long groupId, List <String> members ){
-
-
+    public Group updateGroup(Long groupId, String newGroupName) {
+        Group groupToUpdate = groupRepository.findById(groupId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
+        groupToUpdate.setGroupName(newGroupName);
+        return groupRepository.save(groupToUpdate);
     }
+
+
+    public int countGuests(Long groupId) {
+        Group group = groupRepository.findById(groupId).orElse(null);
+        if (group == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
+        }
+        return group.getGuestIds().size();
+    }
+
 
     public void addGuestToGroupMembers(Long guestId, Long groupId) {
         Group group = getGroupById(groupId);
@@ -78,5 +95,17 @@ public class GroupService {
 
         group = groupRepository.save(group);
         groupRepository.flush();
+    }
+
+    public List<Long> getAllMemberIdsOfGroup(Group group) {
+        List<Long> memberIds = new ArrayList<>();
+
+        memberIds.add(group.getHostId());
+
+        for(Long guestId : group.getGuestIds()) {
+            memberIds.add(guestId);
+        }
+
+        return memberIds;
     }
 }

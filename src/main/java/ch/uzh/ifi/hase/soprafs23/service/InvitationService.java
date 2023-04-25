@@ -25,6 +25,25 @@ public class InvitationService {
         this.invitationRepository = invitationRepository;
     }
 
+
+    public Invitation createInvitation(Long groupId, Long guestId) {
+        List<Invitation> existingInvites = invitationRepository.findByGroupIdAndGuestId(groupId, guestId);
+        if (!existingInvites.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Invitation already exists for the given group and guest.")); // 409-error
+        }
+
+        // assign guestId and groupId to invite
+        Invitation newInvite = new Invitation();
+        newInvite.setGuestId(guestId);
+        newInvite.setGroupId(groupId);
+
+        // save the invite
+        newInvite = invitationRepository.save(newInvite);
+        invitationRepository.flush();
+
+        return newInvite;
+    }
+
     public Invitation getInvitationByGroupIdAndGuestId(Long groupId, Long guestId) {
         List<Invitation> groupInvitations = invitationRepository.findByGroupId(groupId);
         List<Invitation> guestInvitations = invitationRepository.findByGuestId(guestId);
