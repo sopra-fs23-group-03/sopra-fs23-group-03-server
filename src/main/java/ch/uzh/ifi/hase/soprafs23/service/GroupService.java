@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,5 +79,17 @@ public class GroupService {
 
         group = groupRepository.save(group);
         groupRepository.flush();
+    }
+
+    public List<Long> getAllMemberIdsOfGroup(Group group) {
+        List<Long> memberIds = new ArrayList<>();
+
+        memberIds.add(group.getHostId());
+
+        for(Long guestId : group.getGuestIds()) {
+            memberIds.add(guestId);
+        }
+
+        return memberIds;
     }
 }
