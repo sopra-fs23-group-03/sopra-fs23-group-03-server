@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -50,6 +51,9 @@ public class Group implements Serializable {
     }
 
     public void addGuestId(Long guestId) {
+        if(this.guestIds == null) {
+            this.guestIds = new HashSet<Long>();
+        }
         this.guestIds.add(guestId);
     }
 
