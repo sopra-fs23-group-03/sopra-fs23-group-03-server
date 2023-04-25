@@ -36,6 +36,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 
 import javax.servlet.http.HttpServletRequest;
+
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -589,27 +591,79 @@ public class GroupControllerTest {
                                                     .header("X-Token", anotherToken);
 
         // then
-        mockMvc.perform(getRequest)
-            .andExpect(status().isUnauthorized());
+        mockMvc.perform(getRequest).andExpect(status().isUnauthorized());
             
         // verifies
         verify(userService, times(1)).getUseridByToken(anotherToken);
     }
     
-    // TODO: add tests for GET /groups/{groupId}/members
     @Test
     public void testGetGroupMembersById_valid() throws Exception {
+        // mocks
+        given(groupService.getGroupById(group.getId())).willReturn(group);
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(Arrays.asList(group.getHostId()));
+        given(userService.getUserById(group.getHostId())).willReturn(user);
 
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/members", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].id", is(group.getHostId().intValue())));
+            
+        // verifies
+        verify(groupService, times(1)).getGroupById(group.getId());
+        verify(userService, times(1)).getUseridByToken(user.getToken());
+        verify(groupService, times(1)).getAllMemberIdsOfGroup(group);
+        verify(userService, times(1)).getUserById(group.getHostId());
     }
 
     @Test
     public void testGetGroupMembersById_groupNotFound() throws Exception {
+        Long anotherGroupId = 8L;
 
+        // mocks
+        given(groupService.getGroupById(anotherGroupId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "error message"));
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/members", anotherGroupId)
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isNotFound());
+            
+        // verifies
+        verify(groupService, times(1)).getGroupById(anotherGroupId);
+        verify(userService, times(0)).getUseridByToken(any());
+        verify(groupService, times(0)).getAllMemberIdsOfGroup(any());
+        verify(userService, times(0)).getUserById(any());
     }
 
     @Test
     public void testGetGroupMembersById_notValidToken() throws Exception {
+        String anotherToken = "anotherToken";
 
+        // mocks
+        given(userService.getUseridByToken(anotherToken)).willReturn(0L);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/members", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", anotherToken);
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isUnauthorized());
+            
+        // verifies
+        verify(groupService, times(1)).getGroupById(group.getId());
+        verify(userService, times(1)).getUseridByToken(anotherToken);
+        verify(groupService, times(0)).getAllMemberIdsOfGroup(any());
+        verify(userService, times(0)).getUserById(any());
     }
 
     /**
