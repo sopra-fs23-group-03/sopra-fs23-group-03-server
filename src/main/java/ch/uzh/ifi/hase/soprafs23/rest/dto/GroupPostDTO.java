@@ -6,6 +6,8 @@ public class GroupPostDTO {
 
     private Long hostId;
 
+    private String votingType;
+
     public String getGroupName() {
         return groupName;
     }
@@ -20,4 +22,13 @@ public class GroupPostDTO {
     public void setHostId(Long hostId) {
         this.hostId = hostId;
     }
+
+    public String getVotingType() {
+        return votingType;
+    }
+
+    public void setVotingType(String votingType) {
+        this.votingType = votingType;
+    }
+
 }

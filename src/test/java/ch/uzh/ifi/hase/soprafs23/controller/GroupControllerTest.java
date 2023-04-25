@@ -1,22 +1,19 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
-import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
-import ch.uzh.ifi.hase.soprafs23.repository.InvitationRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationPutDTO;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -27,30 +24,26 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 
 import javax.servlet.http.HttpServletRequest;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 @WebMvcTest(GroupController.class)
 public class GroupControllerTest {
@@ -91,6 +84,7 @@ public class GroupControllerTest {
         group.setId(1L);
         group.setGroupName("firstGroupName");
         group.setHostId(2L);
+        group.setVotingType(VotingType.MAJORITYVOTE);
 
         user = new User();
         user.setId(group.getHostId());
@@ -122,7 +116,11 @@ public class GroupControllerTest {
         // then
         mockMvc.perform(getRequest)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].groupName", is(group.getGroupName())));
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].id", is(group.getId().intValue())))
+                .andExpect(jsonPath("$[0].groupName", is(group.getGroupName())))
+                .andExpect(jsonPath("$[0].hostId", is(group.getHostId().intValue())))
+                .andExpect(jsonPath("$[0].votingType", is(group.getVotingType().toString())));
     }
 
 
@@ -448,11 +446,13 @@ public class GroupControllerTest {
         GroupPostDTO groupPostDTO = new GroupPostDTO();
         groupPostDTO.setGroupName("Test Group");
         groupPostDTO.setHostId(1L);
+        groupPostDTO.setVotingType("MAJORITYVOTE");
 
         Group group = new Group();
         group.setId(1L);
         group.setGroupName("Test Group");
         group.setHostId(1L);
+        group.setVotingType(VotingType.MAJORITYVOTE);
 
         given(userService.getUseridByToken(any())).willReturn(group.getHostId());
         given(userService.getUserById(group.getHostId())).willReturn(new User());
@@ -462,7 +462,7 @@ public class GroupControllerTest {
         MockHttpServletRequestBuilder postRequest = post("/groups")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-Token", "valid-token")
-                .content("{\"groupName\": \"Test Group\", \"hostId\": 1}");
+                .content(asJsonString(groupPostDTO));
 
         // then
         mockMvc.perform(postRequest)
@@ -645,7 +645,136 @@ public class GroupControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/groups/" + groupId + "/invitations")
                         .header("X-Token", token));
     }
+    @Test
+    public void testGetGroupById_valid() throws Exception {
+        // mocks
+        given(groupService.getGroupById(group.getId())).willReturn(group);
 
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id", is(group.getId().intValue())))
+            .andExpect(jsonPath("$.groupName", is(group.getGroupName())))
+            .andExpect(jsonPath("$.hostId", is(group.getHostId().intValue())))
+            .andExpect(jsonPath("$.votingType", is(group.getVotingType().toString())));
+            
+        // verifies
+        verify(groupService, times(1)).getGroupById(group.getId());
+        verify(userService, times(1)).getUseridByToken(user.getToken());
+    }
+
+    @Test
+    public void testGetGroupById_groupNotFound() throws Exception {
+        Long anotherGroupId = 8L;
+
+        // mocks
+        given(groupService.getGroupById(anotherGroupId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "error message"));
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}", anotherGroupId)
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isNotFound());
+            
+        // verifies
+        verify(groupService, times(1)).getGroupById(anotherGroupId);
+        verify(userService, times(0)).getUseridByToken(any());
+    }
+
+    @Test
+    public void testGetGroupById_notValidToken() throws Exception {
+        String anotherToken = "anotherToken";
+
+        // mocks
+        given(userService.getUseridByToken(anotherToken)).willReturn(0L);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", anotherToken);
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isUnauthorized());
+            
+        // verifies
+        verify(userService, times(1)).getUseridByToken(anotherToken);
+    }
+    
+    @Test
+    public void testGetGroupMembersById_valid() throws Exception {
+        // mocks
+        given(groupService.getGroupById(group.getId())).willReturn(group);
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(Arrays.asList(group.getHostId()));
+        given(userService.getUserById(group.getHostId())).willReturn(user);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/members", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].id", is(group.getHostId().intValue())));
+            
+        // verifies
+        verify(groupService, times(1)).getGroupById(group.getId());
+        verify(userService, times(1)).getUseridByToken(user.getToken());
+        verify(groupService, times(1)).getAllMemberIdsOfGroup(group);
+        verify(userService, times(1)).getUserById(group.getHostId());
+    }
+
+    @Test
+    public void testGetGroupMembersById_groupNotFound() throws Exception {
+        Long anotherGroupId = 8L;
+
+        // mocks
+        given(groupService.getGroupById(anotherGroupId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "error message"));
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/members", anotherGroupId)
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isNotFound());
+            
+        // verifies
+        verify(groupService, times(1)).getGroupById(anotherGroupId);
+        verify(userService, times(0)).getUseridByToken(any());
+        verify(groupService, times(0)).getAllMemberIdsOfGroup(any());
+        verify(userService, times(0)).getUserById(any());
+    }
+
+    @Test
+    public void testGetGroupMembersById_notValidToken() throws Exception {
+        String anotherToken = "anotherToken";
+
+        // mocks
+        given(userService.getUseridByToken(anotherToken)).willReturn(0L);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/members", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", anotherToken);
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isUnauthorized());
+            
+        // verifies
+        verify(groupService, times(1)).getGroupById(group.getId());
+        verify(userService, times(1)).getUseridByToken(anotherToken);
+        verify(groupService, times(0)).getAllMemberIdsOfGroup(any());
+        verify(userService, times(0)).getUserById(any());
+    }
 
     /**
    * Helper Method to convert userPostDTO into a JSON string such that the input

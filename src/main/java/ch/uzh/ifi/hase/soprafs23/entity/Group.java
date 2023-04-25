@@ -1,6 +1,9 @@
 package ch.uzh.ifi.hase.soprafs23.entity;
 
 import javax.persistence.*;
+
+import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
+
 import java.io.Serializable;
 
 import java.util.HashSet;
@@ -19,6 +22,9 @@ public class Group implements Serializable {
 
     @Column(nullable = false, unique = true)
     private Long hostId;
+
+    @Column(nullable = false)
+    private VotingType votingType;
 
     @ElementCollection
     private Set<Long> guestIds;
@@ -50,6 +56,14 @@ public class Group implements Serializable {
 
     public void setHostId(Long hostId) {
         this.hostId = hostId;
+    }
+
+    public VotingType getVotingType() {
+        return votingType;
+    }
+
+    public void setVotingType(VotingType votingType) {
+        this.votingType = votingType;
     }
 
     public Set<Long> getGuestIds() {

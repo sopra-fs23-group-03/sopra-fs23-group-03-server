@@ -10,12 +10,8 @@ import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
-
-//import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-// import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -185,4 +181,46 @@ public class GroupController {
         invitationService.deleteInvitation(invitation);
     }
 
+    @GetMapping("/groups/{groupId}")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
+    public GroupGetDTO getGroupById(@PathVariable Long groupId, HttpServletRequest request) {
+        // 404 - group not found
+        Group group = groupService.getGroupById(groupId);
+
+        // 401 - not authorized
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if(tokenId == 0L) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
+        }
+
+        return DTOMapper.INSTANCE.convertEntityToGroupGetDTO(group);
+    }
+
+    @GetMapping("/groups/{groupId}/members")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
+    public List<UserGetDTO> getGroupMembersById(@PathVariable Long groupId, HttpServletRequest request) {
+        // 404 - group not found
+        Group group = groupService.getGroupById(groupId);
+
+        // 401 - not authorized
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if(tokenId == 0L) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
+        }
+
+        // get the members of the group
+        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
+        List<UserGetDTO> userGetDTOs = new ArrayList<>();
+
+        // convert each user to the API representation
+        for (Long userId : memberIds) {
+            User user = userService.getUserById(userId);
+            userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
+        }
+
+        return userGetDTOs;
+    }
+    
 }

@@ -3,10 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.service;
 
 import java.util.HashSet;
 import java.util.List;
-import ch.uzh.ifi.hase.soprafs23.entity.User;
-import ch.uzh.ifi.hase.soprafs23.entity.Group;
 
-import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationPostDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
