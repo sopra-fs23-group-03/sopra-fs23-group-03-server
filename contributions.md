@@ -38,11 +38,11 @@
 
 | Name        | Issues | Description                                                                      | Done |
 |-------------|--------|----------------------------------------------------------------------------------|------|
-| Lany        | #115   | Create put call /groups/{groupId}/invitations/reject                             |      |
-|             | #117   | Create put call /groups/{groupId}/invitations/accept                             |      |
+| Lany        | #115   | Create put call /groups/{groupId}/invitations/reject                             |  X   |
+|             | #117   | Create put call /groups/{groupId}/invitations/accept                             |  X   |
 |             | #118   | Check if user is authorized to accept/reject invitation else return error        |  X   |
 |             | #119   | Check if user exists when accepting/rejecting the invitation else return error   |  X   |
-|             | #157   | create GET /users/{userId}/invitations request                                   |      |
+|             | #157   | create GET /users/{userId}/invitations request                                   |  X   |
 |             |        |                                                                                  |      |    
 | Orestis     | #47    | Create Logout Method which sets User to offline                                  |      |
 |             | #88    | Create method for updating the user profile                                      |      |
@@ -52,7 +52,8 @@
 |             | #52    | Create a landing page with sections for displaying the users and active groups.  |  X   |
 |             | #9     | Display user as logged in                                                        |  X   | 
 |             | #11    | Set user to offline and delete localStorage                                      |      |
-|             | #10    | Make Logout Button accessible                                                    |  X   |                                       |             | #79    | Implement method to sort the users based on their online/offline status          |  X   |  
+|             | #10    | Make Logout Button accessible                                                    |  X   |
+|             | #79    | Implement method to sort the users based on their online/offline status          |  X   |  
 |             | #68    | Create the Form Group button in the Landing Page                                 |  X   | 
 |             | #56    | Νavigation to the respective user profile page when a username is clicked        |      |    
 |             | #53    | API calls to retrieve registered users and active groups from the backend        |      |
@@ -83,7 +84,8 @@
 
 | Name        | Issues | Description                                                                      | Done |
 |-------------|--------|----------------------------------------------------------------------------------|------|
-| Lany        |        |                                                                                  |      |
+| Lany        | #84    | Create GET /groups/{id} request                                                  |      |
+|             | #187   | Create GET /groups/{id}/members request                                          |      |
 | Orestis     |        |                                                                                  |      |
 | Kalliopi    |        |                                                                                  |      |
 | Ann-Kathrin |        |                                                                                  |      |
