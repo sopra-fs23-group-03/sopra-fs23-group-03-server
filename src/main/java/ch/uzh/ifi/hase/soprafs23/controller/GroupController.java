@@ -140,4 +140,17 @@ public class GroupController {
         invitationService.deleteInvitation(invitation);
     }
 
+    @GetMapping("/groups/{groupId}")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
+    public void getGroupById(@PathVariable Long groupId, HttpServletRequest request) {
+        // TODO: create this request
+    }
+
+    @GetMapping("/groups/{groupId}/members")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
+    public void getGroupMembersById(@PathVariable Long groupId, HttpServletRequest request) {
+        // TODO: create this request
+    }
 }
