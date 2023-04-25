@@ -347,7 +347,7 @@ public class UserControllerTest {
         userPutDTO.setSpecialDiet("vegan");
         userPutDTO.setPassword("new-password");
 
-        MockHttpServletRequestBuilder requestBuilder = put("/users/1")
+        MockHttpServletRequestBuilder requestBuilder = put("/users/1?currentPassword=test-password")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-Token", "valid-token")
                 .content(objectMapper.writeValueAsString(userPutDTO));
@@ -381,7 +381,7 @@ public class UserControllerTest {
                 .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, errorMessage));
 
         // when
-        MockHttpServletRequestBuilder putRequest = put("/users/{id}", secondUserId)
+        MockHttpServletRequestBuilder putRequest = put("/users/{id}?currentPassword=test-password", secondUserId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(asJsonString(userPutDTO))
                 .header("X-Token", user.getToken());
@@ -403,7 +403,7 @@ public class UserControllerTest {
         user.setId(userId);
         Mockito.when(userService.getUserById(userId)).thenReturn(user); // modify the mock response to return null
         Mockito.when(userService.getUseridByToken(token)).thenReturn(0L);
-        mockMvc.perform(put("/users/" + userId)
+        mockMvc.perform(put("/users/" + userId + "?currentPassword=test-password")
                         .header("X-Token", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\": \"newUsername\"}")

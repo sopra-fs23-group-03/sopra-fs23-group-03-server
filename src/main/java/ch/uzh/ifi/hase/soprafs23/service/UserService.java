@@ -121,7 +121,7 @@ public class UserService {
         userRepository.flush();
     }
 
-    public void updateUser(Long id, UserPutDTO userPutDTO) {
+    public void updateUser(Long id, UserPutDTO userPutDTO,String currentPassword) {
         User user = getUserById(id);
 
         String newUsername = userPutDTO.getUsername();
@@ -148,10 +148,14 @@ public class UserService {
         }
 
         if(newPassword != null && !newPassword.isEmpty()){
-            if(!user.getPassword().equals(newPassword)){
-                user.setPassword(newPassword);
+            if (isPasswordCorrect(user.getPassword(), currentPassword)) {
+                if(!user.getPassword().equals(newPassword)){
+                    user.setPassword(newPassword);
+                } else {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "New password cannot be the same as the current password.");
+                }
             } else {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "New password cannot be the same as the current password.");
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Current password is incorrect.");
             }
         } else if (newPassword != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password cannot be empty.");
@@ -159,6 +163,9 @@ public class UserService {
 
         user = userRepository.save(user);
         userRepository.flush();
+    }
+    public boolean isPasswordCorrect(String storedPassword, String providedPassword) {
+        return storedPassword.equals(providedPassword);
     }
 
     public void joinGroup(Long guestId, Long groupId) {
