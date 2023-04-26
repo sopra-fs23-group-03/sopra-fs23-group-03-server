@@ -456,7 +456,7 @@ public class GroupControllerTest {
 
         given(userService.getUseridByToken(any())).willReturn(group.getHostId());
         given(userService.getUserById(group.getHostId())).willReturn(new User());
-        given(groupService.createGroup(any(Group.class), any(User.class))).willReturn(group);
+        given(groupService.createGroup(any(Group.class))).willReturn(group);
 
         // when
         MockHttpServletRequestBuilder postRequest = post("/groups")
@@ -500,7 +500,7 @@ public class GroupControllerTest {
         Mockito.when(userService.getUseridByToken("validToken")).thenReturn(group.getHostId());
         Mockito.when(userService.getUserById(group.getHostId())).thenReturn(Mockito.mock(User.class));
 
-        given(groupService.createGroup(Mockito.any(Group.class), Mockito.any(User.class))).willThrow(new ResponseStatusException(HttpStatus.CONFLICT, "error message"));
+        given(groupService.createGroup(Mockito.any(Group.class))).willThrow(new ResponseStatusException(HttpStatus.CONFLICT, "error message"));
 
         MockHttpServletRequestBuilder postRequest = post("/groups")
                 .contentType(MediaType.APPLICATION_JSON)

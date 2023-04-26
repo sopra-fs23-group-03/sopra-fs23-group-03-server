@@ -80,11 +80,16 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User not found.")); // 404 - user not found
         }
 
+
+        if(groupPostDTO.getVotingType() == null || !groupPostDTO.getVotingType().equals("MAJORITYVOTE")) {// at the moment only MAJORITYVOTE is accepted, later a && !groupPostDTO.getVotingType().equals("POINTDISTRIBUTION") will be needed
+            groupPostDTO.setVotingType("MAJORITYVOTE"); // standard voting type
+        }
+
         // convert API user to internal representation
         Group groupInput = DTOMapper.INSTANCE.convertGroupPostDTOtoEntity(groupPostDTO);
 
         // create group
-        Group createdGroup = groupService.createGroup(groupInput, user);
+        Group createdGroup = groupService.createGroup(groupInput);
 
         // convert internal representation of user back to API
         GroupGetDTO groupGetDTO = DTOMapper.INSTANCE.convertEntityToGroupGetDTO(createdGroup);
