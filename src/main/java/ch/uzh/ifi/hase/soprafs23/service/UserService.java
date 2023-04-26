@@ -142,8 +142,7 @@ public class UserService {
         }
 
         if(newAllergies != null) {
-            Set<String> allergiesSet = new HashSet<>(newAllergies); //convert here from List to Set to not make it in UserPutDTO //TODO: not necessary anymore?
-            user.setAllergiesSet(allergiesSet);
+            user.setAllergiesSet(newAllergies);
         }
 
 

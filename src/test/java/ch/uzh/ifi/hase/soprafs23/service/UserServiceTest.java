@@ -196,7 +196,7 @@ public class UserServiceTest {
         userPutDTO.setUsername(newUsername);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-        when(userRepository.findByUsername(newUsername)).thenReturn(new User()); //this was before: new User()
+        when(userRepository.findByUsername(newUsername)).thenReturn(new User());
 
         assertThrows(ResponseStatusException.class, () -> {
             userService.updateUser(userId, userPutDTO,"oldPassword");

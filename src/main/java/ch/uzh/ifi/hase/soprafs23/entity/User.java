@@ -41,11 +41,9 @@ public class User implements Serializable {
     @Column(nullable = false)
     private UserStatus status;
 
-  @Column(nullable = true)
-  @ElementCollection
-  private Set<String> allergies = new HashSet<>(); // important to initialize as an empty set
-
-
+    @Column(nullable = true)
+    @ElementCollection
+    private Set<String> allergies = new HashSet<>(); // important to initialize as an empty set
 
     @Column(nullable = true)
     private String favoriteCuisine;
@@ -53,10 +51,8 @@ public class User implements Serializable {
     @Column(nullable = true)
     private String specialDiet;
 
-
     @Column(nullable = true)
     private Long groupId;
-
 
     //Methods
     public Long getId() {
@@ -114,21 +110,22 @@ public class User implements Serializable {
         allergies.add(allergy);
     }
 
-    public void removeAllergies() {
+    public void removeAllergy() {
         if (allergies != null) {
             allergies.clear();
         }
     }
 
-  public String getFavoriteCuisine(){
-      return favoriteCuisine;
-  }
+    public String getFavoriteCuisine() {
+        return favoriteCuisine;
+    }
 
     public void setFavoriteCuisine(String favoriteCuisine) {
         this.favoriteCuisine = favoriteCuisine;
     }
-    public String getSpecialDiet(){
-      return specialDiet;
+
+    public String getSpecialDiet() {
+        return specialDiet;
     }
 
     public void setSpecialDiet(String specialDiet) {
@@ -136,11 +133,11 @@ public class User implements Serializable {
     }
 
     public Long getGroupId() {
-      return groupId;
+        return groupId;
     }
 
     public void setGroupId(Long groupId) {
-      this.groupId = groupId;
+        this.groupId = groupId;
     }
-    
+
 }

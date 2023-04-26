@@ -73,6 +73,7 @@ public class UserControllerTest {
     user.setPassword("firstPassword");
     user.setToken("firstToken");
     user.setStatus(UserStatus.ONLINE);
+    user.setAllergiesSet(new HashSet<>(Arrays.asList("garlic", "nuts")));
 
     // mocks the getUserIdByTokem(token) method in UserService
     given(userService.getUseridByToken(user.getToken())).willReturn(user.getId());
@@ -271,13 +272,8 @@ public class UserControllerTest {
 
     @Test
     public void testGetUserByIdReturns200() throws Exception {
-        User user = new User();
-        user.setId(1L);
-        user.setUsername("firstUsername");
-        user.setPassword("firstPassword");
-        user.setToken("firstToken");
-        user.setStatus(UserStatus.ONLINE);
-        user.setAllergiesSet(new HashSet<>(Arrays.asList("garlic", "nuts")));
+
+
         // mocks the getUserById(id) method in UserService
         given(userService.getUserById(user.getId())).willReturn(user);
 
