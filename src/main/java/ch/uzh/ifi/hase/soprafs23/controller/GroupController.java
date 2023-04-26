@@ -12,6 +12,7 @@ import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -94,11 +95,9 @@ public class GroupController {
 
 
 
-    @PostMapping("/groups/{groupId}/invitations")
+    @PostMapping(value = "/groups/{groupId}/invitations" , produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED) // 201
-    @ResponseBody
     public void sendInvitation(@PathVariable Long groupId, @RequestBody List<Long> ListGuestIds, HttpServletRequest request) {
-
 
         // only HOST can send invitation: check host token
         Group currentGroup = groupService.getGroupById(groupId);  // 404 - group not found

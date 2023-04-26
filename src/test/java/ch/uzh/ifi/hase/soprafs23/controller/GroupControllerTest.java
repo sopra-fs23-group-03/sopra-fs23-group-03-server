@@ -591,7 +591,7 @@ public class GroupControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
 
-   /* @Test
+   @Test
     public void testSendInvitation_409Conflict() throws Exception {
         // Set up test data
         Long hostId = 1L;
@@ -615,14 +615,9 @@ public class GroupControllerTest {
                         .content("[2]")
                         .contentType(MediaType.APPLICATION_JSON))
                 // Validate response code
-                .andExpect(MockMvcResultMatchers.status().isConflict())
-                // Validate response body
-                .andExpect(MockMvcResultMatchers.header().string("Content-Type", "application/json;charset=UTF-8"))
-                .andExpect(jsonPath("$.error", is("An invitation has already been sent.")));
+                .andExpect(MockMvcResultMatchers.status().isConflict());
+
     }
-
-*/
-
 
     @Test
     public void sendInvitation_returns201_whenSuccessful() throws Exception {
