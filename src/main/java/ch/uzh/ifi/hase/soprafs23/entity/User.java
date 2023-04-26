@@ -4,6 +4,9 @@ import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Set;
+import java.util.HashSet;
+
 
 /**
  * Internal User Representation
@@ -38,8 +41,11 @@ public class User implements Serializable {
     @Column(nullable = false)
     private UserStatus status;
 
-    @Column(nullable = true)
-    private String allergies;
+  @Column(nullable = true)
+  @ElementCollection
+  private Set<String> allergies = new HashSet<>(); // important to initialize as an empty set
+
+
 
     @Column(nullable = true)
     private String favoriteCuisine;
@@ -93,24 +99,36 @@ public class User implements Serializable {
         this.status = status;
     }
 
-    public String getAllergies() {
+    public Set<String> getAllergiesSet() {
         return allergies;
     }
 
-    public void setAllergies(String allergies) {
+    public void setAllergiesSet(Set<String> allergies) {
         this.allergies = allergies;
     }
 
-    public String getFavoriteCuisine() {
-        return favoriteCuisine;
+    public void addAllergy(String allergy) {
+        if (allergies == null) {
+            allergies = new HashSet<>();
+        }
+        allergies.add(allergy);
     }
+
+    public void removeAllergies() {
+        if (allergies != null) {
+            allergies.clear();
+        }
+    }
+
+  public String getFavoriteCuisine(){
+      return favoriteCuisine;
+  }
 
     public void setFavoriteCuisine(String favoriteCuisine) {
         this.favoriteCuisine = favoriteCuisine;
     }
-
-    public String getSpecialDiet() {
-        return specialDiet;
+    public String getSpecialDiet(){
+      return specialDiet;
     }
 
     public void setSpecialDiet(String specialDiet) {
@@ -118,12 +136,11 @@ public class User implements Serializable {
     }
 
     public Long getGroupId() {
-        return groupId;
+      return groupId;
     }
 
     public void setGroupId(Long groupId) {
-        this.groupId = groupId;
+      this.groupId = groupId;
     }
-
-
+    
 }

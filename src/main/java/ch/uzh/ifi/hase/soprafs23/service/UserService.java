@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -129,7 +131,7 @@ public class UserService {
         User user = getUserById(id);
 
         String newUsername = userPutDTO.getUsername();
-        String newAllergies = userPutDTO.getAllergies();
+        Set<String> newAllergies = userPutDTO.getAllergies();
         String newFavoriteCuisine = userPutDTO.getFavoriteCuisine();
         String newSpecialDiet = userPutDTO.getSpecialDiet();
         String newPassword = userPutDTO.getPassword();
@@ -140,8 +142,10 @@ public class UserService {
         }
 
         if(newAllergies != null) {
-            user.setAllergies(newAllergies);
+            Set<String> allergiesSet = new HashSet<>(newAllergies); //convert here from List to Set to not make it in UserPutDTO //TODO: not necessary anymore?
+            user.setAllergiesSet(allergiesSet);
         }
+
 
         if(newFavoriteCuisine != null){
             user.setFavoriteCuisine(newFavoriteCuisine);

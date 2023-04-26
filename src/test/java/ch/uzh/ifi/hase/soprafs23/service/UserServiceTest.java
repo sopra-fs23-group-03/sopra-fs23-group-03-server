@@ -16,9 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class UserServiceTest {
 
@@ -147,7 +145,7 @@ public class UserServiceTest {
         Long id = 1L;
         UserPutDTO userPutDTO = new UserPutDTO();
         userPutDTO.setUsername("newUsername");
-        userPutDTO.setAllergies("newAllergies");
+        userPutDTO.setAllergies(Collections.singleton("newAllergies"));
         userPutDTO.setFavoriteCuisine("newFavoriteCuisine");
         userPutDTO.setSpecialDiet("newSpecialDiet");
         userPutDTO.setPassword("newPassword");
@@ -155,7 +153,7 @@ public class UserServiceTest {
         User existingUser = new User();
         existingUser.setId(id);
         existingUser.setUsername("oldUsername");
-        existingUser.setAllergies("oldAllergies");
+        existingUser.addAllergy("oldAllergy");
         existingUser.setFavoriteCuisine("oldFavoriteCuisine");
         existingUser.setSpecialDiet("oldSpecialDiet");
         existingUser.setPassword("oldPassword");
@@ -167,7 +165,7 @@ public class UserServiceTest {
 
         // then
         assertEquals(userPutDTO.getUsername(), existingUser.getUsername());
-        assertEquals(userPutDTO.getAllergies(), existingUser.getAllergies());
+        assertEquals(userPutDTO.getAllergies(), existingUser.getAllergiesSet());
         assertEquals(userPutDTO.getFavoriteCuisine(), existingUser.getFavoriteCuisine());
         assertEquals(userPutDTO.getSpecialDiet(), existingUser.getSpecialDiet());
         assertEquals(userPutDTO.getPassword(), existingUser.getPassword());
@@ -198,7 +196,7 @@ public class UserServiceTest {
         userPutDTO.setUsername(newUsername);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
-        when(userRepository.findByUsername(newUsername)).thenReturn(new User());
+        when(userRepository.findByUsername(newUsername)).thenReturn(new User()); //this was before: new User()
 
         assertThrows(ResponseStatusException.class, () -> {
             userService.updateUser(userId, userPutDTO,"oldPassword");
@@ -211,13 +209,13 @@ public class UserServiceTest {
         user.setId(1L);
         user.setUsername("testUser");
         user.setPassword("currentPassword");
-        user.setAllergies("testAllergies");
+        user.setAllergiesSet(Collections.singleton("testAllergies"));
         user.setFavoriteCuisine("testFavoriteCuisine");
         user.setSpecialDiet("testSpecialDiet");
 
         userPutDTO = new UserPutDTO();
         userPutDTO.setUsername("newTestUser");
-        userPutDTO.setAllergies("newTestAllergies");
+        userPutDTO.setAllergies(Collections.singleton("newTestAllergies"));
         userPutDTO.setFavoriteCuisine("newTestFavoriteCuisine");
         userPutDTO.setSpecialDiet("newTestSpecialDiet");
         
@@ -240,13 +238,13 @@ public class UserServiceTest {
         user.setId(1L);
         user.setUsername("testUser");
         user.setPassword("currentPassword");
-        user.setAllergies("testAllergies");
+        user.setAllergiesSet(Collections.singleton("testAllergies"));
         user.setFavoriteCuisine("testFavoriteCuisine");
         user.setSpecialDiet("testSpecialDiet");
 
         userPutDTO = new UserPutDTO();
         userPutDTO.setUsername("newTestUser");
-        userPutDTO.setAllergies("newTestAllergies");
+        userPutDTO.setAllergies(Collections.singleton("newTestAllergies"));
         userPutDTO.setFavoriteCuisine("newTestFavoriteCuisine");
         userPutDTO.setSpecialDiet("newTestSpecialDiet");
 
@@ -263,19 +261,21 @@ public class UserServiceTest {
         assertEquals("New password cannot be empty.", exception.getReason());
     }
 
+
+
     @Test
     void updateUser_withIncorrectCurrentPassword_throwsException() {
         user = new User();
         user.setId(1L);
         user.setUsername("testUser");
         user.setPassword("currentPassword");
-        user.setAllergies("testAllergies");
+        user.setAllergiesSet(Collections.singleton("testAllergies"));
         user.setFavoriteCuisine("testFavoriteCuisine");
         user.setSpecialDiet("testSpecialDiet");
 
         userPutDTO = new UserPutDTO();
         userPutDTO.setUsername("newTestUser");
-        userPutDTO.setAllergies("newTestAllergies");
+        userPutDTO.setAllergies(Collections.singleton("newTestAllergies"));
         userPutDTO.setFavoriteCuisine("newTestFavoriteCuisine");
         userPutDTO.setSpecialDiet("newTestSpecialDiet");
         userPutDTO.setPassword("newPassword");
