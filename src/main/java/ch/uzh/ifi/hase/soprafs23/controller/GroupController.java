@@ -101,7 +101,6 @@ public class GroupController {
 
     @PostMapping("/groups/{groupId}/invitations")
     @ResponseStatus(HttpStatus.CREATED) // 201
-    @ResponseBody
     public void sendInvitation(@PathVariable Long groupId, @RequestBody List<Long> ListGuestIds, HttpServletRequest request) {
 
 
