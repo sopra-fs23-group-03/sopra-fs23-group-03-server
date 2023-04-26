@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 import javassist.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,14 +43,14 @@ public class GroupServiceTest {
         group.setVotingType(VotingType.MAJORITYVOTE);
 
         // mocks the save() method of GroupRepository
-        Mockito.when(groupRepository.save(Mockito.any())).thenReturn(group);
+        when(groupRepository.save(any())).thenReturn(group);
     }
 
     @Test
     public void getGroupById_test() {
         // mocks the findById(Long id) method of GroupRepository
-        Mockito.when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
-        Mockito.when(groupRepository.findById(2L)).thenReturn(Optional.empty());
+        when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+        when(groupRepository.findById(2L)).thenReturn(Optional.empty());
 
         assertEquals(group, groupService.getGroupById(group.getId()));
         assertThrows(ResponseStatusException.class, () -> groupService.getGroupById(2L));
@@ -63,10 +66,10 @@ public class GroupServiceTest {
         group.addGuestId(86L);
         groupRepository.save(group);
 
-        Mockito.when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+        when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
         assertEquals(2, groupService.countGuests(group.getId()));
 
-        Mockito.when(groupRepository.findById(2L)).thenReturn(Optional.empty());
+        when(groupRepository.findById(2L)).thenReturn(Optional.empty());
         assertThrows(ResponseStatusException.class, () -> groupService.countGuests(2L));
     }
 
@@ -88,5 +91,22 @@ public class GroupServiceTest {
         expectedMembers.add(secondGuestId);
         assertEquals(expectedMembers, groupService.getAllMemberIdsOfGroup(group));
     }
+    @Test
+    void createGroup_success() {
+        // Given
+        Group newGroup = new Group();
+        newGroup.setGroupName("TestGroup");
+        User host = new User();
+        host.setUsername("JohnDoe");
+        when(groupRepository.save(any(Group.class))).thenReturn(newGroup);
 
+        // When
+        Group createdGroup = groupService.createGroup(newGroup, host);
+
+        // Then
+        assertEquals(newGroup.getGroupName(), createdGroup.getGroupName());
+        assertEquals(host.getId(), createdGroup.getHostId());
+        verify(groupRepository, times(1)).save(newGroup);
+        verify(groupRepository, times(1)).flush();
+    }
 }
