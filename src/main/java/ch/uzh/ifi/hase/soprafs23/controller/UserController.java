@@ -2,10 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationGetDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
@@ -194,5 +191,28 @@ public class UserController {
 
     return invitationGetDTOs;
   }
+
+    @PutMapping("/user/{userId}/ingredients")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateUserIngredients(@PathVariable Long userId,
+                                      @RequestBody List<IngredientPutDTO> ingredientsPutDTO,
+                                      @RequestHeader(name = "X-Token") String xToken) {
+        User user = userService.getUserById(userId);
+
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User not found with ID: %d", userId)); // 404 - not found
+        }
+
+        Long tokenId = userService.getUseridByToken(xToken);
+        if (!tokenId.equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to update ingredients associated with this user.")); //401 - unauthorized
+        }
+
+        userService.updateUserIngredients(userId, ingredientsPutDTO);
+    }
+
+
+
+
 
 }

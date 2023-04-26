@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Set;
+import java.util.List;
 import java.util.HashSet;
 
 
@@ -55,9 +56,12 @@ public class User implements Serializable {
     @Column(nullable = true)
     private Long groupId;
 
-    @Column(nullable = true)
-    @ElementCollection
-    private Set<Ingredient> ingredientsSet = new HashSet<>();
+    @ManyToMany(cascade = CascadeType.ALL) // so all changes are applied to ingredients class which is associated
+    @JoinTable(
+            name = "USER_INGREDIENT",
+            joinColumns = @JoinColumn(name = "user_id"), //those are the 2 foreign keys
+            inverseJoinColumns = @JoinColumn(name = "ingredient_id"))
+    private Set<Ingredient> ingredientsSet = new HashSet<>(); // set of ingredients objects of the corresponding user
 
 
     //Methods
@@ -160,8 +164,8 @@ public class User implements Serializable {
     }
 
 
-    public void addIngredient(Ingredient ingredient) {
-        ingredientsSet.add(ingredient);
+    public void addIngredient(List<Ingredient> ingredients) {
+        ingredientsSet.add((Ingredient) ingredients);
     }
 
     public Set<Ingredient> getIngredients() {

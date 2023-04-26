@@ -1,8 +1,11 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -11,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -32,10 +34,13 @@ public class UserService {
   //private final Logger log = LoggerFactory.getLogger(UserService.class); // unused
 
   private final UserRepository userRepository;
+    @Autowired
+  private final IngredientRepository ingredientRepository;
 
   @Autowired
-  public UserService(@Qualifier("userRepository") UserRepository userRepository) {
+  public UserService(@Qualifier("userRepository") UserRepository userRepository, IngredientRepository ingredientRepository) {
     this.userRepository = userRepository;
+    this.ingredientRepository = ingredientRepository;
   }
 
   public List<User> getUsers() {
@@ -184,8 +189,29 @@ public class UserService {
         userRepository.flush();
     }
 
+    public void updateUserIngredients(Long userId, List<IngredientPutDTO> ingredientsPutDTO) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User with id %d does not exist", userId)));
 
-  /**
+        List<Ingredient> updatedIngredients = new ArrayList<>();
+        for (IngredientPutDTO ingredientPutDTO : ingredientsPutDTO) {
+            Ingredient ingredient = ingredientRepository.findById(ingredientPutDTO.getId()).orElseThrow(() ->
+                    new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Ingredient with id %d does not exist", ingredientPutDTO.getId())));
+
+            // update properties of ingredient from ingredientPutDTO
+            ingredient.setName(ingredientPutDTO.getName());
+            ingredient.setCalculatedRating(ingredientPutDTO.getCalculatedRating());
+
+            updatedIngredients.add(ingredient);
+        }
+
+        user.addIngredient(updatedIngredients);
+        userRepository.save(user);
+    }
+
+
+
+    /**
   * This is a helper method that will check the uniqueness criteria of the username
   * defined in the User entity. The method will do nothing if the input is unique
   * and throw an error (CONFLICT, 409) otherwise.
