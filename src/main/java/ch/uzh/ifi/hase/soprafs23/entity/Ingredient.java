@@ -17,6 +17,12 @@ public class Ingredient implements Serializable  {
     @Column(nullable = true)
     private Long calculatedRating;
 
+
+    public Ingredient(String name) {
+        this.name = name;
+    }
+
+    //Methods
     public Long getId() {
         return id;
     }

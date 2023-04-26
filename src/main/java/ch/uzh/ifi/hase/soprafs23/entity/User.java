@@ -55,6 +55,11 @@ public class User implements Serializable {
     @Column(nullable = true)
     private Long groupId;
 
+    @Column(nullable = true)
+    @ElementCollection
+    private Set<Ingredient> ingredientsSet = new HashSet<>();
+
+
     //Methods
     public Long getId() {
         return id;
@@ -152,6 +157,15 @@ public class User implements Serializable {
 
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
+    }
+
+
+    public void addIngredient(Ingredient ingredient) {
+        ingredientsSet.add(ingredient);
+    }
+
+    public Set<Ingredient> getIngredients() {
+        return ingredientsSet;
     }
 
 }
