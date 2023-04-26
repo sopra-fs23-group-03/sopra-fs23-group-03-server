@@ -81,7 +81,7 @@ public class GroupController {
         }
 
 
-        if(!groupPostDTO.getVotingType().equals("MAJORITYVOTE")) {// at the moment only MAJORITYVOTE is accepted, later a && !groupPostDTO.getVotingType().equals("POINTDISTRIBUTION") will be needed
+        if(groupPostDTO.getVotingType() == null || !groupPostDTO.getVotingType().equals("MAJORITYVOTE")) {// at the moment only MAJORITYVOTE is accepted, later a && !groupPostDTO.getVotingType().equals("POINTDISTRIBUTION") will be needed
             groupPostDTO.setVotingType("MAJORITYVOTE"); // standard voting type
         }
 
