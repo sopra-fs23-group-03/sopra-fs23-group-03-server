@@ -95,7 +95,7 @@ public class GroupController {
 
 
 
-    @PostMapping(value = "/groups/{groupId}/invitations" , produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping("/groups/{groupId}/invitations")
     @ResponseStatus(HttpStatus.CREATED) // 201
     public void sendInvitation(@PathVariable Long groupId, @RequestBody List<Long> ListGuestIds, HttpServletRequest request) {
 
