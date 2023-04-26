@@ -146,7 +146,7 @@ public class UserServiceTest {
         UserPutDTO userPutDTO = new UserPutDTO();
         userPutDTO.setUsername("newUsername");
         userPutDTO.setAllergies(Collections.singleton("newAllergies"));
-        userPutDTO.setFavoriteCuisine("newFavoriteCuisine");
+        userPutDTO.setFavoriteCuisine(Collections.singleton("Swiss"));
         userPutDTO.setSpecialDiet("newSpecialDiet");
         userPutDTO.setPassword("newPassword");
 
@@ -154,7 +154,7 @@ public class UserServiceTest {
         existingUser.setId(id);
         existingUser.setUsername("oldUsername");
         existingUser.addAllergy("oldAllergy");
-        existingUser.setFavoriteCuisine("oldFavoriteCuisine");
+        existingUser.addFavouriteCuisine("oldFavoriteCuisine");
         existingUser.setSpecialDiet("oldSpecialDiet");
         existingUser.setPassword("oldPassword");
 
@@ -166,7 +166,7 @@ public class UserServiceTest {
         // then
         assertEquals(userPutDTO.getUsername(), existingUser.getUsername());
         assertEquals(userPutDTO.getAllergies(), existingUser.getAllergiesSet());
-        assertEquals(userPutDTO.getFavoriteCuisine(), existingUser.getFavoriteCuisine());
+        assertEquals(userPutDTO.getFavoriteCuisine(), existingUser.getFavoriteCuisineSet());
         assertEquals(userPutDTO.getSpecialDiet(), existingUser.getSpecialDiet());
         assertEquals(userPutDTO.getPassword(), existingUser.getPassword());
     }
@@ -210,13 +210,13 @@ public class UserServiceTest {
         user.setUsername("testUser");
         user.setPassword("currentPassword");
         user.setAllergiesSet(Collections.singleton("testAllergies"));
-        user.setFavoriteCuisine("testFavoriteCuisine");
+        user.setFavoriteCuisineSet(Collections.singleton("Italian"));
         user.setSpecialDiet("testSpecialDiet");
 
         userPutDTO = new UserPutDTO();
         userPutDTO.setUsername("newTestUser");
         userPutDTO.setAllergies(Collections.singleton("newTestAllergies"));
-        userPutDTO.setFavoriteCuisine("newTestFavoriteCuisine");
+        userPutDTO.setFavoriteCuisine(Collections.singleton("Italian"));
         userPutDTO.setSpecialDiet("newTestSpecialDiet");
         
         // Arrange
@@ -239,13 +239,13 @@ public class UserServiceTest {
         user.setUsername("testUser");
         user.setPassword("currentPassword");
         user.setAllergiesSet(Collections.singleton("testAllergies"));
-        user.setFavoriteCuisine("testFavoriteCuisine");
+        user.setFavoriteCuisineSet(Collections.singleton("Italian"));
         user.setSpecialDiet("testSpecialDiet");
 
         userPutDTO = new UserPutDTO();
         userPutDTO.setUsername("newTestUser");
         userPutDTO.setAllergies(Collections.singleton("newTestAllergies"));
-        userPutDTO.setFavoriteCuisine("newTestFavoriteCuisine");
+        userPutDTO.setFavoriteCuisine(Collections.singleton("Italian"));
         userPutDTO.setSpecialDiet("newTestSpecialDiet");
 
         // Arrange
@@ -270,13 +270,13 @@ public class UserServiceTest {
         user.setUsername("testUser");
         user.setPassword("currentPassword");
         user.setAllergiesSet(Collections.singleton("testAllergies"));
-        user.setFavoriteCuisine("testFavoriteCuisine");
+        user.setFavoriteCuisineSet(Collections.singleton("Italian"));
         user.setSpecialDiet("testSpecialDiet");
 
         userPutDTO = new UserPutDTO();
         userPutDTO.setUsername("newTestUser");
         userPutDTO.setAllergies(Collections.singleton("newTestAllergies"));
-        userPutDTO.setFavoriteCuisine("newTestFavoriteCuisine");
+        userPutDTO.setFavoriteCuisine(Collections.singleton("Italian"));
         userPutDTO.setSpecialDiet("newTestSpecialDiet");
         userPutDTO.setPassword("newPassword");
 

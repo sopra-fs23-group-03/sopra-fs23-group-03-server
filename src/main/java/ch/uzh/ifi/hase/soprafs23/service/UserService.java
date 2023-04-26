@@ -132,7 +132,7 @@ public class UserService {
 
         String newUsername = userPutDTO.getUsername();
         Set<String> newAllergies = userPutDTO.getAllergies();
-        String newFavoriteCuisine = userPutDTO.getFavoriteCuisine();
+        Set<String> newFavoriteCuisine = userPutDTO.getFavoriteCuisine();
         String newSpecialDiet = userPutDTO.getSpecialDiet();
         String newPassword = userPutDTO.getPassword();
 
@@ -147,7 +147,7 @@ public class UserService {
 
 
         if(newFavoriteCuisine != null){
-            user.setFavoriteCuisine(newFavoriteCuisine);
+            user.setFavoriteCuisineSet(newFavoriteCuisine);
         }
 
         if(newSpecialDiet != null){

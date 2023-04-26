@@ -15,7 +15,7 @@ public class UserGetDTO {
   private String username;
   private UserStatus status;
   private Set<String> allergiesSet;
-  private String favoriteCuisine;
+  private Set<String> favoriteCuisineSet;
   private String specialDiet;
 
   public Long getId() {
@@ -55,13 +55,18 @@ public class UserGetDTO {
         }
     }
 
-    public String getFavoriteCuisine() {
-      return favoriteCuisine;
+    public Set<String> getFavoriteCuisine() {
+      return favoriteCuisineSet;
   }
 
-  public void setFavoriteCuisine(String favoriteCuisine) {
-      this.favoriteCuisine = favoriteCuisine;
-  }
+    public void setFavoriteCuisine(String favoriteCuisine) {
+        if (favoriteCuisine == null || favoriteCuisine.trim().isEmpty()) {
+            this.favoriteCuisineSet = Collections.emptySet();
+        } else {
+            String[] favoriteCuisineArray = favoriteCuisine.split(",");
+            this.favoriteCuisineSet = new HashSet<>(Arrays.asList(favoriteCuisineArray));
+        }
+    }
 
   public String getSpecialDiet() {
       return specialDiet;
