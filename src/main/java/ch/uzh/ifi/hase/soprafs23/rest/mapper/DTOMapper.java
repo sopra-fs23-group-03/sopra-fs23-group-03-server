@@ -6,6 +6,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
+import java.util.Set;
 
 /**
  * DTOMapper
@@ -27,13 +28,13 @@ public interface DTOMapper {
     @Mapping(source = "password", target = "password")
     User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
 
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "username", target = "username")
-    @Mapping(source = "status", target = "status")
-    @Mapping(source = "allergies", target = "allergies")
-    @Mapping(source = "favoriteCuisine", target = "favoriteCuisine")
-    @Mapping(source = "specialDiet", target = "specialDiet")
-    UserGetDTO convertEntityToUserGetDTO(User user);
+  @Mapping(source = "id", target = "id")
+  @Mapping(source = "username", target = "username")
+  @Mapping(source = "status", target = "status")
+  @Mapping(source = "allergiesSet", target = "allergies", qualifiedByName = "map")
+  @Mapping(source = "favoriteCuisine", target = "favoriteCuisine")
+  @Mapping(source = "specialDiet", target = "specialDiet")
+  UserGetDTO convertEntityToUserGetDTO(User user);
 
     @Mapping(source = "groupName", target = "groupName")
     @Mapping(source = "hostId", target = "hostId")
@@ -52,5 +53,8 @@ public interface DTOMapper {
 
     Invitation convertInvitationPostDTOtoEntity(Long groupId, Long guestId);
 
+    default String map(Set<String> value) {
+        return String.join(",", value);
+    }
 
 }

@@ -4,6 +4,9 @@ import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Set;
+import java.util.HashSet;
+
 
 /**
  * Internal User Representation
@@ -39,7 +42,8 @@ public class User implements Serializable {
     private UserStatus status;
 
     @Column(nullable = true)
-    private String allergies;
+    @ElementCollection
+    private Set<String> allergiesSet = new HashSet<>(); // important to initialize as an empty set
 
     @Column(nullable = true)
     private String favoriteCuisine;
@@ -47,13 +51,10 @@ public class User implements Serializable {
     @Column(nullable = true)
     private String specialDiet;
 
-
     @Column(nullable = true)
     private Long groupId;
 
-
     //Methods
-
     public Long getId() {
         return id;
     }
@@ -94,12 +95,25 @@ public class User implements Serializable {
         this.status = status;
     }
 
-    public String getAllergies() {
-        return allergies;
+    public Set<String> getAllergiesSet() {
+        return allergiesSet;
     }
 
-    public void setAllergies(String allergies) {
-        this.allergies = allergies;
+    public void setAllergiesSet(Set<String> allergies) {
+        this.allergiesSet = allergies;
+    }
+
+    public void addAllergy(String allergy) {
+        if (allergiesSet == null) {
+            allergiesSet = new HashSet<>();
+        }
+        allergiesSet.add(allergy);
+    }
+
+    public void removeAllergy() {
+        if (allergiesSet != null) {
+            allergiesSet.clear();
+        }
     }
 
     public String getFavoriteCuisine() {
@@ -125,6 +139,5 @@ public class User implements Serializable {
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
     }
-
 
 }

@@ -1,13 +1,20 @@
 package ch.uzh.ifi.hase.soprafs23.rest.dto;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import java.util.HashSet;
+import java.util.Collections;
+import java.util.Arrays;
+import java.util.Set;
+
+
+
 
 public class UserGetDTO {
 
   private Long id;
   private String username;
   private UserStatus status;
-  private String allergies;
+  private Set<String> allergiesSet;
   private String favoriteCuisine;
   private String specialDiet;
 
@@ -35,14 +42,20 @@ public class UserGetDTO {
     this.status = status;
   }
 
-  public String getAllergies() {
-      return allergies;
+  public Set<String> getAllergies() {
+      return allergiesSet;
   }
 
-  public void setAllergies(String allergies) {
-      this.allergies = allergies;
-  }
-  public String getFavoriteCuisine() {
+    public void setAllergies(String allergies) {
+        if (allergies == null || allergies.trim().isEmpty()) {
+            this.allergiesSet = Collections.emptySet();
+        } else {
+            String[] allergyArray = allergies.split(",");
+            this.allergiesSet = new HashSet<>(Arrays.asList(allergyArray));
+        }
+    }
+
+    public String getFavoriteCuisine() {
       return favoriteCuisine;
   }
 
