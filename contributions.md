@@ -83,7 +83,7 @@
 |             | #187   | Create GET /groups/{id}/members request                                          |   X  |
 | Orestis     |        |                                                                                  |      |
 | Kalliopi    |        |                                                                                  |      |
-| Ann-Kathrin |  #106  |  Update fields for allergies to List/Set and adjust all tests                    |      |
+| Ann-Kathrin |  #106  |  Update fields for allergies/cuisine to List/Set and adjust all tests            |  X   |
 |             | #132   | Create POST /groups/{groupId}/invitations                                        |      |
 | Chiara      |        |                                                                                  |      |
 
