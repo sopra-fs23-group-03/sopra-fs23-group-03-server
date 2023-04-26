@@ -46,7 +46,8 @@ public class User implements Serializable {
     private Set<String> allergiesSet = new HashSet<>(); // important to initialize as an empty set
 
     @Column(nullable = true)
-    private String favoriteCuisine;
+    @ElementCollection
+    private Set<String> favoriteCuisineSet = new HashSet<>();
 
     @Column(nullable = true)
     private String specialDiet;
@@ -116,12 +117,25 @@ public class User implements Serializable {
         }
     }
 
-    public String getFavoriteCuisine() {
-        return favoriteCuisine;
+    public Set<String> getFavoriteCuisineSet() {
+        return favoriteCuisineSet;
     }
 
-    public void setFavoriteCuisine(String favoriteCuisine) {
-        this.favoriteCuisine = favoriteCuisine;
+    public void setFavoriteCuisineSet(Set<String> favoriteCuisine) {
+        this.favoriteCuisineSet = favoriteCuisine;
+    }
+
+    public void addFavouriteCuisine(String favouriteCuisine) {
+        if (favoriteCuisineSet == null) {
+            favoriteCuisineSet = new HashSet<>();
+        }
+        favoriteCuisineSet.add(favouriteCuisine);
+    }
+
+    public void removeFavouriteCuisine() {
+        if (favoriteCuisineSet != null) {
+            favoriteCuisineSet.clear();
+        }
     }
 
     public String getSpecialDiet() {

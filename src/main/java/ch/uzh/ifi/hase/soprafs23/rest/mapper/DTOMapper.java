@@ -32,7 +32,7 @@ public interface DTOMapper {
   @Mapping(source = "username", target = "username")
   @Mapping(source = "status", target = "status")
   @Mapping(source = "allergiesSet", target = "allergies", qualifiedByName = "map")
-  @Mapping(source = "favoriteCuisine", target = "favoriteCuisine")
+  @Mapping(source = "favoriteCuisineSet", target = "favoriteCuisine", qualifiedByName = "map")
   @Mapping(source = "specialDiet", target = "specialDiet")
   UserGetDTO convertEntityToUserGetDTO(User user);
 

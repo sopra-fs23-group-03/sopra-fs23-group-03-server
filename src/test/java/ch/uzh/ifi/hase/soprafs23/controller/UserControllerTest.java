@@ -74,6 +74,7 @@ public class UserControllerTest {
     user.setToken("firstToken");
     user.setStatus(UserStatus.ONLINE);
     user.setAllergiesSet(new HashSet<>(Arrays.asList("garlic", "nuts")));
+    user.setFavoriteCuisineSet(new HashSet<>(Arrays.asList("italian", "swiss")));
 
     // mocks the getUserIdByTokem(token) method in UserService
     given(userService.getUseridByToken(user.getToken())).willReturn(user.getId());
@@ -288,7 +289,7 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.id", is(user.getId().intValue())))
                 .andExpect(jsonPath("$.username", is(user.getUsername())))
                 .andExpect(jsonPath("$.allergies", containsInAnyOrder("garlic", "nuts")))
-                .andExpect(jsonPath("$.favoriteCuisine", is(user.getFavoriteCuisine())))
+                .andExpect(jsonPath("$.favoriteCuisine", containsInAnyOrder("italian", "swiss")))
                 .andExpect(jsonPath("$.specialDiet", is(user.getSpecialDiet())))
                 .andExpect(jsonPath("$.status", is(user.getStatus().toString())));
 
@@ -344,7 +345,7 @@ public class UserControllerTest {
         UserPutDTO userPutDTO = new UserPutDTO();
         userPutDTO.setUsername("new-username");
         userPutDTO.setAllergies(Collections.singleton("Nuts"));
-        userPutDTO.setFavoriteCuisine("Italian");
+        userPutDTO.setFavoriteCuisine(Collections.singleton("Italian"));
         userPutDTO.setSpecialDiet("vegan");
         userPutDTO.setPassword("new-password");
 
@@ -360,7 +361,6 @@ public class UserControllerTest {
 
     @Test
     public void putUsersId_whenUserDoesntExist_404() throws Exception {
-        //String newAllergies = "secondAllergies";
         String newUsername = "secondUsername";
         String newFavoriteCuisine = "secondFavoriteCuisine";
         String newSpecialDiet = "secondSpecialDiet";
@@ -373,7 +373,7 @@ public class UserControllerTest {
         UserPutDTO userPutDTO = new UserPutDTO();
         userPutDTO.setUsername(newUsername);
         userPutDTO.setAllergies(Collections.singleton("Nuts"));
-        userPutDTO.setFavoriteCuisine(newFavoriteCuisine);
+        userPutDTO.setFavoriteCuisine(Collections.singleton("Italian"));
         userPutDTO.setSpecialDiet(newSpecialDiet);
         userPutDTO.setPassword(newPassword);
 
