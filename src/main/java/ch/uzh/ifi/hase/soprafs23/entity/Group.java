@@ -10,8 +10,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "GROUP")
+@Table(name = "XGROUP")
 public class Group implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue
@@ -26,6 +28,7 @@ public class Group implements Serializable {
     @Column(nullable = false)
     private VotingType votingType;
 
+    @Column(nullable = true)
     @ElementCollection
     private Set<Long> guestIds;
 

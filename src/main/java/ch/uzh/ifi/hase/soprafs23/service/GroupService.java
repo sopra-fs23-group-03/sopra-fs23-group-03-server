@@ -31,20 +31,13 @@ public class GroupService {
     }
 
     // creates a new group, throws CONFLICT (409) if something goes wrong
-    public Group createGroup(Group newGroup, User host) {
+    public Group createGroup(Group newGroup) {
         // check that the username is still free
         checkIfGroupNameExists(newGroup.getGroupName());
 
         // check if username is only latin letters
         if (!newGroup.getGroupName().matches("^[a-zA-Z]+$")) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "The Group Name should only contain Latin letters (a-z, A-Z)!");
-        }
-
-        // assign the user creating the group as the host
-        newGroup.setHostId(host.getId());
-
-        if(newGroup.getVotingType() != VotingType.MAJORITYVOTE && newGroup.getVotingType() != VotingType.POINTDISTRIBUTION) {
-            newGroup.setVotingType(VotingType.MAJORITYVOTE); // standard voting type
         }
 
         // save the group
