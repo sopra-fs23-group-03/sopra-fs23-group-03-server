@@ -43,7 +43,7 @@ public class User implements Serializable {
 
     @Column(nullable = true)
     @ElementCollection
-    private Set<String> allergies = new HashSet<>(); // important to initialize as an empty set
+    private Set<String> allergiesSet = new HashSet<>(); // important to initialize as an empty set
 
     @Column(nullable = true)
     private String favoriteCuisine;
@@ -96,23 +96,23 @@ public class User implements Serializable {
     }
 
     public Set<String> getAllergiesSet() {
-        return allergies;
+        return allergiesSet;
     }
 
     public void setAllergiesSet(Set<String> allergies) {
-        this.allergies = allergies;
+        this.allergiesSet = allergies;
     }
 
     public void addAllergy(String allergy) {
-        if (allergies == null) {
-            allergies = new HashSet<>();
+        if (allergiesSet == null) {
+            allergiesSet = new HashSet<>();
         }
-        allergies.add(allergy);
+        allergiesSet.add(allergy);
     }
 
     public void removeAllergy() {
-        if (allergies != null) {
-            allergies.clear();
+        if (allergiesSet != null) {
+            allergiesSet.clear();
         }
     }
 
