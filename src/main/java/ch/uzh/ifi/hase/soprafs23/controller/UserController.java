@@ -127,12 +127,8 @@ public class UserController {
   @ResponseStatus(HttpStatus.NO_CONTENT) //NO CONTENT IS 204
   public void updateUser(@PathVariable Long userId,
                          @RequestBody UserPutDTO userPutDTO,
-                         //@RequestParam String currentPassword,
                          HttpServletRequest request)
   {
-      if(userPutDTO.getCurrentPassword() == null) {
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please pass along a current password");
-      }
       // 404
       userService.getUserById(userId);
 
@@ -144,6 +140,7 @@ public class UserController {
 
       userService.updateUser(userId, userPutDTO);
   }
+
     @GetMapping("/users/{userId}")
     @ResponseStatus(HttpStatus.OK) // OK IS 200
     @ResponseBody

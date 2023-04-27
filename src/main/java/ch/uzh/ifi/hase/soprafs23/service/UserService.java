@@ -142,20 +142,20 @@ public class UserService {
         String newPassword = userPutDTO.getPassword();
         String currentPassword = userPutDTO.getCurrentPassword();
 
-        if(!isPasswordCorrect(user.getPassword(), currentPassword)) {
-          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "The current password is incorrect");
+        if(newPassword != null && currentPassword != null) {
+            if(!isPasswordCorrect(user.getPassword(), currentPassword)) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "The current password is incorrect");
+            } else if(newPassword.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password cannot be empty.");
+            } else if(user.getPassword().equals(newPassword)){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password cannot be the same as the current password.");
+            }
+            
+            user.setPassword(newPassword);            
+        } else if(newPassword != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "To change your password please enter your current password");
         }
-
-        if(newPassword != null && !newPassword.isEmpty()){
-          if(!user.getPassword().equals(newPassword)){
-              user.setPassword(newPassword);
-          } else {
-              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password cannot be the same as the current password.");
-          }
-          
-      } else if (newPassword != null) {
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password cannot be empty.");
-      }
+        
 
         if(newUsername != null) {
             checkIfUsernameExists(newUsername);
