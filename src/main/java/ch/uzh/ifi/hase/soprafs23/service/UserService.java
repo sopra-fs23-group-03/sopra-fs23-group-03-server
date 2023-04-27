@@ -178,6 +178,10 @@ public class UserService {
 
     public void joinGroup(Long guestId, Long groupId) {
         User guest = getUserById(guestId);
+        if(guest.getGroupId() != null) {
+          throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("User with id %s is already in the group with id %d.", guest.getId(), guest.getGroupId()));
+        }
+        
         guest.setGroupId(groupId);
         
         guest = userRepository.save(guest);
