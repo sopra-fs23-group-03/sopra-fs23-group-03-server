@@ -155,6 +155,7 @@ public class UserService {
         } else if(newPassword != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "To change your password please enter your current password");
         }
+        
 
         if(newUsername != null && !newUsername.equals(user.getUsername())) {
             checkIfUsernameExists(newUsername);
@@ -162,16 +163,22 @@ public class UserService {
         }
 
         if(newAllergies != null) {
-            user.setAllergiesSet(newAllergies);
+            for(String allergy : newAllergies) {
+              user.addAllergy(allergy);
+            }
         }
 
         if(newFavoriteCuisine != null){
-            user.setFavoriteCuisineSet(newFavoriteCuisine);
+          for(String cuisine : newFavoriteCuisine) {
+            user.addFavouriteCuisine(cuisine);
+          }
         }
 
         if(newSpecialDiet != null){
             user.setSpecialDiet(newSpecialDiet);
         }
+
+
 
         user = userRepository.save(user);
         userRepository.flush();
