@@ -166,17 +166,8 @@ public class UserServiceTest {
 
         // then
         assertEquals(userPutDTO.getUsername(), existingUser.getUsername());
-
-        Set<String> expectedAllergies = new HashSet<>();
-        expectedAllergies.addAll(existingUser.getAllergiesSet());
-        expectedAllergies.addAll(userPutDTO.getAllergies());
-        assertEquals(expectedAllergies, existingUser.getAllergiesSet());
-
-        Set<String> expectedCuisines = new HashSet<>();
-        expectedCuisines.addAll(existingUser.getFavoriteCuisineSet());
-        expectedCuisines.addAll(userPutDTO.getFavoriteCuisine());
-        assertEquals(expectedCuisines, existingUser.getFavoriteCuisineSet());
-
+        assertEquals(userPutDTO.getAllergies(), existingUser.getAllergiesSet());
+        assertEquals(userPutDTO.getFavoriteCuisine(), existingUser.getFavoriteCuisineSet());
         assertEquals(userPutDTO.getSpecialDiet(), existingUser.getSpecialDiet());
         assertEquals(userPutDTO.getPassword(), existingUser.getPassword());
     }
