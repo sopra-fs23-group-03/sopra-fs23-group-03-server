@@ -36,7 +36,7 @@ public class APIController {
     @GetMapping("/groups/{groupId}/result")
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
-    public String getRandomRecipe(@PathVariable Long groupId, HttpServletRequest request) {
+    public APIGetDTO getRandomRecipe(@PathVariable Long groupId, HttpServletRequest request) {
         // 404 - group not found
         Group group = groupService.getGroupById(groupId);
 
@@ -47,14 +47,16 @@ public class APIController {
         }
 
         Long hostId = group.getHostId();
-        User host = userService.getUserById(hostId); // Assuming there's a method to get user by Id in userService
+        User host = userService.getUserById(hostId);
         Recipe detailedRecipe = apiService.getHostRecipe(host);
 
-        return String.format("ID: %d%nTitle: %s%nReady in minutes: %d%nPrice per serving: %.2f",
-                detailedRecipe.getId(),
-                detailedRecipe.getTitle(),
-                detailedRecipe.getReadyInMinutes(),
-                detailedRecipe.getPricePerServing());
-    }
+        APIGetDTO apiGetDTO = new APIGetDTO();
+        apiGetDTO.setId(detailedRecipe.getId());
+        apiGetDTO.setTitle(detailedRecipe.getTitle());
+        apiGetDTO.setReadyInMinutes(detailedRecipe.getReadyInMinutes());
+        apiGetDTO.setPricePerServing(detailedRecipe.getPricePerServing());
 
+        return apiGetDTO;
+
+}
 }
