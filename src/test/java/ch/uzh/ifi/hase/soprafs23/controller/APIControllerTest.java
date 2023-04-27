@@ -33,6 +33,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -83,14 +84,19 @@ public class APIControllerTest {
     }
 
     @Test
-    public void getRandomRecipe_success() throws Exception {
+    public void getRandomRecipe_success_200() throws Exception {
         mockMvc.perform(get("/groups/{groupId}/result", 1L)
                         .header("X-Token", "valid-token")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk()) // 200
+                .andExpect(jsonPath("$.id").value(testRecipe.getId()))
+                .andExpect(jsonPath("$.title").value(testRecipe.getTitle()))
+                .andExpect(jsonPath("$.readyInMinutes").value(testRecipe.getReadyInMinutes()))
+                .andExpect(jsonPath("$.pricePerServing").value(testRecipe.getPricePerServing()));
     }
+
     @Test
-    public void getHostRecipe_returnsConflictStatusCode_whenNoRecipesFound() {
+    public void getHostRecipe_returnsConflictStatusCode_whenNoRecipesFound_409() {
         // Arrange
         User host = new User(); // Set up a User object with necessary data
         String intolerances = String.join(",", host.getAllergiesSet());
@@ -111,12 +117,12 @@ public class APIControllerTest {
             apiService.getHostRecipe(host);
         } catch (HttpClientErrorException e) {
             // Assert
-            assertEquals(HttpStatus.CONFLICT, e.getStatusCode());
+            assertEquals(HttpStatus.CONFLICT, e.getStatusCode()); // 409
             assertEquals("Results cannot be calculated yet", e.getMessage());
         }
     }
     @Test
-    public void getHostRecipe_returnsNotFoundStatusCode_whenApiReturnsNotFound() {
+    public void getHostRecipe_returnsNotFoundStatusCode_whenApiReturns_404() {
         // Arrange
         User host = new User(); // Set up a User object with necessary data
         String intolerances = String.join(",", host.getAllergiesSet());
@@ -134,21 +140,22 @@ public class APIControllerTest {
             apiService.getHostRecipe(host);
         } catch (HttpClientErrorException e) {
             // Assert
-            assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
+            assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode()); // 404
             assertEquals("Group not found", e.getMessage());
         }
     }
     @Test
-    public void getRandomRecipe_returnsUnauthorizedStatusCode_whenUserIsNotAuthorized() throws Exception {
+    public void getRandomRecipe_returnsUnauthorizedStatusCode401() throws Exception {
         // Set up mocks for the unauthorized case
         doReturn(0L).when(userService).getUseridByToken("unauthorized-token");
 
         // Perform the test
         mockMvc.perform(get("/groups/{groupId}/result", 1L)
                         .header("X-Token", "unauthorized-token")
-                        .contentType(MediaType.TEXT_PLAIN))
-                .andExpect(status().isUnauthorized());
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized()); // 401
     }
+
 
 }
 
