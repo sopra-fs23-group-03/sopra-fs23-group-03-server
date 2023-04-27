@@ -93,7 +93,10 @@
 |             |   #61  | Ensure that at least one ingredient is added before allowing the user to submit  |      |    
 |             |        |                                                                                  |      |
 | Ann-Kathrin |  #106  |  Update fields for allergies/cuisine to List/Set and adjust all tests            |  X   |
-|             | #132   | Create POST /groups/{groupId}/invitations                                        |      |
+|             | #132   | Create POST /groups/{groupId}/invitations                                        |   X  |
+|             | #198   | make GET /groups/{groupId}/ingredients call                                      |      |
+|             | #197   | make PUT /user/{userId}/ingredients call                                         |      |
+|             | #104   | Create a new Ingredient class for storing the ingredients contributed by the user|      |
 | Chiara      | #69    | Create Group Creation page                                                       |  X   |
 |             | #16    | Create a button to enable the user to return to the Landing Page                 |  X   |
 |             | #76    | Redirect host to landing page when pressing Delete Group button                  |  X   |
