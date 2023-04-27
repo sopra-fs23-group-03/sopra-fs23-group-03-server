@@ -11,7 +11,6 @@ public class UserPutDTO {
     private Set<String> allergies;
     private Set<String> favoriteCuisine;
     private String specialDiet;
-
     private String password;
 
 

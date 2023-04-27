@@ -101,7 +101,7 @@ public class GroupServiceTest {
         when(groupRepository.save(any(Group.class))).thenReturn(newGroup);
 
         // When
-        Group createdGroup = groupService.createGroup(newGroup, host);
+        Group createdGroup = groupService.createGroup(newGroup);
 
         // Then
         assertEquals(newGroup.getGroupName(), createdGroup.getGroupName());

@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -36,7 +33,9 @@ public class APIController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/groups/{groupsId}/result")
+    @GetMapping("/groups/{groupId}/result")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
     public String getRandomRecipe(@PathVariable Long groupsId, HttpServletRequest request) {
         // 404 - group not found
         Group group = groupService.getGroupById(groupsId);
