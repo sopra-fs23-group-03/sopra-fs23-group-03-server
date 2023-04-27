@@ -2,11 +2,13 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
+import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import org.springframework.http.HttpHeaders;
@@ -32,10 +34,13 @@ public class UserController {
 
   private final UserService userService;
 
+  private final GroupService groupService;
+
   private final InvitationService invitationService;
 
-  public UserController(UserService userService, InvitationService invitationService) {
+  public UserController(UserService userService, GroupService groupService, InvitationService invitationService) {
     this.userService = userService;
+    this.groupService = groupService;
     this.invitationService = invitationService;
   }
 
@@ -164,7 +169,7 @@ public class UserController {
   @GetMapping("/users/{userId}/invitations")
   @ResponseStatus(HttpStatus.OK) // 200
   @ResponseBody
-  public List<InvitationGetDTO> getOpenInvitationsByGuest(@PathVariable Long userId, HttpServletRequest request) {
+  public List<GroupGetDTO> getOpenInvitationsByGuest(@PathVariable Long userId, HttpServletRequest request) {
     // 404 - user not found
     userService.getUserById(userId);
 
@@ -182,15 +187,14 @@ public class UserController {
       throw new ResponseStatusException(HttpStatus.NO_CONTENT);
     }
 
-    // convert to InvitationGetDTOs and return them
-    List<InvitationGetDTO> invitationGetDTOs = new ArrayList<>();
+    // convert to GroupGetDTOs and return them
+    List<GroupGetDTO> groupGetDTOs = new ArrayList<>();
     for(Invitation invitation : invitations) {
-      InvitationGetDTO invitationGetDTO = new InvitationGetDTO();
-      invitationGetDTO.setGroupId(invitation.getGroupId());
-      invitationGetDTOs.add(invitationGetDTO);
+      GroupGetDTO groupGetDTO = DTOMapper.INSTANCE.convertEntityToGroupGetDTO(groupService.getGroupById(invitation.getGroupId()));
+      groupGetDTOs.add(groupGetDTO);
     }
 
-    return invitationGetDTOs;
+    return groupGetDTOs;
   }
 
 }
