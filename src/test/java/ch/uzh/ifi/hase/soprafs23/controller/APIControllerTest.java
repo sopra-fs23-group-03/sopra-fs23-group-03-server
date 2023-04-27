@@ -138,17 +138,17 @@ public class APIControllerTest {
             assertEquals("Group not found", e.getMessage());
         }
     }
-//    @Test
-//    public void getRandomRecipe_returnsUnauthorizedStatusCode_whenUserIsNotAuthorized() throws Exception {
-//        // Set up mocks for the unauthorized case
-//        doReturn(0L).when(userService).getUseridByToken("unauthorized-token");
-//
-//        // Perform the test
-//        mockMvc.perform(get("/groups/{groupId}/result", 1L)
-//                        .header("X-Token", "unauthorized-token")
-//                        .contentType(MediaType.TEXT_PLAIN))
-//                .andExpect(status().isUnauthorized());
-//    }
+    @Test
+    public void getRandomRecipe_returnsUnauthorizedStatusCode_whenUserIsNotAuthorized() throws Exception {
+        // Set up mocks for the unauthorized case
+        doReturn(0L).when(userService).getUseridByToken("unauthorized-token");
+
+        // Perform the test
+        mockMvc.perform(get("/groups/{groupId}/result", 1L)
+                        .header("X-Token", "unauthorized-token")
+                        .contentType(MediaType.TEXT_PLAIN))
+                .andExpect(status().isUnauthorized());
+    }
 
 }
 

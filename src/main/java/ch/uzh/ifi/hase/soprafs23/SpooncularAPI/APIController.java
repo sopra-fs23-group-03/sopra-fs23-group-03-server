@@ -36,9 +36,9 @@ public class APIController {
     @GetMapping("/groups/{groupId}/result")
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
-    public String getRandomRecipe(@PathVariable Long groupsId, HttpServletRequest request) {
+    public String getRandomRecipe(@PathVariable Long groupId, HttpServletRequest request) {
         // 404 - group not found
-        Group group = groupService.getGroupById(groupsId);
+        Group group = groupService.getGroupById(groupId);
 
         // 401 - not authorized
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
