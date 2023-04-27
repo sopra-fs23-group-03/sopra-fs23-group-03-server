@@ -49,7 +49,7 @@
 | Kalliopi    | #80    | Create navigation bar                                                            |  X   |
 |             | #52    | Create a landing page with sections for displaying the users and active groups.  |  X   |
 |             | #9     | Display user as logged in                                                        |  X   | 
-|             | #11    | Set user to offline and delete localStorage                                      |      |
+|             | #11    | Set user to offline and delete localStorage                                      |     |
 |             | #10    | Make Logout Button accessible                                                    |  X   |
 |             | #79    | Implement method to sort the users based on their online/offline status          |  X   |  
 |             | #68    | Create the Form Group button in the Landing Page                                 |  X   | 
@@ -82,7 +82,15 @@
 | Lany        | #84    | Create GET /groups/{id} request                                                  |   X  |
 |             | #187   | Create GET /groups/{id}/members request                                          |   X  |
 | Orestis     |        |                                                                                  |      |
-| Kalliopi    |        |                                                                                  |      |
+| Kalliopi    |   #43  | Create host and guest view of group forming page                                 |      |
+|             |   #57  | Create "Ingredient Page"                                                         |      |      
+|             |   #63  | Create a button to submit the final contributions and transition to next page    |      |   
+|             |   #58  | Create ingredient input field and a button for adding an ingredient to the meal  |      |  
+|             |   #59  | Create a button to remove an ingredient from the meal                            |      |      
+|             |   #60  | Display all ingredients added to the meal in a separate section                  |      |   
+|             |   #60  | Display all ingredients added to the meal in a separate section                  |      |     
+|             |   #61  | Ensure that at least one ingredient is added before allowing the user to submit  |      |    
+|             |        |                                                                                  |      |
 | Ann-Kathrin |  #106  |  Update fields for allergies/cuisine to List/Set and adjust all tests            |  X   |
 |             | #132   | Create POST /groups/{groupId}/invitations                                        |      |
 | Chiara      | #69    | Create Group Creation page                                                       |  X   |
