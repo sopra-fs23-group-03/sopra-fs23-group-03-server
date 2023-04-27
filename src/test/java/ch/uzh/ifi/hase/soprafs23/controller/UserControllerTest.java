@@ -1,10 +1,13 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -59,6 +62,9 @@ public class UserControllerTest {
   private UserService userService;
 
   private final ObjectMapper objectMapper = new ObjectMapper();
+
+  @MockBean
+  private GroupService groupService;
 
   @MockBean
   private InvitationService invitationService;
@@ -415,16 +421,23 @@ public class UserControllerTest {
     }
     @Test
     public void getInvitations_valid() throws Exception {
+        Group group = new Group();
+        group.setId(5L);
+        group.setGroupName("groupname");
+        group.setHostId(27L);
+        group.setVotingType(VotingType.MAJORITYVOTE);
+
         List<Invitation> invitations = new ArrayList<>();
 
         Invitation invitation = new Invitation();
-        invitation.setGroupId(5L);
+        invitation.setGroupId(group.getId());
         invitation.setGuestId(user.getId());
         invitations.add(invitation);
 
         // mocks
         given(userService.getUserById(user.getId())).willReturn(user);
         given(invitationService.getInvitationsByGuestId(user.getId())).willReturn(invitations);
+        given(groupService.getGroupById(invitation.getGroupId())).willReturn(group);
 
         // when
         MockHttpServletRequestBuilder getRequest = get("/users/{userId}/invitations", user.getId())
@@ -435,12 +448,16 @@ public class UserControllerTest {
         mockMvc.perform(getRequest)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].groupId", is(invitation.getGroupId().intValue())));
+                .andExpect(jsonPath("$[0].id", is(group.getId().intValue())))
+                .andExpect(jsonPath("$[0].groupName", is(group.getGroupName())))
+                .andExpect(jsonPath("$[0].hostId", is(group.getHostId().intValue())))
+                .andExpect(jsonPath("$[0].votingType", is(group.getVotingType().toString())));
 
         // verify the correct calls were made
         verify(userService, times(1)).getUserById(user.getId());
         verify(userService, times(1)).getUseridByToken(user.getToken());
         verify(invitationService, times(1)).getInvitationsByGuestId(user.getId());
+        verify(groupService, times(1)).getGroupById(group.getId());
     }
 
     @Test
@@ -464,6 +481,7 @@ public class UserControllerTest {
         verify(userService, times(1)).getUserById(user.getId());
         verify(userService, times(1)).getUseridByToken(user.getToken());
         verify(invitationService, times(1)).getInvitationsByGuestId(user.getId());
+        verify(groupService, times(0)).getGroupById(any());
     }
 
     @Test
@@ -486,6 +504,7 @@ public class UserControllerTest {
         verify(userService, times(1)).getUserById(anotherUserId);
         verify(userService, times(0)).getUseridByToken(any());
         verify(invitationService, times(0)).getInvitationsByGuestId(any());
+        verify(groupService, times(0)).getGroupById(any());
     }
 
     @Test
@@ -509,6 +528,7 @@ public class UserControllerTest {
         verify(userService, times(1)).getUserById(user.getId());
         verify(userService, times(1)).getUseridByToken(anotherToken);
         verify(invitationService, times(0)).getInvitationsByGuestId(any());
+        verify(groupService, times(0)).getGroupById(any());
     }
   /**
    * Helper Method to convert userPostDTO into a JSON string such that the input
