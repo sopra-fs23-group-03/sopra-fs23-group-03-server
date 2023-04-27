@@ -7,6 +7,8 @@ public class GroupGetDTO {
 
     private Long hostId;
 
+    private String hostName;
+
     private String votingType;
 
     public Long getId() {
@@ -31,6 +33,14 @@ public class GroupGetDTO {
 
     public void setHostId(Long hostId) {
         this.hostId = hostId;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
     }
 
     public String getVotingType() {

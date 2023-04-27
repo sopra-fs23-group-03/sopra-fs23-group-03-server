@@ -25,6 +25,9 @@ public class Group implements Serializable {
     @Column(nullable = false, unique = true)
     private Long hostId;
 
+    @Column(nullable = false, unique = true)
+    private String hostName;
+
     @Column(nullable = false)
     private VotingType votingType;
 
@@ -60,6 +63,13 @@ public class Group implements Serializable {
         this.hostId = hostId;
     }
 
+    public String getHostName() {
+        return hostName;
+    }
+
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
+    }
 
     public VotingType getVotingType() {
         return votingType;

@@ -86,6 +86,7 @@ public class GroupController {
 
         // convert API user to internal representation
         Group groupInput = DTOMapper.INSTANCE.convertGroupPostDTOtoEntity(groupPostDTO);
+        groupInput.setHostName(host.getUsername());
 
         // create group
         Group createdGroup = groupService.createGroup(groupInput);
