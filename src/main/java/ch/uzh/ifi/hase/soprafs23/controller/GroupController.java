@@ -67,29 +67,29 @@ public class GroupController {
     @ResponseStatus(HttpStatus.CREATED) // 201
     @ResponseBody
     public GroupGetDTO createGroup(@RequestBody GroupPostDTO groupPostDTO, HttpServletRequest request) {
+        // 404
+        User host = userService.getUserById(groupPostDTO.getHostId());
+
         // check validity of token
-        String token = request.getHeader("X-Token");
-        Long userId = userService.getUseridByToken(token);
-        User user = userService.getUserById(userId);
-        if(user == null) {
+        Long userId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if(userId != groupPostDTO.getHostId()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized.")); // 401 - not authorized
         }
-
-        // check if the user with the token exist
-        if (!userId.equals(groupPostDTO.getHostId())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User not found.")); // 404 - user not found
-        }
-
 
         if(groupPostDTO.getVotingType() == null || !groupPostDTO.getVotingType().equals("MAJORITYVOTE")) {// at the moment only MAJORITYVOTE is accepted, later a && !groupPostDTO.getVotingType().equals("POINTDISTRIBUTION") will be needed
             groupPostDTO.setVotingType("MAJORITYVOTE"); // standard voting type
         }
+
+        if(host.getGroupId() != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("User with id %s is already in the group with id %d.", host.getId(), host.getGroupId()));
+          }
 
         // convert API user to internal representation
         Group groupInput = DTOMapper.INSTANCE.convertGroupPostDTOtoEntity(groupPostDTO);
 
         // create group
         Group createdGroup = groupService.createGroup(groupInput);
+        userService.joinGroup(host.getId(), createdGroup.getId());
 
         // convert internal representation of user back to API
         GroupGetDTO groupGetDTO = DTOMapper.INSTANCE.convertEntityToGroupGetDTO(createdGroup);
