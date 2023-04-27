@@ -85,7 +85,23 @@
 | Kalliopi    |        |                                                                                  |      |
 | Ann-Kathrin |  #106  |  Update fields for allergies/cuisine to List/Set and adjust all tests            |  X   |
 |             | #132   | Create POST /groups/{groupId}/invitations                                        |      |
-| Chiara      |        |                                                                                  |      |
+| Chiara      | #69    | Create Group Creation page                                                       |  X   |
+|             | #16    | Create a button to enable the user to return to the Landing Page                 |  X   |
+|             | #76    | Redirect host to landing page when pressing Delete Group button                  |  X   |
+|             | #51    | Create path to be directed to the profile page                                   |  X   |
+|             | #72    | Add for each user a button to invite                                             |  X   |
+|             | #71    | Create section for online users                                                  |  X   |
+|             | #75    | Create buttons for both creating and deleting group                              |  X   |
+|             | #74    | Move guests into the guests section                                              |  X   |
+|             | #73    | Create a guests section                                                          |  X   |
+|             | #51    | Create path to be redirected to user profile                                     |  X   |
+|             | #46    | Create API calls with body for backend communication                             |      |
+|             | #47    | Display username, allergies, favorite cuisine, and special diet on user profile  |      |
+|             | #49    | Create save button to save the edited fields                                     |      |
+|             | #78    | Redirect host to Group Forming Page - Host View when clicking on Continue        |      |
+|             | #18    | Implement a function to fetch the recipe suggestion the backend API              |      |
+|             | #17    | Display the randomly selected recipe suggestion on the screen                    |      |
+|             | #77    | Create Group Forming Page - Host View                                            |      |
 
 
 </p>
