@@ -43,13 +43,13 @@
 |             | #118   | Check if user is authorized to accept/reject invitation else return error        |  X   |
 |             | #119   | Check if user exists when accepting/rejecting the invitation else return error   |  X   |
 |             | #157   | create GET /users/{userId}/invitations request                                   |  X   |
-| Orestis     | #47    | Create Logout Method which sets User to offline                                  |      |
-|             | #88    | Create method for updating the user profile                                      |      |
-|             | #87    | Create method for returning the user profile                                     |      |
+| Orestis     | #47    | Create Logout Method which sets User to offline                                  |  X   |
+|             | #88    | Create method for updating the user profile                                      |  X   |
+|             | #87    | Create method for returning the user profile                                     |  X   |
 | Kalliopi    | #80    | Create navigation bar                                                            |  X   |
 |             | #52    | Create a landing page with sections for displaying the users and active groups.  |  X   |
 |             | #9     | Display user as logged in                                                        |  X   | 
-|             | #11    | Set user to offline and delete localStorage                                      |      |
+|             | #11    | Set user to offline and delete localStorage                                      |     |
 |             | #10    | Make Logout Button accessible                                                    |  X   |
 |             | #79    | Implement method to sort the users based on their online/offline status          |  X   |  
 |             | #68    | Create the Form Group button in the Landing Page                                 |  X   | 
@@ -81,11 +81,39 @@
 |-------------|--------|----------------------------------------------------------------------------------|------|
 | Lany        | #84    | Create GET /groups/{id} request                                                  |   X  |
 |             | #187   | Create GET /groups/{id}/members request                                          |   X  |
-| Orestis     |        |                                                                                  |      |
-| Kalliopi    |        |                                                                                  |      |
+| Orestis     |   #57  | Function to randomly select one recipe suggestion from the API                   |      |
+|             |   #88  | Reopened and fixed the updating attributes and the tests                         |  X   |
+| Kalliopi    |   #43  | Create host and guest view of group forming page                                 |      |
+|             |   #57  | Create "Ingredient Page"                                                         |      |      
+|             |   #63  | Create a button to submit the final contributions and transition to next page    |      |   
+|             |   #58  | Create ingredient input field and a button for adding an ingredient to the meal  |      |  
+|             |   #59  | Create a button to remove an ingredient from the meal                            |      |      
+|             |   #60  | Display all ingredients added to the meal in a separate section                  |      |   
+|             |   #60  | Display all ingredients added to the meal in a separate section                  |      |     
+|             |   #61  | Ensure that at least one ingredient is added before allowing the user to submit  |      |    
+|             |        |                                                                                  |      |
 | Ann-Kathrin |  #106  |  Update fields for allergies/cuisine to List/Set and adjust all tests            |  X   |
-|             | #132   | Create POST /groups/{groupId}/invitations                                        |      |
-| Chiara      |        |                                                                                  |      |
+|             | #132   | Create POST /groups/{groupId}/invitations                                        |   X  |
+|             | #198   | make GET /groups/{groupId}/ingredients call                                      |      |
+|             | #197   | make PUT /user/{userId}/ingredients call                                         |      |
+|             | #104   | Create a new Ingredient class for storing the ingredients contributed by the user|      |
+| Chiara      | #69    | Create Group Creation page                                                       |  X   |
+|             | #16    | Create a button to enable the user to return to the Landing Page                 |  X   |
+|             | #76    | Redirect host to landing page when pressing Delete Group button                  |  X   |
+|             | #51    | Create path to be directed to the profile page                                   |  X   |
+|             | #72    | Add for each user a button to invite                                             |  X   |
+|             | #71    | Create section for online users                                                  |  X   |
+|             | #75    | Create buttons for both creating and deleting group                              |  X   |
+|             | #74    | Move guests into the guests section                                              |  X   |
+|             | #73    | Create a guests section                                                          |  X   |
+|             | #51    | Create path to be redirected to user profile                                     |  X   |
+|             | #46    | Create API calls with body for backend communication                             |      |
+|             | #47    | Display username, allergies, favorite cuisine, and special diet on user profile  |      |
+|             | #49    | Create save button to save the edited fields                                     |      |
+|             | #78    | Redirect host to Group Forming Page - Host View when clicking on Continue        |      |
+|             | #18    | Implement a function to fetch the recipe suggestion the backend API              |      |
+|             | #17    | Display the randomly selected recipe suggestion on the screen                    |      |
+|             | #77    | Create Group Forming Page - Host View                                            |      |
 
 
 </p>

@@ -13,6 +13,8 @@ public class UserPutDTO {
     private String specialDiet;
     private String password;
 
+    private String currentPassword;
+
 
     public String getUsername() {
         return username;
@@ -61,4 +63,13 @@ public class UserPutDTO {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    public String getCurrentPassword() {
+        return currentPassword;
+    }
+
+    public void setCurrentPassword(String currentPassword) {
+        this.currentPassword = currentPassword;
+    }
+
 }

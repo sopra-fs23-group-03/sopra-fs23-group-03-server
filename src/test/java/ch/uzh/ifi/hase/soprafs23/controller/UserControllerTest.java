@@ -348,6 +348,7 @@ public class UserControllerTest {
         userPutDTO.setFavoriteCuisine(Collections.singleton("Italian"));
         userPutDTO.setSpecialDiet("vegan");
         userPutDTO.setPassword("new-password");
+        userPutDTO.setCurrentPassword(user.getPassword());
 
         MockHttpServletRequestBuilder requestBuilder = put("/users/1?currentPassword=test-password")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -376,6 +377,7 @@ public class UserControllerTest {
         userPutDTO.setFavoriteCuisine(Collections.singleton("Italian"));
         userPutDTO.setSpecialDiet(newSpecialDiet);
         userPutDTO.setPassword(newPassword);
+        userPutDTO.setCurrentPassword(user.getPassword());
 
         // mocks the getUserById(id) method in UserService
         given(userService.getUserById(secondUserId))
