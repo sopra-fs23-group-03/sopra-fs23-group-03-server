@@ -43,9 +43,9 @@
 |             | #118   | Check if user is authorized to accept/reject invitation else return error        |  X   |
 |             | #119   | Check if user exists when accepting/rejecting the invitation else return error   |  X   |
 |             | #157   | create GET /users/{userId}/invitations request                                   |  X   |
-| Orestis     | #47    | Create Logout Method which sets User to offline                                  |      |
-|             | #88    | Create method for updating the user profile                                      |      |
-|             | #87    | Create method for returning the user profile                                     |      |
+| Orestis     | #47    | Create Logout Method which sets User to offline                                  |  X   |
+|             | #88    | Create method for updating the user profile                                      |  X   |
+|             | #87    | Create method for returning the user profile                                     |  X   |
 | Kalliopi    | #80    | Create navigation bar                                                            |  X   |
 |             | #52    | Create a landing page with sections for displaying the users and active groups.  |  X   |
 |             | #9     | Display user as logged in                                                        |  X   | 
@@ -81,7 +81,8 @@
 |-------------|--------|----------------------------------------------------------------------------------|------|
 | Lany        | #84    | Create GET /groups/{id} request                                                  |   X  |
 |             | #187   | Create GET /groups/{id}/members request                                          |   X  |
-| Orestis     |        |                                                                                  |      |
+| Orestis     |   #57  | Function to randomly select one recipe suggestion from the API                   |      |
+|             |   #88  | Reopened and fixed the updating attributes and the tests                         |  X   |
 | Kalliopi    |   #43  | Create host and guest view of group forming page                                 |      |
 |             |   #57  | Create "Ingredient Page"                                                         |      |      
 |             |   #63  | Create a button to submit the final contributions and transition to next page    |      |   
