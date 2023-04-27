@@ -6,9 +6,6 @@ import java.util.Collections;
 import java.util.Arrays;
 import java.util.Set;
 
-
-
-
 public class UserGetDTO {
 
   private Long id;
@@ -17,6 +14,7 @@ public class UserGetDTO {
   private Set<String> allergiesSet;
   private Set<String> favoriteCuisineSet;
   private String specialDiet;
+  private Long groupId;
 
   public Long getId() {
     return id;
@@ -75,4 +73,14 @@ public class UserGetDTO {
   public void setSpecialDiet(String specialDiet) {
       this.specialDiet = specialDiet;
   }
+
+  public Long getGroupId() {
+    return groupId;
+  }
+
+  public void setGroupId(Long groupId) {
+    this.groupId = groupId;
+  }
+
+  
 }

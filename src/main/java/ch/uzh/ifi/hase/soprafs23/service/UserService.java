@@ -127,7 +127,7 @@ public class UserService {
         userRepository.flush();
     }
 
-    public void updateUser(Long id, UserPutDTO userPutDTO,String currentPassword) {
+    public void updateUser(Long id, UserPutDTO userPutDTO) {
         User user = getUserById(id);
 
         String newUsername = userPutDTO.getUsername();
@@ -135,6 +135,22 @@ public class UserService {
         Set<String> newFavoriteCuisine = userPutDTO.getFavoriteCuisine();
         String newSpecialDiet = userPutDTO.getSpecialDiet();
         String newPassword = userPutDTO.getPassword();
+        String currentPassword = userPutDTO.getCurrentPassword();
+
+        if(!isPasswordCorrect(user.getPassword(), currentPassword)) {
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "The current password is incorrect");
+        }
+
+        if(newPassword != null && !newPassword.isEmpty()){
+          if(!user.getPassword().equals(newPassword)){
+              user.setPassword(newPassword);
+          } else {
+              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password cannot be the same as the current password.");
+          }
+          
+      } else if (newPassword != null) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password cannot be empty.");
+      }
 
         if(newUsername != null) {
             checkIfUsernameExists(newUsername);
@@ -142,35 +158,27 @@ public class UserService {
         }
 
         if(newAllergies != null) {
-            user.setAllergiesSet(newAllergies);
+            for(String allergy : newAllergies) {
+              user.addAllergy(allergy);
+            }
         }
 
-
         if(newFavoriteCuisine != null){
-            user.setFavoriteCuisineSet(newFavoriteCuisine);
+          for(String cuisine : newFavoriteCuisine) {
+            user.addFavouriteCuisine(cuisine);
+          }
         }
 
         if(newSpecialDiet != null){
             user.setSpecialDiet(newSpecialDiet);
         }
 
-        if(newPassword != null && !newPassword.isEmpty()){
-            if (isPasswordCorrect(user.getPassword(), currentPassword)) {
-                if(!user.getPassword().equals(newPassword)){
-                    user.setPassword(newPassword);
-                } else {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "New password cannot be the same as the current password.");
-                }
-            } else {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Current password is incorrect.");
-            }
-        } else if (newPassword != null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password cannot be empty.");
-        }
+
 
         user = userRepository.save(user);
         userRepository.flush();
     }
+
     public boolean isPasswordCorrect(String storedPassword, String providedPassword) {
         return storedPassword.equals(providedPassword);
     }
