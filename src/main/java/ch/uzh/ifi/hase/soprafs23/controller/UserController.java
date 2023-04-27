@@ -130,21 +130,22 @@ public class UserController {
   @ResponseStatus(HttpStatus.NO_CONTENT) //NO CONTENT IS 204
   public void updateUser(@PathVariable Long userId,
                          @RequestBody UserPutDTO userPutDTO,
-                         @RequestParam String currentPassword,
+                         //@RequestParam String currentPassword,
                          HttpServletRequest request)
   {
-      User user = userService.getUserById(userId);
-
-      if (user == null){
-          throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User not found with ID: %d", userId));
+      if(userPutDTO.getCurrentPassword() == null) {
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Please pass along a current password");
       }
+      // 404
+      userService.getUserById(userId);
 
+      // 401
       Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
       if(tokenId != userId) {
           throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to make changes to this profile."));
       }
 
-      userService.updateUser(userId, userPutDTO, currentPassword);
+      userService.updateUser(userId, userPutDTO);
   }
     @GetMapping("/users/{userId}")
     @ResponseStatus(HttpStatus.OK) // OK IS 200
