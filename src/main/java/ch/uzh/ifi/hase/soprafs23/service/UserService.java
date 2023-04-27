@@ -152,7 +152,7 @@ public class UserService {
         }
         
 
-        if(newUsername != null) {
+        if(newUsername != null && !newUsername.equals(user.getUsername())) {
             checkIfUsernameExists(newUsername);
             user.setUsername(newUsername);
         }
