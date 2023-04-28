@@ -84,6 +84,7 @@ public class UserControllerTest {
 
     // mocks the getUserIdByTokem(token) method in UserService
     given(userService.getUseridByToken(user.getToken())).willReturn(user.getId());
+    given(userService.getUserById(user.getId())).willReturn(user);
   }
 
   @Test
@@ -254,11 +255,13 @@ public class UserControllerTest {
     }
     @Test
     public void postUsersUserIdLogout_notFound() throws Exception {
+        Long anotherUserId = 5L;
+
         // given
-        given(userService.getUseridByToken("testToken")).willReturn(0L);
+        given(userService.getUserById(5L)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "error message"));
 
         // when/then -> do the request
-        mockMvc.perform(post("/users/1/logout")
+        mockMvc.perform(post("/users/{userId}/logout", anotherUserId)
                         .header("X-Token", "testToken")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
@@ -266,12 +269,14 @@ public class UserControllerTest {
 
     @Test
     public void postUsersUserIdLogout_unauthorized() throws Exception {
+        String anotherToken = "anotherToken";
+
         // given
-        when(userService.getUseridByToken("testToken")).thenReturn(0L);
+        when(userService.getUseridByToken(anotherToken)).thenReturn(6L);
 
         // when/then -> do the request
-        mockMvc.perform(post("/users/0/logout")
-                        .header("X-Token", "testToken")
+        mockMvc.perform(post("/users/{userId}/logout", user.getId())
+                        .header("X-Token", anotherToken)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResponseStatusException));
