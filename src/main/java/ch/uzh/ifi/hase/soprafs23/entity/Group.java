@@ -35,8 +35,9 @@ public class Group implements Serializable {
     @ElementCollection
     private Set<Long> guestIds;
 
+    // constructor
     public Group() {
-        this.guestIds = new HashSet<>(); //guestIds set will be initialized with an empty HashSet when a new Group object is created.
+        this.guestIds = new HashSet<>();
     }
 
     public Long getId() {
