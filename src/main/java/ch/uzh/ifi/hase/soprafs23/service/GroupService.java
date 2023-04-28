@@ -20,7 +20,9 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 @Transactional
 public class GroupService {
+
     private final GroupRepository groupRepository;
+
     @Autowired
     public GroupService(@Qualifier("groupRepository") GroupRepository groupRepository) {
         this.groupRepository = groupRepository;
@@ -30,7 +32,6 @@ public class GroupService {
         return this.groupRepository.findAll();
     }
 
-    // creates a new group, throws CONFLICT (409) if something goes wrong
     public Group createGroup(Group newGroup) {
         // check that the username is still free
         checkIfGroupNameExists(newGroup.getGroupName());
@@ -65,22 +66,19 @@ public class GroupService {
         return group.get();
     }
 
+    // TODO: why does this exist? it doesn't even flush the repo
     public Group updateGroup(Long groupId, String newGroupName) {
-        Group groupToUpdate = groupRepository.findById(groupId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
+        Group groupToUpdate = getGroupById(groupId);
         groupToUpdate.setGroupName(newGroupName);
         return groupRepository.save(groupToUpdate);
     }
 
-
+    // TODO: why does this exist? it's even tested! but only user when it's tested
     public int countGuests(Long groupId) {
-        Group group = groupRepository.findById(groupId).orElse(null);
-        if (group == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
-        }
+        Group group = getGroupById(groupId);
+        
         return group.getGuestIds().size();
     }
-
 
     public void addGuestToGroupMembers(Long guestId, Long groupId) {
         Group group = getGroupById(groupId);
