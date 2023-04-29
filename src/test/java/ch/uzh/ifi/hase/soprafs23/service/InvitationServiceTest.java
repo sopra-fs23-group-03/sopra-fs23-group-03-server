@@ -6,7 +6,6 @@ import ch.uzh.ifi.hase.soprafs23.repository.InvitationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.server.ResponseStatusException;
@@ -39,7 +38,7 @@ public class InvitationServiceTest {
         invitation.setGuestId(3L);
 
         // mocks the save() method of InvitationRepository
-        Mockito.when(invitationRepository.save(Mockito.any())).thenReturn(invitation);
+        when(invitationRepository.save(any())).thenReturn(invitation);
     }
 
     @Test
@@ -53,14 +52,13 @@ public class InvitationServiceTest {
         List<Invitation> existingInvites = new ArrayList<>();
 
         // mocks the findByGroupIdAndGuestId() method of InvitationRepository
-        Mockito.when(invitationRepository.findByGroupIdAndGuestId(Mockito.anyLong(), Mockito.anyLong()))
-                .thenReturn(existingInvites);
+        when(invitationRepository.findByGroupIdAndGuestId(anyLong(), anyLong())).thenReturn(existingInvites);
 
         // when
         Invitation createdInvite = invitationService.createInvitation(groupId, guestId);
 
         // then
-        verify(invitationRepository, times(1)).save(Mockito.any());
+        verify(invitationRepository, times(1)).save(any());
         verify(invitationRepository, times(1)).flush();
 
         assertEquals(createdInvite.getId(), invitation.getId());
@@ -76,8 +74,7 @@ public class InvitationServiceTest {
         List<Invitation> existingInvites = Arrays.asList(invitation);
 
         // mocks the findByGroupIdAndGuestId() method of InvitationRepository
-        Mockito.when(invitationRepository.findByGroupIdAndGuestId(Mockito.anyLong(), Mockito.anyLong()))
-                .thenReturn(existingInvites);
+        when(invitationRepository.findByGroupIdAndGuestId(anyLong(), anyLong())).thenReturn(existingInvites);
 
         // when
         assertThrows(ResponseStatusException.class, () -> {
@@ -85,12 +82,10 @@ public class InvitationServiceTest {
         });
 
         // then
-        verify(invitationRepository, never()).save(Mockito.any());
+        verify(invitationRepository, never()).save(any());
         verify(invitationRepository, never()).flush();
     }
 
-
-
-    }
+}
 
 

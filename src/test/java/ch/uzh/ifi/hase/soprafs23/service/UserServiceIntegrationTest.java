@@ -22,47 +22,47 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 public class UserServiceIntegrationTest {
 
-  @Qualifier("userRepository")
-  @Autowired
-  private UserRepository userRepository;
+    @Qualifier("userRepository")
+    @Autowired
+    private UserRepository userRepository;
 
-  @Autowired
-  private UserService userService;
+    @Autowired
+    private UserService userService;
 
-  @BeforeEach
-  public void setup() {
-    userRepository.deleteAll();
-  }
+    @BeforeEach
+    public void setup() {
+        userRepository.deleteAll();
+    }
 
-  @Test
-  public void createUser_validInputs_success() {
-    // given
-    assertNull(userRepository.findByUsername("testUsername"));
+    @Test
+    public void createUser_validInputs_success() {
+        // given
+        assertNull(userRepository.findByUsername("testUsername"));
 
-    User testUser = new User();
-    testUser.setUsername("testUsername");
-    testUser.setPassword("testPassword");
+        User testUser = new User();
+        testUser.setUsername("testUsername");
+        testUser.setPassword("testPassword");
 
-    // when
-    User createdUser = userService.createUser(testUser);
+        // when
+        User createdUser = userService.createUser(testUser);
 
-    // then
-    assertEquals(testUser.getId(), createdUser.getId());
-    assertEquals(testUser.getPassword(), createdUser.getPassword());
-    assertEquals(testUser.getUsername(), createdUser.getUsername());
-    assertNotNull(createdUser.getToken());
-    assertEquals(UserStatus.ONLINE, createdUser.getStatus());
-  }
+        // then
+        assertEquals(testUser.getId(), createdUser.getId());
+        assertEquals(testUser.getPassword(), createdUser.getPassword());
+        assertEquals(testUser.getUsername(), createdUser.getUsername());
+        assertNotNull(createdUser.getToken());
+        assertEquals(UserStatus.ONLINE, createdUser.getStatus());
+    }
 
-  @Test
-  public void createUser_duplicateUsername_throwsException() {
-    assertNull(userRepository.findByUsername("testUsername"));
+    @Test
+    public void createUser_duplicateUsername_throwsException() {
+        assertNull(userRepository.findByUsername("testUsername"));
 
-    User testUser = new User();
-    testUser.setUsername("testUsername");
-    testUser.setPassword("testPassword");
-    userService.createUser(testUser);
+        User testUser = new User();
+        testUser.setUsername("testUsername");
+        testUser.setPassword("testPassword");
+        userService.createUser(testUser);
 
-    assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser));
-  }
+        assertThrows(ResponseStatusException.class, () -> userService.createUser(testUser));
+    }
 }
