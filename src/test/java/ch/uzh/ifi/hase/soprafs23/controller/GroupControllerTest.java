@@ -17,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -27,8 +26,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
-
-
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -564,7 +561,7 @@ public class GroupControllerTest {
         existingInvitation.setGuestId(2L);
 
         // mocks
-        given(invitationService.createInvitation(Mockito.anyLong(), Mockito.anyLong())).willThrow(new ResponseStatusException(HttpStatus.CONFLICT, "An invitation has already been sent."));
+        given(invitationService.createInvitation(anyLong(), anyLong())).willThrow(new ResponseStatusException(HttpStatus.CONFLICT, "An invitation has already been sent."));
 
         // when and then
         MockHttpServletRequestBuilder postRequest = post("/groups/{groupId}/invitations", group.getId())
@@ -737,6 +734,6 @@ public class GroupControllerTest {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             String.format("The request body could not be created.%s", e.toString()));
         }
-  }
+    }
     
 }
