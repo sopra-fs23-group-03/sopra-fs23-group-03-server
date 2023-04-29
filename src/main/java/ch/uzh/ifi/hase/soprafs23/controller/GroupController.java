@@ -111,6 +111,9 @@ public class GroupController {
         // Loop through each guest id and create an invitation for them:
         // idea--> create InvitationPostDTO object for each guest id, set guest id in it, then use DTOMapper to convert it to an Invit entity
         for (Long guestId : ListGuestIds) {
+            // check if users to be invited exist
+            userService.getUserById(guestId); // 404 - user not found
+
             // Convert guest id to invitation entity
             InvitationPostDTO invitationPostDTO = new InvitationPostDTO();
             invitationPostDTO.setGuestId(guestId);
