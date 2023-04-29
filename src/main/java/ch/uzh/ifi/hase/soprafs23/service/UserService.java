@@ -32,7 +32,7 @@ public class UserService {
         return this.userRepository.findAll();
     }
 
-    // TODO: why does this exist?
+    // TODO: why does this exist? this is not functionality we are going to implement right?
     public List getUsersFreeToInvite(){
         // TODO: List with users which are not in a group yet
         List L = new ArrayList<>();
