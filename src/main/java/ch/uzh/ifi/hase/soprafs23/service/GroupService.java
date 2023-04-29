@@ -1,8 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
-import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
-import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 
 import java.util.ArrayList;
@@ -66,14 +64,14 @@ public class GroupService {
         return group.get();
     }
 
-    // TODO: why does this exist? it doesn't even flush the repo
+    // TODO: why does this exist? it doesn't flush the repo, so it wouldn't work, but it's also never used
     public Group updateGroup(Long groupId, String newGroupName) {
         Group groupToUpdate = getGroupById(groupId);
         groupToUpdate.setGroupName(newGroupName);
         return groupRepository.save(groupToUpdate);
     }
 
-    // TODO: why does this exist? it's even tested! but only user when it's tested
+    // TODO: why does this exist? it's even tested! but only used where it's tested nowhere else
     public int countGuests(Long groupId) {
         Group group = getGroupById(groupId);
         
