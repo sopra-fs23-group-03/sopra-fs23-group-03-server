@@ -2,8 +2,11 @@ package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientPutDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -11,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,8 +28,11 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Autowired
-    public UserService(@Qualifier("userRepository") UserRepository userRepository) {
+    private final IngredientRepository ingredientRepository;
+    @Autowired
+    public UserService(@Qualifier("userRepository") UserRepository userRepository, IngredientRepository ingredientRepository) {
         this.userRepository = userRepository;
+        this.ingredientRepository = ingredientRepository;
     }
 
     public List<User> getUsers() {
@@ -182,5 +190,24 @@ public class UserService {
         if (userByUsername != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("The username %s is already taken!", username));
         }
+    }
+
+    public void updateUserIngredients(Long userId, List<IngredientPutDTO> ingredientsPutDTO) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User with id %d does not exist", userId)));
+        List<Ingredient> updatedIngredients = new ArrayList<>();
+        for (IngredientPutDTO ingredientPutDTO : ingredientsPutDTO) {
+            Ingredient ingredient = ingredientRepository.findById(ingredientPutDTO.getId()).orElseThrow(() ->
+                    new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Ingredient with id %d does not exist", ingredientPutDTO.getId())));
+
+            // update properties of ingredient from ingredientPutDTO
+            ingredient.setName(ingredientPutDTO.getName());
+            ingredient.setCalculatedRating(ingredientPutDTO.getCalculatedRating());
+
+            updatedIngredients.add(ingredient);
+        }
+
+        user.addIngredient(updatedIngredients);
+        userRepository.save(user);
     }
 }

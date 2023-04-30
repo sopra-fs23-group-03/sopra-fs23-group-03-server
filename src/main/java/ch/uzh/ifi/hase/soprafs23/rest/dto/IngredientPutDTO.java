@@ -2,7 +2,6 @@ package ch.uzh.ifi.hase.soprafs23.rest.dto;
 
 public class IngredientPutDTO {
     private String name;
-
     private Long id;
     private Long calculatedRating;
 

@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
+import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.APIService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @RestController
 public class APIController {
@@ -53,5 +56,19 @@ public class APIController {
         apiGetDTO.setPricePerServing(detailedRecipe.getPricePerServing());
 
         return apiGetDTO;
+    }
+
+    @GetMapping("/ingredients")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
+    public List<String> getAllIngredients(HttpServletRequest request, @RequestParam String initialString){
+        // check validity of token
+        String token = request.getHeader("X-Token"); // 401 - not authorized
+        if(userService.getUseridByToken(token).equals(0L)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
+        }
+
+        List<String> ingredientNames = apiService.getListOfIngredients(initialString);
+        return ingredientNames;
     }
 }
