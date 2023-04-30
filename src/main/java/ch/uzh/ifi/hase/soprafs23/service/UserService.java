@@ -32,13 +32,6 @@ public class UserService {
         return this.userRepository.findAll();
     }
 
-    // TODO: why does this exist? this is not functionality we are going to implement right?
-    public List getUsersFreeToInvite(){
-        // TODO: List with users which are not in a group yet
-        List L = new ArrayList<>();
-        return L;
-    }
-
     // returns the userId of the user with the given token
     // returns 0L if no user has the given token
     public Long getUseridByToken(String token) {

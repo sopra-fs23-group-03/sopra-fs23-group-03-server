@@ -64,14 +64,6 @@ public class GroupService {
         return group.get();
     }
 
-    // TODO: why does this exist? it doesn't flush the repo, so it wouldn't work, but it's also never used
-    public Group updateGroup(Long groupId, String newGroupName) {
-        Group groupToUpdate = getGroupById(groupId);
-        groupToUpdate.setGroupName(newGroupName);
-        return groupRepository.save(groupToUpdate);
-    }
-
-    // TODO: why does this exist? it's even tested! but only used where it's tested nowhere else
     public int countGuests(Long groupId) {
         Group group = getGroupById(groupId);
         
