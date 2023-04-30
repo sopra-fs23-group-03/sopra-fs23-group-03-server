@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -73,8 +72,6 @@ public class GroupServiceTest {
         assertThrows(ResponseStatusException.class, () -> groupService.countGuests(2L));
     }
 
-
-
     @Test
     public void getAllMemberIdsOfGroup_test() {
         List<Long> expectedMembers = new ArrayList<>();
@@ -91,8 +88,9 @@ public class GroupServiceTest {
         expectedMembers.add(secondGuestId);
         assertEquals(expectedMembers, groupService.getAllMemberIdsOfGroup(group));
     }
+    
     @Test
-    void createGroup_success() {
+    public void createGroup_success() {
         // Given
         Group newGroup = new Group();
         newGroup.setGroupName("TestGroup");

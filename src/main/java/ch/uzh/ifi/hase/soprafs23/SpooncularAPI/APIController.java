@@ -7,15 +7,11 @@ import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
 
 @RestController
 public class APIController {
@@ -42,7 +38,7 @@ public class APIController {
 
         // 401 - not authorized
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
-        if (tokenId == 0L) {
+        if (tokenId.equals(0L)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
         }
 
@@ -57,6 +53,5 @@ public class APIController {
         apiGetDTO.setPricePerServing(detailedRecipe.getPricePerServing());
 
         return apiGetDTO;
-
-}
+    }
 }

@@ -5,21 +5,8 @@ import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Set;
-import java.util.List;
 import java.util.HashSet;
 
-
-/**
- * Internal User Representation
- * This class composes the internal representation of the user and defines how
- * the user is stored in the database.
- * Every variable will be mapped into a database field with the @Column
- * annotation
- * - nullable = false -> this cannot be left empty
- * - unique = true -> this value must be unqiue across the database -> composes
- * the primary key
- * small comment to track changes
- */
 @Entity
 @Table(name = "USER")
 public class User implements Serializable {
@@ -44,11 +31,11 @@ public class User implements Serializable {
 
     @Column(nullable = true)
     @ElementCollection
-    private Set<String> allergiesSet = new HashSet<>(); // important to initialize as an empty set
+    private Set<String> allergiesSet;
 
     @Column(nullable = true)
     @ElementCollection
-    private Set<String> favoriteCuisineSet = new HashSet<>();
+    private Set<String> favoriteCuisineSet;
 
     @Column(nullable = true)
     private String specialDiet;
@@ -56,15 +43,12 @@ public class User implements Serializable {
     @Column(nullable = true)
     private Long groupId;
 
-    @ManyToMany(cascade = CascadeType.ALL) // so all changes are applied to ingredients class which is associated
-    @JoinTable(
-            name = "USER_INGREDIENT",
-            joinColumns = @JoinColumn(name = "user_id"), //those are the 2 foreign keys
-            inverseJoinColumns = @JoinColumn(name = "ingredient_id"))
-    private Set<Ingredient> ingredientsSet = new HashSet<>(); // set of ingredients objects of the corresponding user
+    // Constructor
+    public User() {
+        this.allergiesSet = new HashSet<>();
+        this.favoriteCuisineSet = new HashSet<>();
+    }
 
-
-    //Methods
     public Long getId() {
         return id;
     }
@@ -161,15 +145,6 @@ public class User implements Serializable {
 
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
-    }
-
-
-    public void addIngredient(List<Ingredient> ingredients) {
-        ingredientsSet.add((Ingredient) ingredients);
-    }
-
-    public Set<Ingredient> getIngredients() {
-        return ingredientsSet;
     }
 
 }
