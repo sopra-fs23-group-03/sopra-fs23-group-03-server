@@ -6,7 +6,6 @@ public class InvitationPostDTO {
 
     private Long invitationId;
 
-
     private Long guestId;
 
     public Long getGroupId() {

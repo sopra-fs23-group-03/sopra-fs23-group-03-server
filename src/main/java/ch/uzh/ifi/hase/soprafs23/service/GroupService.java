@@ -1,8 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
-import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
-import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 
 import java.util.ArrayList;
@@ -20,7 +18,9 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 @Transactional
 public class GroupService {
+
     private final GroupRepository groupRepository;
+
     @Autowired
     public GroupService(@Qualifier("groupRepository") GroupRepository groupRepository) {
         this.groupRepository = groupRepository;
@@ -30,7 +30,6 @@ public class GroupService {
         return this.groupRepository.findAll();
     }
 
-    // creates a new group, throws CONFLICT (409) if something goes wrong
     public Group createGroup(Group newGroup) {
         // check that the username is still free
         checkIfGroupNameExists(newGroup.getGroupName());
@@ -65,22 +64,11 @@ public class GroupService {
         return group.get();
     }
 
-    public Group updateGroup(Long groupId, String newGroupName) {
-        Group groupToUpdate = groupRepository.findById(groupId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
-        groupToUpdate.setGroupName(newGroupName);
-        return groupRepository.save(groupToUpdate);
-    }
-
-
     public int countGuests(Long groupId) {
-        Group group = groupRepository.findById(groupId).orElse(null);
-        if (group == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
-        }
+        Group group = getGroupById(groupId);
+        
         return group.getGuestIds().size();
     }
-
 
     public void addGuestToGroupMembers(Long guestId, Long groupId) {
         Group group = getGroupById(groupId);

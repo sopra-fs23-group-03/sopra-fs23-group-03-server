@@ -43,10 +43,9 @@ public class GroupController {
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
     public List<GroupGetDTO> getAllGroups(HttpServletRequest request) {
-
         // check validity of token
         String token = request.getHeader("X-Token");
-        if(userService.getUseridByToken(token) == 0) {
+        if(userService.getUseridByToken(token).equals(0L)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized.")); // 401 - not authorized
         }
 
@@ -59,20 +58,19 @@ public class GroupController {
             groupGetDTOs.add(DTOMapper.INSTANCE.convertEntityToGroupGetDTO(group));
         }
         return groupGetDTOs;
-
-
     }
 
+    // TODO: change VotingType check when POINTDISTRIBUTION is implemented
     @PostMapping("/groups")
     @ResponseStatus(HttpStatus.CREATED) // 201
     @ResponseBody
     public GroupGetDTO createGroup(@RequestBody GroupPostDTO groupPostDTO, HttpServletRequest request) {
-        // 404
+        // 404 - host not found
         User host = userService.getUserById(groupPostDTO.getHostId());
 
         // check validity of token
-        Long userId = userService.getUseridByToken(request.getHeader("X-Token"));
-        if(userId != groupPostDTO.getHostId()) {
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if(!tokenId.equals(groupPostDTO.getHostId())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized.")); // 401 - not authorized
         }
 
@@ -82,7 +80,7 @@ public class GroupController {
 
         if(host.getGroupId() != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("User with id %s is already in the group with id %d.", host.getId(), host.getGroupId()));
-          }
+        }
 
         // convert API user to internal representation
         Group groupInput = DTOMapper.INSTANCE.convertGroupPostDTOtoEntity(groupPostDTO);
@@ -98,24 +96,24 @@ public class GroupController {
         return groupGetDTO;
     }
 
-
-
     @PostMapping("/groups/{groupId}/invitations")
     @ResponseStatus(HttpStatus.CREATED) // 201
     public void sendInvitation(@PathVariable Long groupId, @RequestBody List<Long> ListGuestIds, HttpServletRequest request) {
-
-
         // only HOST can send invitation: check host token
         Group currentGroup = groupService.getGroupById(groupId);  // 404 - group not found
         Long currentGroupHostId = currentGroup.getHostId(); // get host of the group in db
 
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));  // check if its the same one sending the invites
-        if(tokenId != currentGroupHostId) {
+        if(!tokenId.equals(currentGroupHostId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized.")); // 401 - not authorized
         }
 
-        // Loop through each guest id and create an invitation for them: idea--> create InvitationPostDTO object for each guest id, set guest id in it, then use DTOMapper to convert it to an Invit entity
+        // Loop through each guest id and create an invitation for them:
+        // idea--> create InvitationPostDTO object for each guest id, set guest id in it, then use DTOMapper to convert it to an Invit entity
         for (Long guestId : ListGuestIds) {
+            // check if users to be invited exist
+            userService.getUserById(guestId); // 404 - user not found
+
             // Convert guest id to invitation entity
             InvitationPostDTO invitationPostDTO = new InvitationPostDTO();
             invitationPostDTO.setGuestId(guestId);
@@ -133,8 +131,6 @@ public class GroupController {
                     throw e;
                 }
             }
-
-
         }
     }
 
@@ -152,7 +148,7 @@ public class GroupController {
         
         // 401 - not authorized
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
-        if(tokenId != guestId) {
+        if(!tokenId.equals(guestId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to reject this invitation."));
         }
 
@@ -174,7 +170,7 @@ public class GroupController {
 
         // 401 - not authorized
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
-        if(tokenId != guestId) {
+        if(!tokenId.equals(guestId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to accept this invitation."));
         }
 
@@ -195,7 +191,7 @@ public class GroupController {
 
         // 401 - not authorized
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
-        if(tokenId == 0L) {
+        if(tokenId.equals(0L)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
         }
 
@@ -211,7 +207,7 @@ public class GroupController {
 
         // 401 - not authorized
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
-        if(tokenId == 0L) {
+        if(tokenId.equals(0L)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
         }
 
