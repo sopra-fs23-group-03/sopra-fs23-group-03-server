@@ -203,10 +203,6 @@ public class UserController {
                                       @RequestHeader(name = "X-Token") String xToken) {
         User user = userService.getUserById(userId);
 
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User not found with ID: %d", userId)); // 404 - not found
-        }
-
         Long tokenId = userService.getUseridByToken(xToken);
         if (!tokenId.equals(userId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to update ingredients associated with this user.")); //401 - unauthorized
