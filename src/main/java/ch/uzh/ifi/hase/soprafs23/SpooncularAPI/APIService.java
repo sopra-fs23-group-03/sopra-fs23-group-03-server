@@ -71,7 +71,7 @@ public class APIService {
             }
 
             if (ingredientNames.isEmpty()) {
-                throw new HttpClientErrorException(HttpStatus.CONFLICT, "There is no ingredient starting with those letters");
+                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "There is no ingredient starting with those letters"); // 404 - error
             }
 
             return ingredientNames;

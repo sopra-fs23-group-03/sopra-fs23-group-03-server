@@ -199,7 +199,7 @@ public class UserController {
     @PutMapping("/user/{userId}/ingredients")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateUserIngredients(@PathVariable Long userId,
-                                      @RequestBody List<IngredientPutDTO> ingredientsPutDTO,
+                                      @RequestBody List<IngredientPutDTO> ingredientsPutDTO, // I get list of objects (arrays)
                                       @RequestHeader(name = "X-Token") String xToken) {
         User user = userService.getUserById(userId);
 

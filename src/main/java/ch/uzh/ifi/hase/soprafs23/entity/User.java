@@ -156,7 +156,7 @@ public class User implements Serializable {
     }
 
     public void addIngredient(List<Ingredient> ingredients) {
-        ingredientsSet.add((Ingredient) ingredients);
+        ingredientsSet.addAll(ingredients);
     }
 
     public Set<Ingredient> getIngredients() {
