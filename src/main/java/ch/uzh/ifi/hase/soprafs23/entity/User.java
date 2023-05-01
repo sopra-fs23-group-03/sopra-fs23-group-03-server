@@ -155,8 +155,12 @@ public class User implements Serializable {
         this.groupId = groupId;
     }
 
-    public void addIngredient(List<Ingredient> ingredients) {
-        ingredientsSet.addAll(ingredients);
+    public void addIngredient(List<Ingredient> ingredients) { // even it is a set we check double entries beforehand (for the tests)
+        for (Ingredient ingredient : ingredients) {
+            if (!ingredientsSet.contains(ingredient)) {
+                ingredientsSet.add(ingredient);
+            }
+        }
     }
 
     public Set<Ingredient> getIngredients() {

@@ -200,7 +200,9 @@ public class UserService {
 
         for (IngredientPutDTO ingredientPutDTO : ingredientsPutDTO) {
             Ingredient ingredient = ingredientRepository.findByName(ingredientPutDTO.getName()).orElse(new Ingredient(ingredientPutDTO.getName()));
-            newIngredients.add(ingredient);
+            if (!user.getIngredients().contains(ingredient)) {
+                newIngredients.add(ingredient);
+            }
         }
 
         user.addIngredient(newIngredients);

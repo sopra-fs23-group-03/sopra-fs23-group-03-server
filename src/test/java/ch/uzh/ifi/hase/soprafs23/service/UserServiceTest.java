@@ -2,8 +2,11 @@ package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientPutDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -22,9 +25,14 @@ public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private IngredientRepository ingredientRepository;
+
     @InjectMocks
     private UserService userService;
     private UserPutDTO userPutDTO;
+
+    private IngredientPutDTO ingredientPutDTO;
 
     private User user;
 
@@ -35,9 +43,14 @@ public class UserServiceTest {
         // given
         user = new User();
         user.setId(1L);
-        user.setUsername("fisrtUsername");
+        user.setUsername("firstUsername");
         user.setPassword("firstPassword");
         user.setToken("firstToken");
+
+        List<Ingredient> ingredients = new ArrayList<>();
+        ingredients.add(new Ingredient("ingredient1"));
+        ingredients.add(new Ingredient("ingredient2"));
+        user.addIngredient(ingredients);
 
         // mocks the save() method of UserRepository
         when(userRepository.save(Mockito.any())).thenReturn(user);
@@ -218,4 +231,47 @@ public class UserServiceTest {
 
         assertThrows(ResponseStatusException.class, () -> userService.updateUser(user.getId(), userPutDTO));
     }
+
+    @Test
+    void updateUserIngredients_withExistingUserIdAndNewIngredient_addsIngredientToUser() {
+        Long userId = user.getId();
+        IngredientPutDTO ingredientPutDTO = new IngredientPutDTO("new_ingredient_name");
+
+        Ingredient ingredient = new Ingredient("new_ingredient_name");
+        when(ingredientRepository.findByName(ingredientPutDTO.getName())).thenReturn(Optional.of(ingredient));
+
+        userService.updateUserIngredients(userId, Collections.singletonList(ingredientPutDTO));
+
+        verify(userRepository).save(user);
+        assertEquals(3, user.getIngredients().size()); //expects 3 bc in the setup are already 2
+        assertTrue(user.getIngredients().contains(ingredient));
+    }
+
+    @Test
+    void updateUserIngredients_withExistingIngredients_doesNotAddDuplicatesToUser() {
+        Long userId = user.getId();
+        IngredientPutDTO ingredientPutDTO = new IngredientPutDTO(user.getIngredients().iterator().next().getName());
+
+        Ingredient existingIngredient = user.getIngredients().iterator().next();
+        when(ingredientRepository.findByName(ingredientPutDTO.getName())).thenReturn(Optional.of(existingIngredient));
+
+        userService.updateUserIngredients(userId, Collections.singletonList(ingredientPutDTO));
+
+        verify(userRepository).save(user);
+        assertEquals(user.getIngredients().size(), 2);
+    }
+
+
+    @Test
+    void updateUserIngredients_withNonexistentUserId_throwsException() {
+        Long nonexistentUserId = 999L;
+        IngredientPutDTO ingredientPutDTO = new IngredientPutDTO("new_ingredient_name");
+
+        when(userRepository.findById(nonexistentUserId)).thenReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class, () -> userService.updateUserIngredients(nonexistentUserId, Collections.singletonList(ingredientPutDTO)));
+    }
+
+
+
 }
