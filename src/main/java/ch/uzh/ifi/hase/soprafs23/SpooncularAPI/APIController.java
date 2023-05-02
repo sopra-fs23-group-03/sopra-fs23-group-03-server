@@ -69,6 +69,11 @@ public class APIController {
         }
 
         List<String> ingredientNames = apiService.getListOfIngredients(initialString);
+
+        // when no ingredients were found - 404
+        if (ingredientNames.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No ingredients found for initial string '%s'.", initialString));
+        }
         return ingredientNames;
     }
 }
