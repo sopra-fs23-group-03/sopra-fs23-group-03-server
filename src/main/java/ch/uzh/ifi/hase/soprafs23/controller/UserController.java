@@ -6,6 +6,7 @@ import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
@@ -193,5 +194,22 @@ public class UserController {
       
         return groupGetDTOs;
     }
+
+    @PutMapping("/user/{userId}/ingredients")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateUserIngredients(@PathVariable Long userId,
+                                      @RequestBody List<IngredientPutDTO> ingredientsPutDTO, // I get list of objects (arrays)
+                                      @RequestHeader(name = "X-Token") String xToken) {
+        User user = userService.getUserById(userId);
+
+        Long tokenId = userService.getUseridByToken(xToken);
+        if (!tokenId.equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to update ingredients associated with this user.")); //401 - unauthorized
+        }
+
+        userService.addUserIngredients(userId, ingredientsPutDTO);
+    }
+
+
 
 }

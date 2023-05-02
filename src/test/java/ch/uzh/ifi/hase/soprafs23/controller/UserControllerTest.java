@@ -7,6 +7,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientPutDTO;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
@@ -35,6 +36,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -206,11 +208,6 @@ public class UserControllerTest {
 
     @Test
     public void testLoginUser_PasswordInvalid() throws Exception {
-        // create a User object
-        // User user = new User();
-        // user.setId(1L);
-        // user.setUsername("name");
-        // user.setPassword("word");
 
         // create a UserPostDTO object for the request body
         UserPostDTO userPostDTO = new UserPostDTO();
@@ -505,7 +502,79 @@ public class UserControllerTest {
         verify(invitationService, times(0)).getInvitationsByGuestId(any());
         verify(groupService, times(0)).getGroupById(any());
     }
-  
+
+    @Test
+    void updateUserIngredients_validRequest_returnsNoContent() throws Exception { // 204 - no content
+        // create IngredientPutDTO list for the request body
+        List<IngredientPutDTO> ingredientsPutDTO = new ArrayList<>();
+        IngredientPutDTO ingredientPutDTO1 = new IngredientPutDTO();
+        ingredientPutDTO1.setName("fish");
+
+        IngredientPutDTO ingredientPutDTO2 = new IngredientPutDTO();
+        ingredientPutDTO2.setName("beer");
+
+
+        // when/then -> do the request
+        String xToken = user.getToken();
+        mockMvc.perform(put("/user/{userId}/ingredients", user.getId())
+                        .header("X-Token", xToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(ingredientsPutDTO)))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void updateUserIngredients_unauthorized_returnsUnauthorized() throws Exception { // 401 - not authorized
+        // create IngredientPutDTO list for the request body
+        List<IngredientPutDTO> ingredientsPutDTO = new ArrayList<>();
+        IngredientPutDTO ingredientPutDTO1 = new IngredientPutDTO();
+        ingredientPutDTO1.setName("fish");
+
+        IngredientPutDTO ingredientPutDTO2 = new IngredientPutDTO();
+        ingredientPutDTO2.setName("beer");
+
+        // when/then -> do the request
+        String invalidToken = "invalidToken";
+        mockMvc.perform(put("/user/{userId}/ingredients", user.getId())
+                        .header("X-Token", invalidToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(ingredientsPutDTO)))
+                .andExpect(status().isUnauthorized());
+
+        // verify the correct calls were made
+        verify(userService, times(1)).getUserById(user.getId());
+        verify(userService, times(1)).getUseridByToken(invalidToken);
+        verify(userService, times(0)).addUserIngredients(any(), any());
+    }
+
+    @Test
+    void updateUserIngredients_userNotFound_returnsNotFound() throws Exception { // 404 - user not found
+        // create IngredientPutDTO list for the request body
+        List<IngredientPutDTO> ingredientsPutDTO = new ArrayList<>();
+        IngredientPutDTO ingredientPutDTO1 = new IngredientPutDTO();
+        ingredientPutDTO1.setName("fish");
+
+        IngredientPutDTO ingredientPutDTO2 = new IngredientPutDTO();
+        ingredientPutDTO2.setName("beer");
+
+        // mocks
+        given(userService.getUserById(user.getId())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        // when/then -> do the request
+        String xToken = user.getToken();
+        mockMvc.perform(put("/user/{userId}/ingredients", user.getId())
+                        .header("X-Token", xToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(ingredientsPutDTO)))
+                .andExpect(status().isNotFound());
+
+        // verify the correct calls were made
+        verify(userService, times(1)).getUserById(user.getId());
+        verify(userService, times(0)).getUseridByToken(xToken);
+        verify(userService, times(0)).addUserIngredients(any(), any());
+    }
+
+
     //Helper Method to convert DTOs into a JSON strings
     private String asJsonString(final Object object) {
         try {
@@ -515,4 +584,5 @@ public class UserControllerTest {
             String.format("The request body could not be created.%s", e.toString()));
         }
     }
+
 }
