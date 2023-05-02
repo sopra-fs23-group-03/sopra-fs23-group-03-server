@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.*;
@@ -22,7 +23,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @RestController
@@ -224,4 +227,36 @@ public class GroupController {
         return userGetDTOs;
     }
     
+    @GetMapping("/groups/{groupId}/ingredients")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
+    public List<IngredientGetDTO> getIngredientsOfGroupById(@PathVariable Long groupId, HttpServletRequest request) {
+
+        Group group = groupService.getGroupById(groupId); // 404 - group not found
+        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
+
+        // 401 - not authorized if not a member of the group
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if(!memberIds.contains(tokenId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
+        }
+
+        // retrieve all ingretients available from the members of the group
+        Set<Ingredient> groupIngredients = new HashSet<>();
+        for(Long memberId : memberIds) {
+            User user = userService.getUserById(memberId);
+            Set<Ingredient> userIngredients = new HashSet<>(); // TODO: get ingridients of the user -> method in UserService
+            groupIngredients.addAll(userIngredients);
+        }
+
+        // convert to API representation
+        List<IngredientGetDTO> ingredientGetDTOs = new ArrayList<>();
+        for(Ingredient ingredient : groupIngredients) {
+            // TODO: add converted ingredient to ingredientGetDTOs -> DTO mapper
+        }
+
+        return ingredientGetDTOs;
+
+    }
+
 }
