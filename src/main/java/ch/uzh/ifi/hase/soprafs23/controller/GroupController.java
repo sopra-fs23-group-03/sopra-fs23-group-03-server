@@ -245,18 +245,17 @@ public class GroupController {
         Set<Ingredient> groupIngredients = new HashSet<>();
         for(Long memberId : memberIds) {
             User user = userService.getUserById(memberId);
-            Set<Ingredient> userIngredients = new HashSet<>(); // TODO: get ingridients of the user -> method in UserService
+            Set<Ingredient> userIngredients = user.getIngredients();
             groupIngredients.addAll(userIngredients);
         }
 
         // convert to API representation
         List<IngredientGetDTO> ingredientGetDTOs = new ArrayList<>();
         for(Ingredient ingredient : groupIngredients) {
-            // TODO: add converted ingredient to ingredientGetDTOs -> DTO mapper
+            ingredientGetDTOs.add(DTOMapper.INSTANCE.convertEntityToIngredientGetDTO(ingredient));
         }
 
         return ingredientGetDTOs;
-
     }
 
 }

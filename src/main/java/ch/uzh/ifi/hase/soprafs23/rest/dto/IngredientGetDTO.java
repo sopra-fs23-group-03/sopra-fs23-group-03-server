@@ -4,6 +4,7 @@ public class IngredientGetDTO {
 
     private Long id;
     private String name;
+    private Long calculatedRating;
 
     public Long getId() {
         return id;
@@ -19,6 +20,14 @@ public class IngredientGetDTO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Long getCalculatedRating() {
+        return calculatedRating;
+    }
+
+    public void setCalculatedRating(Long calculatedRating) {
+        this.calculatedRating = calculatedRating;
     }
 
 }
