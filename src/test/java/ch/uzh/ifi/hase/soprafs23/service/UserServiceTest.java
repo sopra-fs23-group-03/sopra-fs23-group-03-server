@@ -233,14 +233,15 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateUserIngredients_withExistingUserIdAndNewIngredient_addsIngredientToUser() {
+    void addUserIngredients_withExistingUserIdAndNewIngredient_addsIngredientToUser() {
         Long userId = user.getId();
-        IngredientPutDTO ingredientPutDTO = new IngredientPutDTO("new_ingredient_name");
+        IngredientPutDTO ingredientPutDTO = new IngredientPutDTO();
+        ingredientPutDTO.setName("new_ingredient_name");
 
         Ingredient ingredient = new Ingredient("new_ingredient_name");
         when(ingredientRepository.findByName(ingredientPutDTO.getName())).thenReturn(Optional.of(ingredient));
 
-        userService.updateUserIngredients(userId, Collections.singletonList(ingredientPutDTO));
+        userService.addUserIngredients(userId, Collections.singletonList(ingredientPutDTO));
 
         verify(userRepository).save(user);
         assertEquals(3, user.getIngredients().size()); //expects 3 bc in the setup are already 2
@@ -248,28 +249,31 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateUserIngredients_withExistingIngredients_doesNotAddDuplicatesToUser() {
+    void addUserIngredients_withExistingIngredients_doesNotAddDuplicatesToUser() {
         Long userId = user.getId();
-        IngredientPutDTO ingredientPutDTO = new IngredientPutDTO(user.getIngredients().iterator().next().getName());
 
         Ingredient existingIngredient = user.getIngredients().iterator().next();
-        when(ingredientRepository.findByName(ingredientPutDTO.getName())).thenReturn(Optional.of(existingIngredient));
+        IngredientPutDTO ingredientPutDTO = new IngredientPutDTO();
+        ingredientPutDTO.setName(existingIngredient.getName()); //get another ingredient with the same name
 
-        userService.updateUserIngredients(userId, Collections.singletonList(ingredientPutDTO));
+        when(ingredientRepository.findByName(existingIngredient.getName())).thenReturn(Optional.of(existingIngredient));
+
+        userService.addUserIngredients(userId, Collections.singletonList(ingredientPutDTO));
 
         verify(userRepository).save(user);
-        assertEquals(user.getIngredients().size(), 2);
+        assertEquals(user.getIngredients().size(), 2); // bc 2 are mentioned above in setup
     }
 
 
     @Test
-    void updateUserIngredients_withNonexistentUserId_throwsException() {
+    void addUserIngredients_withNonexistentUserId_throwsException() {
         Long nonexistentUserId = 999L;
-        IngredientPutDTO ingredientPutDTO = new IngredientPutDTO("new_ingredient_name");
+        IngredientPutDTO ingredientPutDTO = new IngredientPutDTO();
+        ingredientPutDTO.setName("new_ingredient_name");
 
         when(userRepository.findById(nonexistentUserId)).thenReturn(Optional.empty());
 
-        assertThrows(ResponseStatusException.class, () -> userService.updateUserIngredients(nonexistentUserId, Collections.singletonList(ingredientPutDTO)));
+        assertThrows(ResponseStatusException.class, () -> userService.addUserIngredients(nonexistentUserId, Collections.singletonList(ingredientPutDTO)));
     }
 
 

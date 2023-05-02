@@ -192,7 +192,7 @@ public class UserService {
         }
     }
 
-    public void updateUserIngredients(Long userId, List<IngredientPutDTO> ingredientsPutDTO) {
+    public void addUserIngredients(Long userId, List<IngredientPutDTO> ingredientsPutDTO) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User with id %d does not exist", userId)));
 
@@ -200,9 +200,9 @@ public class UserService {
 
         for (IngredientPutDTO ingredientPutDTO : ingredientsPutDTO) {
             Ingredient ingredient = ingredientRepository.findByName(ingredientPutDTO.getName()).orElse(new Ingredient(ingredientPutDTO.getName()));
-            if (!user.getIngredients().contains(ingredient)) {
+            if (!user.getIngredients().contains(ingredient)) {}
                 newIngredients.add(ingredient);
-            }
+
         }
 
         user.addIngredient(newIngredients);

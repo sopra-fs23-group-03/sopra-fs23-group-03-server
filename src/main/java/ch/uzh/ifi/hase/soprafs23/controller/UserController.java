@@ -195,7 +195,6 @@ public class UserController {
         return groupGetDTOs;
     }
 
-
     @PutMapping("/user/{userId}/ingredients")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateUserIngredients(@PathVariable Long userId,
@@ -208,7 +207,7 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to update ingredients associated with this user.")); //401 - unauthorized
         }
 
-        userService.updateUserIngredients(userId, ingredientsPutDTO);
+        userService.addUserIngredients(userId, ingredientsPutDTO);
     }
 
 
