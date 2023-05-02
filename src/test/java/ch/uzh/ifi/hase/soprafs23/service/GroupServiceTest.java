@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +28,9 @@ public class GroupServiceTest {
 
     @InjectMocks
     private GroupService groupService;
+
+    @Mock
+    private UserService userService;
 
     private Group group;
 
@@ -107,4 +111,5 @@ public class GroupServiceTest {
         verify(groupRepository, times(1)).save(newGroup);
         verify(groupRepository, times(1)).flush();
     }
+
 }

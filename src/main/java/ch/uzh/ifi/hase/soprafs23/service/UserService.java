@@ -1,8 +1,11 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
+import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
@@ -13,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
 
 import java.util.List;
 import java.util.ArrayList;
@@ -26,13 +28,14 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
-
+    private final GroupRepository groupRepository;
     @Autowired
     private final IngredientRepository ingredientRepository;
     @Autowired
-    public UserService(@Qualifier("userRepository") UserRepository userRepository, IngredientRepository ingredientRepository) {
+    public UserService(@Qualifier("userRepository") UserRepository userRepository, IngredientRepository ingredientRepository, GroupRepository groupRepository) {
         this.userRepository = userRepository;
         this.ingredientRepository = ingredientRepository;
+        this.groupRepository = groupRepository;
     }
 
     public List<User> getUsers() {
@@ -208,4 +211,20 @@ public class UserService {
         user.addIngredient(newIngredients);
         userRepository.save(user);
     }
+
+    public void leaveGroup(Long userId) {
+        User user = getUserById(userId);
+        Long groupId = user.getGroupId();
+        if (groupId != null) {
+            Group group = groupRepository.findById(groupId).orElseThrow(() ->
+                    new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Group with id %d does not exist", groupId)));
+            group.removeGuestId(userId);
+            groupRepository.save(group);
+            groupRepository.flush();
+        }
+        user.setGroupId(null);
+        userRepository.save(user);
+        userRepository.flush();
+    }
+
 }

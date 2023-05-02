@@ -30,9 +30,12 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -735,5 +738,87 @@ public class GroupControllerTest {
             String.format("The request body could not be created.%s", e.toString()));
         }
     }
-    
+
+    @Test
+    public void testDeleteGroup204() throws Exception {
+        mockMvc.perform(delete("/groups/{groupId}", group.getId())
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isNoContent());
+
+        verify(groupService).deleteGroup(group.getId());
+    }
+
+    @Test
+    public void testDeleteGroup404() throws Exception {
+        ResponseStatusException exception = new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
+        given(groupService.getGroupById(group.getId())).willThrow(exception);
+
+        mockMvc.perform(delete("/groups/{groupId}", group.getId())
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isNotFound());
+    }
+
+
+    @Test
+    public void testDeleteGroup401() throws Exception {
+        // Prepare a different user
+        User anotherUser = new User();
+        anotherUser.setId(3L);
+        anotherUser.setToken("anothertoken");
+
+        // Set up mock
+        given(userService.getUseridByToken(anotherUser.getToken())).willReturn(anotherUser.getId());
+        given(userService.getUserById(anotherUser.getId())).willReturn(anotherUser);
+
+        mockMvc.perform(delete("/groups/{groupId}", group.getId())
+                        .header("X-Token", anotherUser.getToken()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void leaveGroup_success_204() throws Exception {
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(Collections.singletonList(user.getId()));
+
+        mockMvc.perform(put("/groups/{groupId}/leave", group.getId())
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isNoContent());
+
+        verify(userService, times(1)).leaveGroup(user.getId());
+    }
+
+    @Test
+    public void leaveGroup_guestNotInGroup_409() throws Exception {
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(Collections.emptyList());
+
+        mockMvc.perform(put("/groups/{groupId}/leave", group.getId())
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isConflict());
+
+        verify(userService, times(0)).leaveGroup(user.getId());
+    }
+
+    @Test
+    public void leaveGroup_groupNotFound_404() throws Exception {
+        given(groupService.getGroupById(group.getId())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
+
+        mockMvc.perform(put("/groups/{groupId}/leave", group.getId())
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isNotFound());
+
+        verify(userService, times(0)).leaveGroup(user.getId());
+    }
+
+    @Test
+    public void leaveGroup_notAuthorized_401() throws Exception {
+        given(userService.getUseridByToken(user.getToken())).willReturn(0L);
+
+        mockMvc.perform(put("/groups/{groupId}/leave", group.getId())
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isUnauthorized());
+
+        verify(userService, times(0)).leaveGroup(user.getId());
+    }
+
+
+
 }

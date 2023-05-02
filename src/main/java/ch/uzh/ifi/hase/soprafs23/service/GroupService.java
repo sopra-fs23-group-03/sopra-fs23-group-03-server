@@ -21,9 +21,13 @@ public class GroupService {
 
     private final GroupRepository groupRepository;
 
+    private final UserService userService;
+
     @Autowired
-    public GroupService(@Qualifier("groupRepository") GroupRepository groupRepository) {
+    public GroupService(@Qualifier("groupRepository") GroupRepository groupRepository,
+                        @Qualifier("userService") UserService userService) {
         this.groupRepository = groupRepository;
+        this.userService = userService;
     }
 
     public List<Group> getGroups() {
@@ -89,4 +93,19 @@ public class GroupService {
 
         return memberIds;
     }
+
+    public void deleteGroup(Long groupId) {
+        // Check if the group exists
+        Group group = getGroupById(groupId);
+
+        // Remove the group from each user's groupId
+        List<Long> memberIds = getAllMemberIdsOfGroup(group);
+        for (Long memberId : memberIds) {
+            userService.leaveGroup(memberId);
+        }
+
+        // Delete the group
+        groupRepository.delete(group);
+    }
+
 }

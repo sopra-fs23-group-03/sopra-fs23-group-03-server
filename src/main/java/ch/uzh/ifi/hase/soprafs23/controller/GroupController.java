@@ -223,5 +223,50 @@ public class GroupController {
 
         return userGetDTOs;
     }
-    
+    @DeleteMapping("/groups/{groupId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT) // 204
+    public void deleteGroup(@PathVariable Long groupId, HttpServletRequest request) {
+        // Check if the group exists
+        Group group = groupService.getGroupById(groupId); // 404 - group not found
+
+        // Check the validity of the token
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if (tokenId.equals(0L)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized"); // 401 - not authorized
+        }
+
+        // Check if the user is the host of the group
+        if (!tokenId.equals(group.getHostId())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized"); // 401 - not authorized
+        }
+
+        // Delete the group
+        groupService.deleteGroup(groupId);
+    }
+
+    @PutMapping("/groups/{groupId}/leave")
+    @ResponseStatus(HttpStatus.NO_CONTENT) // 204
+    public void leaveGroup(@PathVariable Long groupId, HttpServletRequest request) {
+        // Check if the group exists
+        Group group = groupService.getGroupById(groupId); // 404 - group not found
+
+        // Check the validity of the token
+        Long guestId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if (guestId.equals(0L)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized"); // 401 - not authorized
+        }
+
+        // Check if the user is a member of the group
+        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
+        if (!memberIds.contains(guestId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Guest was not in the group"); // 409 - conflict
+        }
+
+        // Remove the guest from the group
+        userService.leaveGroup(guestId);
+    }
+
+
+
+
 }
