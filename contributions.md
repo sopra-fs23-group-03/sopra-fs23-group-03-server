@@ -116,7 +116,9 @@
 |             | #77    | Create Group Forming Page - Host View                                            |      |
 
 <p>
-    ## **Week 4** 
+
+## **Week 4** 
+
 <p>
 
 | Name        | Issues | Description                                                                      | Done |
