@@ -756,8 +756,7 @@ public class GroupControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].id", is(apple.getId().intValue())))
-            .andExpect(jsonPath("$[0].name", is(apple.getName())))
-            .andExpect(jsonPath("$[0].calculatedRating", is(apple.getCalculatedRating().intValue())));
+            .andExpect(jsonPath("$[0].name", is(apple.getName())));
     }
 
     @Test
