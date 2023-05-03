@@ -1,12 +1,15 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
+import ch.uzh.ifi.hase.soprafs23.constant.JoinRequestStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
+import ch.uzh.ifi.hase.soprafs23.entity.JoinRequest;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.*;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
+import ch.uzh.ifi.hase.soprafs23.service.JoinRequestService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,11 +35,13 @@ public class GroupController {
     private final UserService userService;
 
     private final InvitationService invitationService;
+    private final JoinRequestService joinRequestService;
 
-    GroupController(GroupService groupService, UserService userService, InvitationService invitationService) {
+    GroupController(GroupService groupService, UserService userService, InvitationService invitationService, JoinRequestService joinRequestService) {
         this.groupService = groupService;
         this.userService = userService;
         this.invitationService = invitationService;
+        this.joinRequestService = joinRequestService;
     }
 
     @GetMapping("/groups")
@@ -231,11 +236,6 @@ public class GroupController {
 
         // Check the validity of the token
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
-        if (tokenId.equals(0L)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized"); // 401 - not authorized
-        }
-
-        // Check if the user is the host of the group
         if (!tokenId.equals(group.getHostId())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized"); // 401 - not authorized
         }
@@ -262,11 +262,78 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Guest was not in the group"); // 409 - conflict
         }
 
+        // Check if the user is the host of the group
+        if (group.getHostId().equals(guestId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "You are the host. If you want to leave, delete the group"); // 409 - conflict
+        }
+
         // Remove the guest from the group
         userService.leaveGroup(guestId);
     }
 
 
+    @PostMapping("/groups/{groupId}/requests")
+    @ResponseStatus(HttpStatus.CREATED) // 201
+    public void sendRequestToJoinGroup(@PathVariable Long groupId, @RequestBody JoinRequestPostDTO joinRequestPostDTO, HttpServletRequest request) {
+        // Check if the group exists
+        groupService.getGroupById(groupId); // 404 - group not found
 
+        // Check if the guest exists
+        userService.getUserById(joinRequestPostDTO.getGuestId()); // 404 - guest not found
+
+        // Check the validity of the token
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if (!tokenId.equals(joinRequestPostDTO.getGuestId())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized"); // 401 - not authorized
+        }
+
+        try {
+            joinRequestService.createJoinRequest(joinRequestPostDTO, groupId);
+        } catch (ResponseStatusException e) {
+            if (e.getStatus() == HttpStatus.CONFLICT) {
+                String errorMessage = "The join request could not be sent.";
+                throw new ResponseStatusException(HttpStatus.CONFLICT, errorMessage, e);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    @PutMapping("/groups/{groupId}/requests/accept")
+    @ResponseStatus(HttpStatus.NO_CONTENT) // 204
+    public void acceptJoinRequest(@PathVariable Long groupId, @RequestBody JoinRequestPutDTO joinRequestPutDTO, HttpServletRequest request) {
+        Group currentGroup = groupService.getGroupById(groupId); // 404 - group not found
+        Long hostId = currentGroup.getHostId();
+
+        // Check if the guest exists
+        userService.getUserById(joinRequestPutDTO.getGuestId()); // 404 - guest not found
+
+        // Check the validity of the token
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if (!tokenId.equals(hostId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized to accept this join request."); // 401 - not authorized
+        }
+
+        joinRequestService.acceptJoinRequest(groupId, hostId, joinRequestPutDTO.getGuestId());
+    }
+
+    @PutMapping("/groups/{groupId}/requests/reject")
+    @ResponseStatus(HttpStatus.NO_CONTENT) // 204
+    public void rejectJoinRequest(@PathVariable Long groupId, @RequestBody JoinRequestPutDTO joinRequestPutDTO, HttpServletRequest request) {
+        // 404 - group, guest, and/or join request not found
+        Group currentGroup = groupService.getGroupById(groupId);
+        Long hostId = currentGroup.getHostId();
+        userService.getUserById(joinRequestPutDTO.getGuestId());
+        JoinRequest joinRequest = joinRequestService.getJoinRequestByGuestIdAndGroupId(joinRequestPutDTO.getGuestId(), groupId);
+
+        // 401 - not authorized
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if (!tokenId.equals(hostId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized to reject this join request.");
+        }
+
+        // Set the status of the join request to REJECTED
+        joinRequestService.rejectJoinRequest(joinRequest);
+    }
 
 }
