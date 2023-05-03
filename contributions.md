@@ -91,7 +91,6 @@
 |             |   #60  | Display all ingredients added to the meal in a separate section                  |      |   
 |             |   #60  | Display all ingredients added to the meal in a separate section                  |      |     
 |             |   #61  | Ensure that at least one ingredient is added before allowing the user to submit  |      |    
-|             |        |                                                                                  |      |
 | Ann-Kathrin |  #106  |  Update fields for allergies/cuisine to List/Set and adjust all tests            |  X   |
 |             | #132   | Create POST /groups/{groupId}/invitations                                        |   X  |
 |             | #198   | make GET /groups/{groupId}/ingredients call                                      |    X |
@@ -123,8 +122,8 @@
 
 | Name        | Issues | Description                                                                      | Done |
 |-------------|--------|----------------------------------------------------------------------------------|------|
-| Lany        |        |                                                                                  |      |
-|             |        |                                                                                  |      |
+| Lany        | #88 & #126 | Reopened and fixed                                                           | X     |
+|             | #64    | Create an endpoint to retrieve and return the list of ingredients and guest contributions |      |
 | Orestis     |        |                                                                                  |      |
 |             |        |                                                                                  |      |
 | Kalliopi    |        |                                                                                  |      |
