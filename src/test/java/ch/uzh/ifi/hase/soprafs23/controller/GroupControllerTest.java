@@ -729,15 +729,16 @@ public class GroupControllerTest {
     }
 
     @Test
-    public void testGetIngredientsOfGroupById_valid_onlyHost() throws Exception {
+    public void testGetIngredientsOfGroupById_valid_oneIngredient() throws Exception {
         // given
         Ingredient apple = new Ingredient();
         apple.setId(19L);
         apple.setName("apple");
+        apple.setCalculatedRating(1L);
 
         List<Ingredient> ingredients = new ArrayList<>();
         ingredients.add(apple);
-        user.addIngredient(ingredients);
+        group.addIngredient(ingredients);
 
         List<Long> memberIds = new ArrayList<>();
         memberIds.add(group.getHostId());
@@ -755,35 +756,28 @@ public class GroupControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].id", is(apple.getId().intValue())))
-            .andExpect(jsonPath("$[0].name", is(apple.getName())));
+            .andExpect(jsonPath("$[0].name", is(apple.getName())))
+            .andExpect(jsonPath("$[0].calculatedRating", is(apple.getCalculatedRating().intValue())));
     }
 
     @Test
-    public void testGetIngredientsOfGroupById_valid_hostAndGuest() throws Exception {
+    public void testGetIngredientsOfGroupById_valid_multipleIngredients() throws Exception {
         // given
-        Ingredient apple = new Ingredient();
-        apple.setId(13L);
-        apple.setName("apple");
-        List<Ingredient> hostIngredients = new ArrayList<>();
-        hostIngredients.add(apple);
-        user.addIngredient(hostIngredients);
+        Ingredient apple = new Ingredient("apple");
+        Ingredient pear = new Ingredient("pear");
+        Ingredient banana = new Ingredient("banana");
 
-        User guest = new User();
-        guest.setId(15L);
-        Ingredient pear = new Ingredient();
-        pear.setId(19L);
-        pear.setName("pear");
-        List<Ingredient> guestIngredients = new ArrayList<>();
-        guestIngredients.add(pear);
-        user.addIngredient(guestIngredients);
+        List<Ingredient> ingredients = new ArrayList<>();
+        ingredients.add(apple);
+        ingredients.add(pear);
+        ingredients.add(banana);
+        group.addIngredient(ingredients);
 
         List<Long> memberIds = new ArrayList<>();
         memberIds.add(group.getHostId());
-        memberIds.add(guest.getId());
 
         // mocks
         given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
-        given(userService.getUserById(guest.getId())).willReturn(guest);
 
         // when
         MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/ingredients", group.getId())
@@ -793,7 +787,7 @@ public class GroupControllerTest {
         // then
         mockMvc.perform(getRequest)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$", hasSize(2)));
+            .andExpect(jsonPath("$", hasSize(3)));
     }
 
     @Test

@@ -242,12 +242,12 @@ public class GroupController {
         }
 
         // retrieve all ingretients available from the members of the group
-        Set<Ingredient> groupIngredients = new HashSet<>();
-        for(Long memberId : memberIds) {
-            User user = userService.getUserById(memberId);
-            Set<Ingredient> userIngredients = user.getIngredients();
-            groupIngredients.addAll(userIngredients);
-        }
+        Set<Ingredient> groupIngredients = group.getIngredients(); // retrieve directly from group now
+        // for(Long memberId : memberIds) {
+        //     User user = userService.getUserById(memberId);
+        //     Set<Ingredient> userIngredients = user.getIngredients();
+        //     groupIngredients.addAll(userIngredients);
+        // }
 
         // convert to API representation
         List<IngredientGetDTO> ingredientGetDTOs = new ArrayList<>();
