@@ -12,6 +12,7 @@ import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientPutDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,14 +29,14 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final GroupRepository groupRepository;
+    private final GroupService groupService;
     @Autowired
     private final IngredientRepository ingredientRepository;
     @Autowired
-    public UserService(@Qualifier("userRepository") UserRepository userRepository, IngredientRepository ingredientRepository, GroupRepository groupRepository) {
+    public UserService(@Qualifier("userRepository") UserRepository userRepository, IngredientRepository ingredientRepository, @Lazy GroupService groupService) {
         this.userRepository = userRepository;
         this.ingredientRepository = ingredientRepository;
-        this.groupRepository = groupRepository;
+        this.groupService =  groupService;
     }
 
     public List<User> getUsers() {
@@ -216,15 +217,12 @@ public class UserService {
         User user = getUserById(userId);
         Long groupId = user.getGroupId();
         if (groupId != null) {
-            Group group = groupRepository.findById(groupId).orElseThrow(() ->
-                    new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Group with id %d does not exist", groupId)));
+            Group group = groupService.getGroupById(groupId);
             group.removeGuestId(userId);
-            groupRepository.save(group);
-            groupRepository.flush();
+            groupService.updateGroupToRemoveGuest(group);
         }
         user.setGroupId(null);
         userRepository.save(user);
         userRepository.flush();
     }
-
 }

@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +26,7 @@ public class GroupService {
 
     @Autowired
     public GroupService(@Qualifier("groupRepository") GroupRepository groupRepository,
-                        @Qualifier("userService") UserService userService) {
+                        @Lazy @Qualifier("userService") UserService userService) {
         this.groupRepository = groupRepository;
         this.userService = userService;
     }
@@ -107,5 +108,22 @@ public class GroupService {
         // Delete the group
         groupRepository.delete(group);
     }
+
+    // This method has no intent to update the actual attributes of the group. It has the puprose to update the group to show the removed guest.
+    public Group updateGroupToRemoveGuest(Group updatedGroup) {
+        Optional<Group> groupOptional = groupRepository.findById(updatedGroup.getId());
+
+        if (!groupOptional.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Group with id %s does not exist", updatedGroup.getId()));
+        }
+
+        Group group = groupOptional.get();
+
+        group = groupRepository.save(group);
+        groupRepository.flush();
+
+        return group;
+    }
+
 
 }
