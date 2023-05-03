@@ -123,10 +123,13 @@
 | Name        | Issues | Description                                                                      | Done |
 |-------------|--------|----------------------------------------------------------------------------------|------|
 | Lany        | #88 & #126 | Reopened and fixed                                                           | X     |
-|             | #64    | Create an endpoint to retrieve and return the list of ingredients and guest contributions |      |
+|             | #64    | Create an endpoint to retrieve and return the list of ingredients and guest contributions |  X   |
 |             | #65    | Create an endpoint to store and update the ingredient ratings for each guest     | X    |
-| Orestis     |        |                                                                                  | X    |
-|             |        |                                                                                  |      |
+| Orestis     | #69    | Create the PUT /groups/{id}/leave request                                        |      |
+|             | #114   | Create the DELETE /groups/{id} request                                           |      |
+|             | #168   | implement PUT /groups/{groupId}/requests/reject call                             |      |
+|             | #167   |implement POST /groups/{groupId}/requests call                                    |      |
+|             | #169   | implement PUT /groups/{groupId}/requests/accept call                             |      |    
 | Kalliopi    |        |                                                                                  |      |
 |             |        |                                                                                  |      |
 | Ann-Kathrin |  #105  |  Implement a method for adding the ingredient contributions                      |  X   |
