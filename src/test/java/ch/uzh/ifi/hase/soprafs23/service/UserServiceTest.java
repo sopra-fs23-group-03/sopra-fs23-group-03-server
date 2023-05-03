@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
@@ -26,10 +27,14 @@ public class UserServiceTest {
     private UserRepository userRepository;
 
     @Mock
+    private GroupService groupService;
+
+    @Mock
     private IngredientRepository ingredientRepository;
 
     @InjectMocks
     private UserService userService;
+
     private UserPutDTO userPutDTO;
 
     private IngredientPutDTO ingredientPutDTO;
@@ -225,6 +230,10 @@ public class UserServiceTest {
 
     @Test
     void addUserIngredients_withExistingUserIdAndNewIngredient_addsIngredientToUser() {
+        // user needs to be in a group
+        user.setGroupId(5L);
+        when(groupService.getGroupById(user.getGroupId())).thenReturn(new Group());
+
         Long userId = user.getId();
         IngredientPutDTO ingredientPutDTO = new IngredientPutDTO();
         ingredientPutDTO.setName("new_ingredient_name");
@@ -241,6 +250,10 @@ public class UserServiceTest {
 
     @Test
     void addUserIngredients_withExistingIngredients_doesNotAddDuplicatesToUser() {
+        // user needs to be in a group
+        user.setGroupId(5L);
+        when(groupService.getGroupById(user.getGroupId())).thenReturn(new Group());
+
         Long userId = user.getId();
 
         Ingredient existingIngredient = user.getIngredients().iterator().next();

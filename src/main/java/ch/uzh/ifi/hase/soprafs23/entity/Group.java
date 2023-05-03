@@ -7,6 +7,7 @@ import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import java.io.Serializable;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -35,9 +36,13 @@ public class Group implements Serializable {
     @ElementCollection
     private Set<Long> guestIds;
 
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+    private Set<Ingredient> ingredientsSet;
+
     // constructor
     public Group() {
         this.guestIds = new HashSet<>();
+        this.ingredientsSet = new HashSet<>();
     }
 
     public Long getId() {
@@ -90,6 +95,18 @@ public class Group implements Serializable {
 
     public void removeGuestId(Long guestId) {
         this.guestIds.remove(guestId);
+    }
+
+    public void addIngredient(List<Ingredient> ingredients) {
+        for (Ingredient ingredient : ingredients) {
+            if (!ingredientsSet.contains(ingredient)) {
+                ingredientsSet.add(ingredient);
+            }
+        }
+    }
+
+    public Set<Ingredient> getIngredients() {
+        return ingredientsSet;
     }
 
 }

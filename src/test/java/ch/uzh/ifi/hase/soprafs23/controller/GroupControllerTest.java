@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupPostDTO;
@@ -27,6 +28,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -724,6 +726,108 @@ public class GroupControllerTest {
         verify(userService, times(1)).getUseridByToken(anotherToken);
         verify(groupService, times(0)).getAllMemberIdsOfGroup(any());
         verify(userService, times(0)).getUserById(any());
+    }
+
+    @Test
+    public void testGetIngredientsOfGroupById_valid_oneIngredient() throws Exception {
+        // given
+        Ingredient apple = new Ingredient();
+        apple.setId(19L);
+        apple.setName("apple");
+        apple.setCalculatedRating(1L);
+
+        List<Ingredient> ingredients = new ArrayList<>();
+        ingredients.add(apple);
+        group.addIngredient(ingredients);
+
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(group.getHostId());
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/ingredients", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].id", is(apple.getId().intValue())))
+            .andExpect(jsonPath("$[0].name", is(apple.getName())));
+    }
+
+    @Test
+    public void testGetIngredientsOfGroupById_valid_multipleIngredients() throws Exception {
+        // given
+        Ingredient apple = new Ingredient("apple");
+        Ingredient pear = new Ingredient("pear");
+        Ingredient banana = new Ingredient("banana");
+
+        List<Ingredient> ingredients = new ArrayList<>();
+        ingredients.add(apple);
+        ingredients.add(pear);
+        ingredients.add(banana);
+        group.addIngredient(ingredients);
+
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(group.getHostId());
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/ingredients", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)));
+    }
+
+    @Test
+    public void testGetIngredientsOfGroupById_groupNotFound() throws Exception {
+        // given
+        Long anotherGroupId = 17L;
+
+        // mocks
+        given(groupService.getGroupById(anotherGroupId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "error message"));
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/ingredients", anotherGroupId)
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testGetIngredientsOfGroupById_notValidToken() throws Exception {
+        // given
+        String anotherToken = "anotherToken";
+        Long anotherUserId = 7L;
+
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(group.getHostId());
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+        given(userService.getUseridByToken(anotherToken)).willReturn(anotherUserId);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/ingredients", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", anotherToken);
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isUnauthorized());
     }
 
     //Helper Method to convert DTOs into a JSON strings

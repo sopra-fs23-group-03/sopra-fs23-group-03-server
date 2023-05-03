@@ -20,13 +20,18 @@ public class Ingredient implements Serializable  {
     private Long calculatedRating;
 
     @ManyToMany(mappedBy = "ingredientsSet")
-    private Set<User> usersSet = new HashSet<>();
+    private Set<User> usersSet;
+
+    @ManyToOne
+    private Group group;
 
     public Ingredient() {
-        // default constructor needed
+        this.usersSet = new HashSet<>();
     }
+
     public Ingredient(String name) {
         this.name = name;
+        this.usersSet = new HashSet<>();
     }
 
     //Methods
@@ -61,4 +66,13 @@ public class Ingredient implements Serializable  {
     public void setUsersSet(Set<User> usersSet) {
         this.usersSet = usersSet;
     }
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
+    }
+
 }
