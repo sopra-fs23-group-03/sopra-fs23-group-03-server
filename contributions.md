@@ -94,9 +94,9 @@
 |             |        |                                                                                  |      |
 | Ann-Kathrin |  #106  |  Update fields for allergies/cuisine to List/Set and adjust all tests            |  X   |
 |             | #132   | Create POST /groups/{groupId}/invitations                                        |   X  |
-|             | #198   | make GET /groups/{groupId}/ingredients call                                      |      |
-|             | #197   | make PUT /user/{userId}/ingredients call                                         |      |
-|             | #104   | Create a new Ingredient class for storing the ingredients contributed by the user|      |
+|             | #198   | make GET /groups/{groupId}/ingredients call                                      |    X |
+|             | #197   | make PUT /user/{userId}/ingredients call                                         |    X |
+|             | #104   | Create a new Ingredient class for storing the ingredients contributed by the user|   X  |
 | Chiara      | #69    | Create Group Creation page                                                       |  X   |
 |             | #16    | Create a button to enable the user to return to the Landing Page                 |  X   |
 |             | #76    | Redirect host to landing page when pressing Delete Group button                  |  X   |
@@ -115,5 +115,20 @@
 |             | #17    | Display the randomly selected recipe suggestion on the screen                    |      |
 |             | #77    | Create Group Forming Page - Host View                                            |      |
 
+    ## **Week 4** 
+
+<p>
+
+| Name        | Issues | Description                                                                      | Done |
+|-------------|--------|----------------------------------------------------------------------------------|------|
+| Lany        |        |                                                                                  |      |
+|             |        |                                                                                  |      |
+| Orestis     |        |                                                                                  |      |
+|             |        |                                                                                  |      |
+| Kalliopi    |        |                                                                                  |      |
+|             |        |                                                                                  |      |
+| Ann-Kathrin |  #105  |  Implement a method for adding the ingredient contributions                      |  X   |
+|             |    #210|  Retrieve all ingredients from external API to avoid spelling mistakes           |    X |
+|             |        |                                                                                  |      |
 
 </p>
