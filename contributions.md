@@ -124,7 +124,8 @@
 |-------------|--------|----------------------------------------------------------------------------------|------|
 | Lany        | #88 & #126 | Reopened and fixed                                                           | X     |
 |             | #64    | Create an endpoint to retrieve and return the list of ingredients and guest contributions |      |
-| Orestis     |        |                                                                                  |      |
+|             | #65    | Create an endpoint to store and update the ingredient ratings for each guest     | X    |
+| Orestis     |        |                                                                                  | X    |
 |             |        |                                                                                  |      |
 | Kalliopi    |        |                                                                                  |      |
 |             |        |                                                                                  |      |
