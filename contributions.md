@@ -130,6 +130,8 @@
 |             |        |                                                                                  |      |
 | Ann-Kathrin |  #105  |  Implement a method for adding the ingredient contributions                      |  X   |
 |             |    #210|  Retrieve all ingredients from external API to avoid spelling mistakes           |    X |
-|             |        |                                                                                  |      |
+|             |    #54 |  Take input from REST API per user for all ingredients and transform it ...      |      |   
+|             |    #55 |    Implement majority logic                                                      |      | 
+    
 
 </p>
