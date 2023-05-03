@@ -237,7 +237,7 @@ public class GroupController {
         // Check the validity of the token
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
         if (!tokenId.equals(group.getHostId())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized"); // 401 - not authorized
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Only the Host can delete the Group"); // 401 - not authorized
         }
 
         // Delete the group
