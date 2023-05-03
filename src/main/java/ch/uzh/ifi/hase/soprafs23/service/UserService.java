@@ -149,12 +149,14 @@ public class UserService {
         }
 
         if(newAllergies != null) {
+            user.removeAllergies();
             for(String allergy : newAllergies) {
                 user.addAllergy(allergy);
             }
         }
 
         if(newFavoriteCuisine != null){
+            user.removeFavouriteCuisines();
             for(String cuisine : newFavoriteCuisine) {
                 user.addFavouriteCuisine(cuisine);
             }
