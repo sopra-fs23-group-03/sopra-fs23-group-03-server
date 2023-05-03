@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
@@ -27,12 +28,16 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    private final GroupService groupService;
+
     @Autowired
     private final IngredientRepository ingredientRepository;
+
     @Autowired
-    public UserService(@Qualifier("userRepository") UserRepository userRepository, IngredientRepository ingredientRepository) {
+    public UserService(@Qualifier("userRepository") UserRepository userRepository, IngredientRepository ingredientRepository, GroupService groupService) {
         this.userRepository = userRepository;
         this.ingredientRepository = ingredientRepository;
+        this.groupService = groupService;
     }
 
     public List<User> getUsers() {
@@ -193,19 +198,35 @@ public class UserService {
     }
 
     public void addUserIngredients(Long userId, List<IngredientPutDTO> ingredientsPutDTO) {
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User with id %d does not exist", userId)));
+        User user = getUserById(userId);
 
         List<Ingredient> newIngredients = new ArrayList<>();
 
+        if(user.getGroupId() == null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "You must be part of a group to add ingredients.");
+        }
+
+        Group group = groupService.getGroupById(user.getGroupId());
+
         for (IngredientPutDTO ingredientPutDTO : ingredientsPutDTO) {
-            Ingredient ingredient = ingredientRepository.findByName(ingredientPutDTO.getName()).orElse(new Ingredient(ingredientPutDTO.getName()));
-            if (!user.getIngredients().contains(ingredient)) {}
-                newIngredients.add(ingredient);
+            Optional<Ingredient> ingredientOptional = ingredientRepository.findByName(ingredientPutDTO.getName());
+            Ingredient ingredient;
+            if(ingredientOptional.isPresent()) {
+                ingredient = ingredientOptional.get();
+            } else {
+                ingredient = new Ingredient(ingredientPutDTO.getName());
+            }
+
+            if(ingredient.getGroup() != null && !ingredient.getGroup().getId().equals(group.getId())) {
+                ingredient = new Ingredient(ingredientPutDTO.getName());
+            }
+            ingredient.setGroup(group);    
+            newIngredients.add(ingredient);
 
         }
 
         user.addIngredient(newIngredients);
         userRepository.save(user);
+        userRepository.flush();
     }
 }
