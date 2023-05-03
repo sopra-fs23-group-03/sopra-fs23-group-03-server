@@ -115,8 +115,8 @@
 |             | #17    | Display the randomly selected recipe suggestion on the screen                    |      |
 |             | #77    | Create Group Forming Page - Host View                                            |      |
 
+<p>
     ## **Week 4** 
-
 <p>
 
 | Name        | Issues | Description                                                                      | Done |
