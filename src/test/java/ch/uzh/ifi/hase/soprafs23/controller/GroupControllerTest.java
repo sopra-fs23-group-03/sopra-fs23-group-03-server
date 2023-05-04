@@ -830,6 +830,80 @@ public class GroupControllerTest {
             .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    public void testGetGroupGuestsById_valid() throws Exception {
+        User guest = new User();
+        guest.setId(6L);
+
+        List<Long> guestIds = Arrays.asList(guest.getId());
+
+        // mocks
+        given(groupService.getGroupById(group.getId())).willReturn(group);
+        given(groupService.getAllGuestIdsOfGroup(group)).willReturn(guestIds);
+        given(userService.getUserById(guest.getId())).willReturn(guest);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/guests", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].id", is(guest.getId().intValue())));
+            
+        // verifies
+        verify(groupService, times(1)).getGroupById(group.getId());
+        verify(userService, times(1)).getUseridByToken(user.getToken());
+        verify(groupService, times(1)).getAllGuestIdsOfGroup(group);
+        verify(userService, times(1)).getUserById(guest.getId());
+    }
+
+    @Test
+    public void testGetGroupGuestsById_groupNotFound() throws Exception {
+        Long anotherGroupId = 8L;
+
+        // mocks
+        given(groupService.getGroupById(anotherGroupId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "error message"));
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/guests", anotherGroupId)
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isNotFound());
+            
+        // verifies
+        verify(groupService, times(1)).getGroupById(anotherGroupId);
+        verify(userService, times(0)).getUseridByToken(any());
+        verify(groupService, times(0)).getAllGuestIdsOfGroup(any());
+        verify(userService, times(0)).getUserById(any());
+    }
+
+    @Test
+    public void testGetGroupGuestsById_notValidToken() throws Exception {
+        String anotherToken = "anotherToken";
+
+        // mocks
+        given(userService.getUseridByToken(anotherToken)).willReturn(0L);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/guests", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", anotherToken);
+
+        // then
+        mockMvc.perform(getRequest).andExpect(status().isUnauthorized());
+            
+        // verifies
+        verify(groupService, times(1)).getGroupById(group.getId());
+        verify(userService, times(1)).getUseridByToken(anotherToken);
+        verify(groupService, times(0)).getAllGuestIdsOfGroup(any());
+        verify(userService, times(0)).getUserById(any());
+    }
+
     //Helper Method to convert DTOs into a JSON strings
     private String asJsonString(final Object object) {
         try {
