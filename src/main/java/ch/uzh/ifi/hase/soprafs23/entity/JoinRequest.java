@@ -1,7 +1,5 @@
 package ch.uzh.ifi.hase.soprafs23.entity;
 
-import ch.uzh.ifi.hase.soprafs23.constant.JoinRequestStatus;
-
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -21,9 +19,6 @@ public class JoinRequest implements Serializable {
     @Column(nullable = false)
     private Long guestId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private JoinRequestStatus status;
 
     public Long getId() {
         return id;
@@ -49,11 +44,4 @@ public class JoinRequest implements Serializable {
         this.guestId = guestId;
     }
 
-    public JoinRequestStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(JoinRequestStatus status) {
-        this.status = status;
-    }
 }

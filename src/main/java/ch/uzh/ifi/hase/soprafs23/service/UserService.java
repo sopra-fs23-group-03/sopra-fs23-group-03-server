@@ -245,4 +245,8 @@ public class UserService {
         userRepository.save(user);
         userRepository.flush();
     }
+    public boolean isUserInGroup(Long userId) {
+        User user = getUserById(userId);
+        return user.getGroupId() != null;
+    }
 }

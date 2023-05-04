@@ -1,6 +1,5 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
-import ch.uzh.ifi.hase.soprafs23.constant.JoinRequestStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
@@ -11,6 +10,7 @@ import ch.uzh.ifi.hase.soprafs23.repository.JoinRequestRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.JoinRequestPostDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.JoinRequestPutDTO;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 import ch.uzh.ifi.hase.soprafs23.service.JoinRequestService;
@@ -23,19 +23,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -1026,7 +1022,43 @@ public class GroupControllerTest {
         // Assert
         assertEquals(HttpStatus.CREATED.value(), mvcResult.getResponse().getStatus());
     }
+    @Test
+    public void sendRequestToJoinGroup_forbidden_403() throws Exception {
+        // Prepare
+        String groupId = "1";
+        String guestId = "2";
 
+        String joinRequestPostDTOJson = String.format("{\"guestId\": %s}", guestId);
+
+        when(userService.isUserInGroup(Long.parseLong(guestId))).thenReturn(true);
+
+        // Execute & Assert
+        mockMvc.perform(post("/groups/{groupId}/requests", groupId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(joinRequestPostDTOJson)
+                        .header("X-Token", guestId))
+                .andExpect(status().isForbidden());
+    }
+    @Test
+    public void sendRequestToJoinGroup_unauthorized_401() throws Exception {
+        // Prepare
+        String groupId = "1";
+        String guestId = "2";
+        String invalidToken = "3";
+
+        String joinRequestPostDTOJson = String.format("{\"guestId\": %s}", guestId);
+
+        when(groupService.getGroupById(anyLong())).thenReturn(new Group());
+        when(userService.getUserById(anyLong())).thenReturn(new User());
+        when(userService.getUseridByToken(invalidToken)).thenReturn(Long.parseLong(invalidToken));
+
+        // Execute & Assert
+        mockMvc.perform(post("/groups/{groupId}/requests", groupId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(joinRequestPostDTOJson)
+                        .header("X-Token", invalidToken))
+                .andExpect(status().isUnauthorized());
+    }
     @Test
     public void sendRequestToJoinGroup_conflict_409() throws Exception {
         // Prepare
@@ -1075,117 +1107,138 @@ public class GroupControllerTest {
     }
 
     @Test
-    public void sendRequestToJoinGroup_unauthorized_401() throws Exception {
+    public void acceptJoinRequest_204() throws Exception {
         // Prepare
-        String groupId = "1";
-        String guestId = "2";
-        String invalidToken = "3";
+        Long groupId = 1L;
+        Long hostId = 1L;
+        Long guestId = 2L;
+        Group group = new Group();
+        group.setHostId(hostId);
+        JoinRequestPutDTO joinRequestPutDTO = new JoinRequestPutDTO();
+        joinRequestPutDTO.setGuestId(guestId);
 
-        String joinRequestPostDTOJson = String.format("{\"guestId\": %s}", guestId);
-
-        when(groupService.getGroupById(anyLong())).thenReturn(new Group());
-        when(userService.getUserById(anyLong())).thenReturn(new User());
-
-        // Mock userService.getUseridByToken to return an invalid guest ID
-        when(userService.getUseridByToken(invalidToken)).thenReturn(Long.parseLong(invalidToken));
+        when(groupService.getGroupById(groupId)).thenReturn(group);
+        when(userService.getUserById(guestId)).thenReturn(new User());
+        when(userService.getUseridByToken("valid-token")).thenReturn(hostId);
+        doNothing().when(joinRequestService).acceptJoinRequest(groupId, hostId, guestId);
+        doNothing().when(joinRequestService).deleteOtherJoinRequests(guestId, groupId);
 
         // Execute & Assert
-        mockMvc.perform(post("/groups/{groupId}/requests", groupId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(joinRequestPostDTOJson)
-                        .header("X-Token", invalidToken))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    public void acceptJoinRequest_204() throws Exception {
-        Group group = new Group();
-        group.setHostId(1L);
-
-        when(groupService.getGroupById(anyLong())).thenReturn(group);
-        when(userService.getUserById(anyLong())).thenReturn(new User());
-        when(userService.getUseridByToken(any())).thenReturn(1L);
-        doNothing().when(joinRequestService).acceptJoinRequest(anyLong(), anyLong(), anyLong());
-
-        mockMvc.perform(put("/groups/1/requests/accept")
+        mockMvc.perform(put("/groups/{groupId}/requests/accept", groupId)
                         .header("X-Token", "valid-token")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"guestId\": 2}"))
+                        .content(new ObjectMapper().writeValueAsString(joinRequestPutDTO)))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     public void acceptJoinRequest_404() throws Exception {
-        when(groupService.getGroupById(anyLong())).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+        // Prepare
+        Long groupId = 1L;
+        Long guestId = 2L;
+        JoinRequestPutDTO joinRequestPutDTO = new JoinRequestPutDTO();
+        joinRequestPutDTO.setGuestId(guestId);
 
-        mockMvc.perform(put("/groups/1/requests/accept")
+        when(groupService.getGroupById(groupId)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // Execute & Assert
+        mockMvc.perform(put("/groups/{groupId}/requests/accept", groupId)
                         .header("X-Token", "valid-token")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"guestId\": 2}"))
+                        .content(new ObjectMapper().writeValueAsString(joinRequestPutDTO)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     public void acceptJoinRequest_401() throws Exception {
+        // Prepare
+        Long groupId = 1L;
+        Long hostId = 1L;
+        Long guestId = 2L;
         Group group = new Group();
-        group.setHostId(1L);
+        group.setHostId(hostId);
+        JoinRequestPutDTO joinRequestPutDTO = new JoinRequestPutDTO();
+        joinRequestPutDTO.setGuestId(guestId);
 
-        when(groupService.getGroupById(anyLong())).thenReturn(group);
-        when(userService.getUserById(anyLong())).thenReturn(new User());
-        when(userService.getUseridByToken(any())).thenReturn(2L);
+        when(groupService.getGroupById(groupId)).thenReturn(group);
+        when(userService.getUserById(guestId)).thenReturn(new User());
+        when(userService.getUseridByToken("invalid-token")).thenReturn(2L);
 
-        mockMvc.perform(put("/groups/1/requests/accept")
+        // Execute & Assert
+        mockMvc.perform(put("/groups/{groupId}/requests/accept", groupId)
                         .header("X-Token", "invalid-token")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"guestId\": 2}"))
+                        .content(new ObjectMapper().writeValueAsString(joinRequestPutDTO)))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     public void rejectJoinRequest_204() throws Exception {
+        // Prepare
+        Long groupId = 1L;
+        Long hostId = 1L;
+        Long guestId = 2L;
         Group group = new Group();
-        group.setHostId(1L);
+        group.setHostId(hostId);
         JoinRequest joinRequest = new JoinRequest();
+        JoinRequestPutDTO joinRequestPutDTO = new JoinRequestPutDTO();
+        joinRequestPutDTO.setGuestId(guestId);
 
-        when(groupService.getGroupById(anyLong())).thenReturn(group);
-        when(userService.getUserById(anyLong())).thenReturn(new User());
-        when(userService.getUseridByToken(any())).thenReturn(1L);
-        when(joinRequestService.getJoinRequestByGuestIdAndGroupId(anyLong(), anyLong())).thenReturn(joinRequest);
-        doNothing().when(joinRequestService).rejectJoinRequest(any(JoinRequest.class));
+        when(groupService.getGroupById(groupId)).thenReturn(group);
+        when(userService.getUserById(guestId)).thenReturn(new User());
+        when(userService.getUseridByToken("valid-token")).thenReturn(hostId);
+        when(joinRequestService.getJoinRequestByGuestIdAndGroupId(guestId, groupId)).thenReturn(joinRequest);
+        doNothing().when(joinRequestService).rejectJoinRequest(joinRequest);
 
-        mockMvc.perform(put("/groups/1/requests/reject")
+        // Execute & Assert
+        mockMvc.perform(put("/groups/{groupId}/requests/reject", groupId)
                         .header("X-Token", "valid-token")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"guestId\": 2}"))
+                        .content(new ObjectMapper().writeValueAsString(joinRequestPutDTO)))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     public void rejectJoinRequest_404() throws Exception {
+        // Prepare
+        Long groupId = 1L;
+        Long guestId = 2L;
+        JoinRequestPutDTO joinRequestPutDTO = new JoinRequestPutDTO();
+        joinRequestPutDTO.setGuestId(guestId);
+
         when(groupService.getGroupById(anyLong())).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        mockMvc.perform(put("/groups/1/requests/reject")
+        // Execute & Assert
+        mockMvc.perform(put("/groups/{groupId}/requests/reject", groupId)
                         .header("X-Token", "valid-token")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"guestId\": 2}"))
+                        .content(new ObjectMapper().writeValueAsString(joinRequestPutDTO)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     public void rejectJoinRequest_401() throws Exception {
+        // Prepare
+        Long groupId = 1L;
+        Long hostId = 1L;
+        Long guestId = 2L;
+        JoinRequestPutDTO joinRequestPutDTO = new JoinRequestPutDTO();
+        joinRequestPutDTO.setGuestId(guestId);
         Group group = new Group();
-        group.setHostId(1L);
+        group.setHostId(hostId);
 
-        when(groupService.getGroupById(anyLong())).thenReturn(group);
-        when(userService.getUserById(anyLong())).thenReturn(new User());
-        when(userService.getUseridByToken(any())).thenReturn(2L);
+        when(groupService.getGroupById(groupId)).thenReturn(group);
+        when(userService.getUserById(guestId)).thenReturn(new User());
+        when(userService.getUseridByToken("invalid-token")).thenReturn(2L);
 
-        mockMvc.perform(put("/groups/1/requests/reject")
+        // Execute & Assert
+        mockMvc.perform(put("/groups/{groupId}/requests/reject", groupId)
                         .header("X-Token", "invalid-token")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"guestId\": 2}"))
+                        .content(new ObjectMapper().writeValueAsString(joinRequestPutDTO)))
                 .andExpect(status().isUnauthorized());
     }
+
 
 
 }
