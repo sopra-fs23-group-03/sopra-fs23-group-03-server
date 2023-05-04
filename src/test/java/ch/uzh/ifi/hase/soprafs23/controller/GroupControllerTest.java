@@ -861,6 +861,28 @@ public class GroupControllerTest {
     }
 
     @Test
+    public void testGetGroupGuestsById_noGuestsInGroup() throws Exception {
+         // mocks
+        given(groupService.getGroupById(group.getId())).willReturn(group);
+        given(groupService.getAllGuestIdsOfGroup(group)).willReturn(new ArrayList<>());
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/guests", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isNoContent());
+          
+        // verifies
+        verify(groupService, times(1)).getGroupById(group.getId());
+        verify(userService, times(1)).getUseridByToken(user.getToken());
+        verify(groupService, times(1)).getAllGuestIdsOfGroup(group);
+        verify(userService, times(0)).getUserById(any());
+    }
+
+    @Test
     public void testGetGroupGuestsById_groupNotFound() throws Exception {
         Long anotherGroupId = 8L;
 

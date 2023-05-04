@@ -239,9 +239,16 @@ public class GroupController {
 
         // get the guests of the group
         List<Long> guestIds = groupService.getAllGuestIdsOfGroup(group);
-        List<UserGetDTO> userGetDTOs = new ArrayList<>();
+
+        // 204 - no open invitations
+        if(guestIds.size() == 0) {
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
+        }
+
+        
 
         // convert each user to the API representation
+        List<UserGetDTO> userGetDTOs = new ArrayList<>();
         for (Long userId : guestIds) {
             User user = userService.getUserById(userId);
             userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
