@@ -28,7 +28,6 @@
 |             | #4     | Create Login page                                                                |  X   |
 |             | #2     | Write error messages                                                             |  X   |
 |             | #3     | Create path to direct to personal profile                                        |  X   |
-|             | #45    | Create profile page with fields for allergies, favourite cuisine and special diet|      |
 
 </p>         
 
@@ -49,7 +48,7 @@
 | Kalliopi    | #80    | Create navigation bar                                                            |  X   |
 |             | #52    | Create a landing page with sections for displaying the users and active groups.  |  X   |
 |             | #9     | Display user as logged in                                                        |  X   | 
-|             | #11    | Set user to offline and delete localStorage                                      |     |
+|             | #11    | Set user to offline and delete localStorage                                      |      |
 |             | #10    | Make Logout Button accessible                                                    |  X   |
 |             | #79    | Implement method to sort the users based on their online/offline status          |  X   |  
 |             | #68    | Create the Form Group button in the Landing Page                                 |  X   | 
@@ -57,16 +56,13 @@
 |             | #53    | API calls to retrieve registered users and active groups from the backend        |      |
 |             | #54    | Display all users with online users at the beginning of the list                 |      |
 |             | #55    | Display all active planning groups with their group name, host and guests        |      |
-| Ann-Kathrin | #101/102| Create method to retrieve active groups / active users                          |   X  |
-|             | #135   | Create function to check that one user is only in one group                      |    X |
-|             | #159   | create GET calls to retrieve group information                                   |    X |
-|             | #134   | Create function to check if group has at least one guest                         |    X |
-|             | #131   | Create a method that checks that person is not already invited to another group  |   X  |
+| Ann-Kathrin | #101/102| Create method to retrieve active groups / active users                          |  X   |
+|             | #135   | Create function to check that one user is only in one group                      |  X   |
+|             | #159   | create GET calls to retrieve group information                                   |  X   |
+|             | #134   | Create function to check if group has at least one guest                         |  X   |
+|             | #131   | Create a method that checks that person is not already invited to another group  |  X   |
 | Chiara      | #45    | Create profile page with fields for allergies, favourite cuisine and special diet|  X   |
-|             | #46    | Create API calls with body for backend communication                             |      |
-|             | #47    | Display username, allergies, favorite cuisine, and special diet on user profile  |      |
 |             | #48    | Create edit button to allow user to edit fields of his/her own profile           |  X   |
-|             | #49    | Create save button to save the edited fields                                     |      |
 |             | #50    | Create cancel button to cancel the edits                                         |  X   |
 |             | #51    | Create path to be redirected to user profile                                     |      |
 |             | #70    | Redirect user to Group Creation page when pressing on Form Group button          |  X   |
@@ -106,13 +102,9 @@
 |             | #74    | Move guests into the guests section                                              |  X   |
 |             | #73    | Create a guests section                                                          |  X   |
 |             | #51    | Create path to be redirected to user profile                                     |  X   |
-|             | #46    | Create API calls with body for backend communication                             |      |
-|             | #47    | Display username, allergies, favorite cuisine, and special diet on user profile  |      |
-|             | #49    | Create save button to save the edited fields                                     |      |
-|             | #78    | Redirect host to Group Forming Page - Host View when clicking on Continue        |      |
-|             | #18    | Implement a function to fetch the recipe suggestion the backend API              |      |
-|             | #17    | Display the randomly selected recipe suggestion on the screen                    |      |
-|             | #77    | Create Group Forming Page - Host View                                            |      |
+|             | #46    | Create API calls with body for backend communication                             |  X   |
+|             | #47    | Display username, allergies, favorite cuisine, and special diet on user profile  |  X   |
+|             | #49    | Create save button to save the edited fields                                     |  X   |
 
 <p>
 
@@ -131,11 +123,17 @@
 |             | #167   |implement POST /groups/{groupId}/requests call                                    |      |
 |             | #169   | implement PUT /groups/{groupId}/requests/accept call                             |      |    
 | Kalliopi    |        |                                                                                  |      |
-|             |        |                                                                                  |      |
-| Ann-Kathrin |  #105  |  Implement a method for adding the ingredient contributions                      |  X   |
-|             |    #210|  Retrieve all ingredients from external API to avoid spelling mistakes           |    X |
-|             |    #54 |  Take input from REST API per user for all ingredients and transform it ...      |      |   
-|             |    #55 |    Implement majority logic                                                      |      | 
+|             | #18    | Implement a function to fetch the recipe suggestion the backend API              |      |
+|             | #17    | Display the randomly selected recipe suggestion on the screen                    |      |
+| Ann-Kathrin | #105   |  Implement a method for adding the ingredient contributions                      |  X   |
+|             | #210   |  Retrieve all ingredients from external API to avoid spelling mistakes           |  X   |
+|             | #54    |  Take input from REST API per user for all ingredients and transform it ...      |      |   
+|             | #55    |    Implement majority logic                                                      |      | 
+| Chiara      | #94    | Edit change button to edit also username/password                                |  X   |
+|             | #100   | Imprement button voting types in Group Creation page with default for majority   |  X   |
+|             | #112   | Create dropdown for diet preference                                              |  X   |
+|             | #78    | Redirect host to Group Forming Page - Host View when clicking on Continue        |      |
+|             | #77    | Create Group Forming Page - Host View                                            |      |
     
 
 </p>
