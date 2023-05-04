@@ -112,10 +112,8 @@ public class User implements Serializable {
         allergiesSet.add(allergy);
     }
 
-    public void removeAllergy() {
-        if (allergiesSet != null) {
-            allergiesSet.clear();
-        }
+    public void removeAllergies() {
+        this.allergiesSet = new HashSet<>();
     }
 
     public Set<String> getFavoriteCuisineSet() {
@@ -133,10 +131,8 @@ public class User implements Serializable {
         favoriteCuisineSet.add(favouriteCuisine);
     }
 
-    public void removeFavouriteCuisine() {
-        if (favoriteCuisineSet != null) {
-            favoriteCuisineSet.clear();
-        }
+    public void removeFavouriteCuisines() {
+        this.favoriteCuisineSet = new HashSet<>();
     }
 
     public String getSpecialDiet() {

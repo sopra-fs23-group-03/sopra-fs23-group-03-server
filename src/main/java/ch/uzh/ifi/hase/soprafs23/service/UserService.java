@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
 
 import java.util.List;
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ public class UserService {
     private final GroupService groupService;
     @Autowired
     private final IngredientRepository ingredientRepository;
+
     @Autowired
     public UserService(@Qualifier("userRepository") UserRepository userRepository, IngredientRepository ingredientRepository, @Lazy GroupService groupService) {
         this.userRepository = userRepository;
@@ -153,12 +156,14 @@ public class UserService {
         }
 
         if(newAllergies != null) {
+            user.removeAllergies();
             for(String allergy : newAllergies) {
                 user.addAllergy(allergy);
             }
         }
 
         if(newFavoriteCuisine != null){
+            user.removeFavouriteCuisines();
             for(String cuisine : newFavoriteCuisine) {
                 user.addFavouriteCuisine(cuisine);
             }
@@ -197,22 +202,37 @@ public class UserService {
     }
 
     public void addUserIngredients(Long userId, List<IngredientPutDTO> ingredientsPutDTO) {
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User with id %d does not exist", userId)));
+        User user = getUserById(userId);
 
         List<Ingredient> newIngredients = new ArrayList<>();
 
+        if(user.getGroupId() == null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "You must be part of a group to add ingredients.");
+        }
+
+        Group group = groupService.getGroupById(user.getGroupId());
+
         for (IngredientPutDTO ingredientPutDTO : ingredientsPutDTO) {
-            Ingredient ingredient = ingredientRepository.findByName(ingredientPutDTO.getName()).orElse(new Ingredient(ingredientPutDTO.getName()));
-            if (!user.getIngredients().contains(ingredient)) {}
-                newIngredients.add(ingredient);
+            Optional<Ingredient> ingredientOptional = ingredientRepository.findByName(ingredientPutDTO.getName());
+            Ingredient ingredient;
+            if(ingredientOptional.isPresent()) {
+                ingredient = ingredientOptional.get();
+            } else {
+                ingredient = new Ingredient(ingredientPutDTO.getName());
+            }
+
+            if(ingredient.getGroup() != null && !ingredient.getGroup().getId().equals(group.getId())) {
+                ingredient = new Ingredient(ingredientPutDTO.getName());
+            }
+            ingredient.setGroup(group);
+            newIngredients.add(ingredient);
 
         }
 
         user.addIngredient(newIngredients);
         userRepository.save(user);
+        userRepository.flush();
     }
-
     public void leaveGroup(Long userId) {
         User user = getUserById(userId);
         Long groupId = user.getGroupId();

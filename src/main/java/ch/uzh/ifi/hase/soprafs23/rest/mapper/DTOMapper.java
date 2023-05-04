@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.rest.mapper;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.*;
@@ -47,5 +48,9 @@ public interface DTOMapper {
     default String map(Set<String> value) {
         return String.join(",", value);
     }
+
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "name", target = "name")
+    IngredientGetDTO convertEntityToIngredientGetDTO(Ingredient ingredient);
 
 }
