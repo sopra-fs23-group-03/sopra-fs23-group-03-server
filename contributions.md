@@ -64,7 +64,6 @@
 | Chiara      | #45    | Create profile page with fields for allergies, favourite cuisine and special diet|  X   |
 |             | #48    | Create edit button to allow user to edit fields of his/her own profile           |  X   |
 |             | #50    | Create cancel button to cancel the edits                                         |  X   |
-|             | #51    | Create path to be redirected to user profile                                     |      |
 |             | #70    | Redirect user to Group Creation page when pressing on Form Group button          |  X   |
 
 </p>
@@ -75,8 +74,8 @@
 
 | Name        | Issues | Description                                                                      | Done |
 |-------------|--------|----------------------------------------------------------------------------------|------|
-| Lany        | #84    | Create GET /groups/{id} request                                                  |   X  |
-|             | #187   | Create GET /groups/{id}/members request                                          |   X  |
+| Lany        | #84    | Create GET /groups/{id} request                                                  |  X   |
+|             | #187   | Create GET /groups/{id}/members request                                          |  X   |
 | Orestis     |   #57  | Function to randomly select one recipe suggestion from the API                   |      |
 |             |   #88  | Reopened and fixed the updating attributes and the tests                         |  X   |
 | Kalliopi    |   #43  | Create host and guest view of group forming page                                 |      |
@@ -88,10 +87,10 @@
 |             |   #60  | Display all ingredients added to the meal in a separate section                  |      |     
 |             |   #61  | Ensure that at least one ingredient is added before allowing the user to submit  |      |    
 | Ann-Kathrin |  #106  |  Update fields for allergies/cuisine to List/Set and adjust all tests            |  X   |
-|             | #132   | Create POST /groups/{groupId}/invitations                                        |   X  |
-|             | #198   | make GET /groups/{groupId}/ingredients call                                      |    X |
-|             | #197   | make PUT /user/{userId}/ingredients call                                         |    X |
-|             | #104   | Create a new Ingredient class for storing the ingredients contributed by the user|   X  |
+|             | #132   | Create POST /groups/{groupId}/invitations                                        |  X   |
+|             | #198   | make GET /groups/{groupId}/ingredients call                                      |  X   |
+|             | #197   | make PUT /user/{userId}/ingredients call                                         |  X   |
+|             | #104   | Create a new Ingredient class for storing the ingredients contributed by the user|  X   |
 | Chiara      | #69    | Create Group Creation page                                                       |  X   |
 |             | #16    | Create a button to enable the user to return to the Landing Page                 |  X   |
 |             | #76    | Redirect host to landing page when pressing Delete Group button                  |  X   |
