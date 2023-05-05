@@ -240,12 +240,10 @@ public class GroupController {
         // get the guests of the group
         List<Long> guestIds = groupService.getAllGuestIdsOfGroup(group);
 
-        // 204 - no open invitations
+        // 204 - no guests in group
         if(guestIds.size() == 0) {
             throw new ResponseStatusException(HttpStatus.NO_CONTENT);
         }
-
-        
 
         // convert each user to the API representation
         List<UserGetDTO> userGetDTOs = new ArrayList<>();
