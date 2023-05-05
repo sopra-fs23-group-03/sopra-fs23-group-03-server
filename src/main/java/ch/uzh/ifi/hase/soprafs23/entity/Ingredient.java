@@ -2,6 +2,9 @@ package ch.uzh.ifi.hase.soprafs23.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -24,6 +27,10 @@ public class Ingredient implements Serializable  {
 
     @ManyToOne
     private Group group;
+
+    @ElementCollection
+    @Column(nullable = true)
+    private List<String> singleUserRatings = new ArrayList<>();
 
     public Ingredient() {
         this.usersSet = new HashSet<>();
@@ -75,4 +82,11 @@ public class Ingredient implements Serializable  {
         this.group = group;
     }
 
+    public List<String> getSingleUserRatings() {
+        return singleUserRatings;
+    }
+
+    public void setSingleUserRatings(List<String> singleUserRatings) {
+        this.singleUserRatings = singleUserRatings;
+    }
 }

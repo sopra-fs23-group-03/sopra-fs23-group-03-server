@@ -16,11 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -146,7 +143,6 @@ public class UserService {
         } else if(newPassword != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "To change your password please enter your current password");
         }
-        
 
         if(newUsername != null && !newUsername.equals(user.getUsername())) {
             checkIfUsernameExists(newUsername);
@@ -184,7 +180,6 @@ public class UserService {
         if(guest.getGroupId() != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("User with id %s is already in the group with id %d.", guest.getId(), guest.getGroupId()));
         }
-        
         guest.setGroupId(groupId);
         
         guest = userRepository.save(guest);
@@ -231,4 +226,35 @@ public class UserService {
         userRepository.save(user);
         userRepository.flush();
     }
+
+    @Transactional //for Spring; makes all changes to db persisted in one single transaction --> helps rolling back in case of an error (data consistency)
+    public void updateIngredientRatings(Long groupId, Long userId, Map <Long, String> ingredientRatings) {
+        // fetch User and Group
+        User user = getUserById(userId); // 404 - user not found
+        Group group = groupService.getGroupById(groupId);  // 404 - group not found
+
+        // for each ingredient in ingredientRatings
+        for (Map.Entry<Long, String> entry : ingredientRatings.entrySet()) {
+            Long ingredientId = entry.getKey();
+            String userRating = entry.getValue();
+
+            // find Ingredient based on IngredientID
+            Ingredient ingredient = group.getIngredients()
+                    .stream()
+                    .filter(i -> i.getId().equals(ingredientId))
+                    .findFirst()
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ingredient with given ID not found"));
+
+            // add rating to singleUserRatings list of found Ingredient for the given User
+            List<String> singleUserRatings = ingredient.getSingleUserRatings();
+            singleUserRatings.add(userRating);
+            ingredient.setSingleUserRatings(singleUserRatings);
+
+            ingredientRepository.save(ingredient);
+        }
+
+        ingredientRepository.flush();
+    }
+
+
 }
