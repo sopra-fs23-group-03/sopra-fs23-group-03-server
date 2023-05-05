@@ -734,7 +734,7 @@ public class GroupControllerTest {
         Ingredient apple = new Ingredient();
         apple.setId(19L);
         apple.setName("apple");
-        apple.setCalculatedRating(1L);
+        apple.setCalculatedRating(1);
 
         List<Ingredient> ingredients = new ArrayList<>();
         ingredients.add(apple);

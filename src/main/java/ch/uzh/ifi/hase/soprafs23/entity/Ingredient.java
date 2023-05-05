@@ -20,7 +20,7 @@ public class Ingredient implements Serializable  {
     private String name;
 
     @Column(nullable = true)
-    private Long calculatedRating;
+    private int calculatedRating;
 
     @ManyToMany(mappedBy = "ingredientsSet")
     private Set<User> usersSet;
@@ -28,7 +28,7 @@ public class Ingredient implements Serializable  {
     @ManyToOne
     private Group group;
 
-    @ElementCollection
+    @ElementCollection //TODO: makes sense to have own table?
     @Column(nullable = true)
     private List<String> singleUserRatings = new ArrayList<>();
 
@@ -58,11 +58,11 @@ public class Ingredient implements Serializable  {
         this.name = name;
     }
 
-    public Long getCalculatedRating() {
+    public int getCalculatedRating() {
         return calculatedRating;
     }
 
-    public void setCalculatedRating(Long calculatedRating) {
+    public void setCalculatedRating(int calculatedRating) {
         this.calculatedRating = calculatedRating;
     }
 

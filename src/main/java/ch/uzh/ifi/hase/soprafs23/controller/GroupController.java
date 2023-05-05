@@ -275,6 +275,12 @@ public class GroupController {
 
         // Pass the map of ingredient ratings to the service method
         userService.updateIngredientRatings(groupId, userId, ingredientRatings);
+        //TODO: implement check that one user does only vote once! Frontend idea?
+
+        // As last step calculate the final ingredientRating per Group and store it in ingredientRepo
+        groupService.calculateRatingPerGroup(groupId);
+
+        //TODO: then it depends on votingtype to get final result, so include API Call with voting type?
 
     }
 

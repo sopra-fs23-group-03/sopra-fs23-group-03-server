@@ -1,7 +1,9 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
+import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,10 +22,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class GroupService {
 
     private final GroupRepository groupRepository;
+    private final IngredientRepository ingredientRepository;
 
     @Autowired
-    public GroupService(@Qualifier("groupRepository") GroupRepository groupRepository) {
+    public GroupService(@Qualifier("groupRepository") GroupRepository groupRepository, IngredientRepository ingredientRepository) {
         this.groupRepository = groupRepository;
+        this.ingredientRepository = ingredientRepository;
     }
 
     public List<Group> getGroups() {
@@ -89,4 +93,24 @@ public class GroupService {
 
         return memberIds;
     }
+
+    @Transactional
+    public void calculateRatingPerGroup(Long groupId) {
+        // Fetch all ingredients related to the given groupId
+        List<Ingredient> ingredients = ingredientRepository.findByGroupId(groupId);
+
+        // Loop through each ingredient and calculate the sum of singleUserRatings
+        for (Ingredient ingredient : ingredients) {
+            List<String> singleUserRatings = ingredient.getSingleUserRatings();
+            int sum = 0;
+            for (String rating : singleUserRatings) {
+                sum += Integer.parseInt(rating);
+            }
+
+            // Store the sum in the calculatedRating field for the ingredient and save to the database
+            ingredient.setCalculatedRating(sum);
+            ingredientRepository.save(ingredient);
+        }
+    }
+
 }
