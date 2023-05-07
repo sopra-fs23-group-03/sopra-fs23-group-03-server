@@ -88,6 +88,22 @@ public class GroupServiceTest {
         expectedMembers.add(secondGuestId);
         assertEquals(expectedMembers, groupService.getAllMemberIdsOfGroup(group));
     }
+
+    @Test
+    public void getAllGuestIdsOfGroup_test() {
+        List<Long> expectedMembers = new ArrayList<>();
+        assertEquals(expectedMembers, groupService.getAllGuestIdsOfGroup(group));
+
+        Long firstGuestId = 4L;
+        group.addGuestId(firstGuestId);
+        expectedMembers.add(firstGuestId);
+        assertEquals(expectedMembers, groupService.getAllGuestIdsOfGroup(group));
+
+        Long secondGuestId = 7L;
+        group.addGuestId(secondGuestId);
+        expectedMembers.add(secondGuestId);
+        assertEquals(expectedMembers, groupService.getAllGuestIdsOfGroup(group));
+    }
     
     @Test
     public void createGroup_success() {
