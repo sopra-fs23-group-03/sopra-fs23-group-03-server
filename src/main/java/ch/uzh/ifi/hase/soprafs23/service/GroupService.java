@@ -87,12 +87,19 @@ public class GroupService {
         List<Long> memberIds = new ArrayList<>();
 
         memberIds.add(group.getHostId());
-
-        for(Long guestId : group.getGuestIds()) {
-            memberIds.add(guestId);
-        }
+        memberIds.addAll(getAllGuestIdsOfGroup(group));
 
         return memberIds;
+    }
+
+    public List<Long> getAllGuestIdsOfGroup(Group group) {
+        List<Long> guestIds = new ArrayList<>();
+
+        for(Long guestId : group.getGuestIds()) {
+            guestIds.add(guestId);
+        }
+
+        return guestIds;
     }
 
     public void deleteGroup(Long groupId) {

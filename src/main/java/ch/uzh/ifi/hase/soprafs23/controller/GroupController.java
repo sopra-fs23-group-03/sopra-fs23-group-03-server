@@ -22,8 +22,6 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
-
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -229,6 +227,38 @@ public class GroupController {
 
         return userGetDTOs;
     }
+
+    @GetMapping("/groups/{groupId}/guests")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
+    public List<UserGetDTO> getGroupGuestsById(@PathVariable Long groupId, HttpServletRequest request) {
+        // 404 - group not found
+        Group group = groupService.getGroupById(groupId);
+
+        // 401 - not authorized
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if(tokenId.equals(0L)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
+        }
+
+        // get the guests of the group
+        List<Long> guestIds = groupService.getAllGuestIdsOfGroup(group);
+
+        // 204 - no guests in group
+        if(guestIds.size() == 0) {
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
+        }
+
+        // convert each user to the API representation
+        List<UserGetDTO> userGetDTOs = new ArrayList<>();
+        for (Long userId : guestIds) {
+            User user = userService.getUserById(userId);
+            userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
+        }
+
+        return userGetDTOs;
+    }
+
     @GetMapping("/groups/{groupId}/ingredients")
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
