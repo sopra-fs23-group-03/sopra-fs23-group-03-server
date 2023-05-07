@@ -221,7 +221,6 @@ public class UserService {
             }
             ingredient.setGroup(group);    
             newIngredients.add(ingredient);
-
         }
 
         user.addIngredient(newIngredients);
