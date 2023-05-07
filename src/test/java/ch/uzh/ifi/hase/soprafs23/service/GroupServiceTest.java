@@ -3,7 +3,9 @@ package ch.uzh.ifi.hase.soprafs23.service;
 import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
+import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import javassist.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +27,9 @@ public class GroupServiceTest {
 
     @Mock
     private GroupRepository groupRepository;
+
+    @Mock
+    private IngredientRepository ingredientRepository;
 
     @InjectMocks
     private GroupService groupService;
@@ -107,4 +113,50 @@ public class GroupServiceTest {
         verify(groupRepository, times(1)).save(newGroup);
         verify(groupRepository, times(1)).flush();
     }
+
+    @Test
+    public void testCalculateRatingPerGroup_success() {
+        // given
+        Ingredient ingredient1 = new Ingredient();
+        ingredient1.setId(1L);
+        ingredient1.setName("Ingredient 1");
+        ingredient1.setGroup(group);
+        List<String> singleUserRatings1 = new ArrayList<>(Arrays.asList("1", "0", "-1"));
+        ingredient1.setSingleUserRatings(singleUserRatings1);
+
+        Ingredient ingredient2 = new Ingredient();
+        ingredient2.setId(2L);
+        ingredient2.setName("Ingredient 2");
+        ingredient1.setGroup(group);
+        List<String> singleUserRatings2 = new ArrayList<>(Arrays.asList("1", "0", "0"));
+        ingredient2.setSingleUserRatings(singleUserRatings2);
+
+        List<Ingredient> ingredients = new ArrayList<>(Arrays.asList(ingredient1, ingredient2));
+
+        when(ingredientRepository.findByGroupId(1L)).thenReturn(ingredients);
+
+        // when
+        groupService.calculateRatingPerGroup(1L);
+
+        // then
+        verify(ingredientRepository).findByGroupId(1L);
+
+        verify(ingredientRepository).save(ingredient1);
+        assertEquals(0, ingredient1.getCalculatedRating());
+
+        verify(ingredientRepository).save(ingredient2);
+        assertEquals(1, ingredient2.getCalculatedRating());
+    }
+
+    @Test
+    public void testCalculateRatingPerGroup_emptyIngredients() { // gives 422 error bc no ingredients are saved for this group
+        // given
+        List<Ingredient> ingredients = new ArrayList<>();
+        when(ingredientRepository.findByGroupId(1L)).thenReturn(ingredients);
+
+        // when, then
+        assertThrows(ResponseStatusException.class, () -> groupService.calculateRatingPerGroup(1L));
+        verify(ingredientRepository).findByGroupId(1L);
+    }
+
 }
