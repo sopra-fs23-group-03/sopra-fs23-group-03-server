@@ -1120,7 +1120,7 @@ public class GroupControllerTest {
         when(groupService.getGroupById(groupId)).thenReturn(group);
         when(userService.getUserById(guestId)).thenReturn(new User());
         when(userService.getUseridByToken("valid-token")).thenReturn(hostId);
-        doNothing().when(joinRequestService).acceptJoinRequest(groupId, hostId, guestId);
+        doNothing().when(joinRequestService).acceptJoinRequest(groupId, guestId);
         doNothing().when(joinRequestService).deleteOtherJoinRequests(guestId, groupId);
 
         // Execute & Assert

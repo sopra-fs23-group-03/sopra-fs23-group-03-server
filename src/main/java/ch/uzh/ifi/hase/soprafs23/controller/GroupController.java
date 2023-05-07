@@ -328,7 +328,7 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized to accept this join request.");
         }
 
-        joinRequestService.acceptJoinRequest(groupId, hostId, joinRequestPutDTO.getGuestId());
+        joinRequestService.acceptJoinRequest(groupId, joinRequestPutDTO.getGuestId());
 
         // Delete other join requests of the user
         joinRequestService.deleteOtherJoinRequests(joinRequestPutDTO.getGuestId(), groupId);

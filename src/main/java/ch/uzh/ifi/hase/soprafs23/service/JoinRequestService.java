@@ -30,18 +30,21 @@ public class JoinRequestService {
     }
 
     public JoinRequest createJoinRequest(JoinRequestPostDTO joinRequestPostDTO, Long groupId) {
-        Optional<JoinRequest> existingJoinRequest = joinRequestRepository.findByGuestIdAndGroupId(joinRequestPostDTO.getGuestId(), groupId);
+        Long guestId = joinRequestPostDTO.getGuestId();
+        Optional<JoinRequest> existingJoinRequest = joinRequestRepository.findByGuestIdAndGroupId(guestId, groupId);
         if (existingJoinRequest.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "A request could not be sent");
+            String errorMessage = String.format("Guest %d already has an open request to join Group %d", guestId, groupId);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, errorMessage);
         }
 
         JoinRequest joinRequest = new JoinRequest();
-        joinRequest.setGuestId(joinRequestPostDTO.getGuestId());
+        joinRequest.setGuestId(guestId);
         joinRequest.setGroupId(groupId);
 
         joinRequestRepository.save(joinRequest);
         return joinRequest;
     }
+
 
     public JoinRequest getJoinRequestByGuestIdAndGroupId(Long guestId, Long groupId) {
         Optional<JoinRequest> joinRequest = joinRequestRepository.findByGuestIdAndGroupId(guestId, groupId);
@@ -51,14 +54,8 @@ public class JoinRequestService {
         return joinRequest.get();
     }
 
-    public void acceptJoinRequest(Long groupId, Long hostId, Long guestId) {
-        Optional<JoinRequest> joinRequestOptional = joinRequestRepository.findByGuestIdAndGroupId(guestId, groupId);
-
-        if (!joinRequestOptional.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Join request not found");
-        }
-
-        JoinRequest joinRequest = joinRequestOptional.get();
+    public void acceptJoinRequest(Long groupId, Long guestId) {
+        JoinRequest joinRequest = getJoinRequestByGuestIdAndGroupId(guestId,groupId);
         joinRequestRepository.delete(joinRequest);
 
         Group group = groupService.getGroupById(groupId);
