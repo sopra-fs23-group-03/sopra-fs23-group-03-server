@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.constant.UserVotingStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
@@ -61,6 +62,7 @@ public class UserService {
     public User createUser(User newUser) {
         newUser.setToken(UUID.randomUUID().toString());
         newUser.setStatus(UserStatus.ONLINE);
+        newUser.setVotingStatus(UserVotingStatus.NOT_VOTED);
       
         // check that the username is still free
         checkIfUsernameExists(newUser.getUsername());
@@ -233,6 +235,21 @@ public class UserService {
         User user = getUserById(userId); // 404 - user not found
         Group group = groupService.getGroupById(groupId);  // 404 - group not found
 
+        if(user.getVotingStatus() == UserVotingStatus.VOTED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "You voted already"); // 409 - user already voted
+            // TODO: check (or change) enum everytime someone leaves the group, also at the end after planning when redirected to Landing Page
+        }
+
+        // Count entries in map and check if user rated all of them.
+        int countGivenRatings = ingredientRatings.size();
+
+        Set<Ingredient> groupIngredients = group.getIngredients();
+        int countNeededRatings = groupIngredients.size();
+
+        if (countGivenRatings != countNeededRatings) { // 422 - not enough ratings send
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, countGivenRatings + " ratings given, but " + countNeededRatings + " ratings needed. Amount of ratings not matching.");
+        }
+
         // for each ingredient in ingredientRatings
         for (Map.Entry<Long, String> entry : ingredientRatings.entrySet()) {
             Long ingredientId = entry.getKey();
@@ -243,7 +260,7 @@ public class UserService {
                     .stream()
                     .filter(i -> i.getId().equals(ingredientId))
                     .findFirst()
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ingredient with given ID not found"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ingredient with given ID " + ingredientId + " not found"));
 
             // add rating to singleUserRatings list of found Ingredient for the given User
             List<String> singleUserRatings = ingredient.getSingleUserRatings();
@@ -254,6 +271,7 @@ public class UserService {
         }
 
         ingredientRepository.flush();
+        user.setVotingStatus(UserVotingStatus.VOTED);
     }
 
 

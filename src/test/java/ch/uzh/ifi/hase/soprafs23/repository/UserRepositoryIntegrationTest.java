@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.repository;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.constant.UserVotingStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ public class UserRepositoryIntegrationTest {
         user.setUsername("firstUsername");
         user.setPassword("firstPassword");
         user.setStatus(UserStatus.ONLINE);
+        user.setVotingStatus(UserVotingStatus.NOT_VOTED);
         user.setToken("firstToken");
 
         entityManager.persist(user);
@@ -39,6 +41,7 @@ public class UserRepositoryIntegrationTest {
         assertEquals(found.getUsername(), user.getUsername());
         assertEquals(found.getPassword(), user.getPassword());
         assertEquals(found.getStatus(), user.getStatus());
+        assertEquals(found.getVotingStatus(),user.getVotingStatus());
         assertEquals(found.getToken(), user.getToken());
     }
 }

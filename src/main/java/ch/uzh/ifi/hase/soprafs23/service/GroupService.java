@@ -99,7 +99,7 @@ public class GroupService {
         // Fetch all ingredients related to the given groupId
         List<Ingredient> ingredients = ingredientRepository.findByGroupId(groupId);
 
-        // Loop through each ingredient and calculate the sum of singleUserRatings
+        // Loop through each ingredient and calculate the sum of singleUserRatings --> MAJORITY VOTING LOGIC
         for (Ingredient ingredient : ingredients) {
             List<String> singleUserRatings = ingredient.getSingleUserRatings();
             int sum = 0;
