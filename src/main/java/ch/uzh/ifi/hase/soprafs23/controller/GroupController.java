@@ -410,7 +410,6 @@ public class GroupController {
             // As last step calculate the final ingredientRating per Group and store it in ingredientRepo
             groupService.calculateRatingPerGroup(groupId);
         }
-        //TODO: then it depends on votingtype to get final result, so include API Call with voting type?
     }
 
 }

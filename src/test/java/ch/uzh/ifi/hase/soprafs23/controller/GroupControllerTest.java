@@ -535,7 +535,6 @@ public class GroupControllerTest {
         // given
         Long anotherGroupId = 5L;
         List<Long> guestIds = Arrays.asList(2L, 3L);
-        //HttpServletRequest request = mock(HttpServletRequest.class);
 
         // mocks
         given(groupService.getGroupById(anotherGroupId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "error message"));
