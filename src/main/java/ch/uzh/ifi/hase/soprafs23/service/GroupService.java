@@ -6,8 +6,10 @@ import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -121,7 +123,6 @@ public class GroupService {
         groupRepository.delete(group);
     }
 
-
     @Transactional
     public void calculateRatingPerGroup(Long groupId) {
         // Fetch all ingredients related to the given groupId
@@ -146,6 +147,18 @@ public class GroupService {
         }
     }
 
+    public Set<Ingredient> getFinalIngredients(Group group) {
+        Set<Ingredient> ingredients = group.getIngredients();
+        Set<Ingredient> finalIngredients = new HashSet<>();
+
+        for (Ingredient ingredient : ingredients) {
+            if (ingredient.getCalculatedRating() >= 0) {
+                finalIngredients.add(ingredient);
+            }
+        }
+
+        return finalIngredients;
+    }
 
     // This method has no intent to update the actual attributes of the group. It has the puprose to update the group to show the removed guest.
     public Group updateGroupToRemoveGuest(Group updatedGroup) {
