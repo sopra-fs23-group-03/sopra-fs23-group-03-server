@@ -20,8 +20,10 @@ import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class GroupServiceTest {
 
@@ -133,7 +135,6 @@ public class GroupServiceTest {
         verify(groupRepository, times(1)).flush();
     }
 
-
     @Test
     public void testCalculateRatingPerGroup_success() {
         // given
@@ -179,5 +180,26 @@ public class GroupServiceTest {
         verify(ingredientRepository).findByGroupId(1L);
     }
 
+    @Test
+    public void getFinalIngredients_test() {
+        Ingredient onion = new Ingredient("onion");
+        onion.setCalculatedRating(-1);
+        Ingredient carrot = new Ingredient("carrot");
+        carrot.setCalculatedRating(0);
+        Ingredient potato = new Ingredient("potato");
+        potato.setCalculatedRating(1);
+
+        List<Ingredient> ingredients = new ArrayList<>();
+        ingredients.add(onion);
+        ingredients.add(carrot);
+        ingredients.add(potato);
+        group.addIngredient(ingredients);
+
+        Set<Ingredient> expectedIngredients = new HashSet<>();
+        expectedIngredients.add(carrot);
+        expectedIngredients.add(potato);
+
+        assertEquals(expectedIngredients, groupService.getFinalIngredients(group));
+    }
 
 }
