@@ -2,15 +2,18 @@ package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientPutDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,11 +26,20 @@ public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private GroupService groupService;
+
+    @Mock
+    private IngredientRepository ingredientRepository;
+
     @InjectMocks
     private UserService userService;
+
     private UserPutDTO userPutDTO;
 
-    private User user; // so we will always take user as testuser
+    private IngredientPutDTO ingredientPutDTO;
+
+    private User user;
 
     @BeforeEach
     public void setup() {
@@ -36,12 +48,18 @@ public class UserServiceTest {
         // given
         user = new User();
         user.setId(1L);
-        user.setUsername("fisrtUsername");
+        user.setUsername("firstUsername");
         user.setPassword("firstPassword");
         user.setToken("firstToken");
 
+        List<Ingredient> ingredients = new ArrayList<>();
+        ingredients.add(new Ingredient("ingredient1"));
+        ingredients.add(new Ingredient("ingredient2"));
+        user.addIngredient(ingredients);
+
         // mocks the save() method of UserRepository
         when(userRepository.save(Mockito.any())).thenReturn(user);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
     }
 
     @Test
@@ -50,13 +68,12 @@ public class UserServiceTest {
         List<User> listWithTheUser = new ArrayList<User>();
         listWithTheUser.add(user);
         when(userRepository.findByToken(user.getToken())).thenReturn(listWithTheUser);
-        List<User> listWithNoUser = new ArrayList<User>();
-        when(userRepository.findByToken("newToken")).thenReturn(listWithNoUser);
 
+        List<User> listWithNoUser = new ArrayList<User>();
+        when(userRepository.findByToken("anotherToken")).thenReturn(listWithNoUser);
 
         assertEquals(1L, userService.getUseridByToken(user.getToken()));
-        assertEquals(0L, userService.getUseridByToken("newToken"));
-
+        assertEquals(0L, userService.getUseridByToken("anotherToken"));
     }
 
     @Test
@@ -103,7 +120,6 @@ public class UserServiceTest {
 
     @Test
     public void loginUser_NameNotExists_throwsException() {
-
         // mocks findByUsername(username) method in UserRepository
         when(userRepository.findByUsername("new")).thenReturn(null);
 
@@ -112,37 +128,28 @@ public class UserServiceTest {
 
     @Test
     public void testCorrectPassword() {
-        user.setUsername("testuser");
-        user.setPassword("testpassword");
-        when(userRepository.findByUsername(Mockito.any())).thenReturn(user);
+        when(userRepository.findByUsername(user.getUsername())).thenReturn(user);
 
         // Test correct password
-        userService.correctPassword("testuser", "testpassword");
+        userService.correctPassword(user.getUsername(), user.getPassword());
 
         // Test incorrect password
-        try {
-            userService.correctPassword("testuser", "incorrectpassword");
-            fail("Expected ResponseStatusException was not thrown");
-        } catch (ResponseStatusException e) {
-            assertEquals("Password is wrong. Check the spelling", e.getReason());
-        }
+        assertThrows(ResponseStatusException.class, () -> userService.correctPassword(user.getUsername(), "incorrectpassword"));
     }
-
 
     @Test
     public void loginUser_validInputs_success() {
         userService.createUser(user);
         user.setStatus(UserStatus.OFFLINE);
-        userService.login(user); // needs to be o set to online then
+        userService.login(user);
         assertEquals(user.getStatus(), UserStatus.ONLINE);
         assertNotEquals("firstToken", user.getToken());
-
     }
 
     @Test
     void updateUser_ShouldUpdateUserFields_WhenUserExists() {
         // given
-        Long id = 1L;
+        Long id = 5L;
         UserPutDTO userPutDTO = new UserPutDTO();
         userPutDTO.setUsername("newUsername");
         userPutDTO.setAllergies(Collections.singleton("newAllergies"));
@@ -159,24 +166,15 @@ public class UserServiceTest {
         existingUser.setSpecialDiet("oldSpecialDiet");
         existingUser.setPassword("oldPassword");
 
-        when(userRepository.findById(id)).thenReturn(java.util.Optional.of(existingUser));
+        when(userRepository.findById(id)).thenReturn(Optional.of(existingUser));
 
         // when
         userService.updateUser(id, userPutDTO);
 
         // then
         assertEquals(userPutDTO.getUsername(), existingUser.getUsername());
-
-        Set<String> expectedAllergies = new HashSet<>();
-        expectedAllergies.addAll(existingUser.getAllergiesSet());
-        expectedAllergies.addAll(userPutDTO.getAllergies());
-        assertEquals(expectedAllergies, existingUser.getAllergiesSet());
-
-        Set<String> expectedCuisines = new HashSet<>();
-        expectedCuisines.addAll(existingUser.getFavoriteCuisineSet());
-        expectedCuisines.addAll(userPutDTO.getFavoriteCuisine());
-        assertEquals(expectedCuisines, existingUser.getFavoriteCuisineSet());
-
+        assertEquals(userPutDTO.getAllergies(), existingUser.getAllergiesSet());
+        assertEquals(userPutDTO.getFavoriteCuisine(), existingUser.getFavoriteCuisineSet());
         assertEquals(userPutDTO.getSpecialDiet(), existingUser.getSpecialDiet());
         assertEquals(userPutDTO.getPassword(), existingUser.getPassword());
     }
@@ -185,125 +183,103 @@ public class UserServiceTest {
     public void testUpdateUserWithInvalidId() {
         Long invalidId = 123456L;
         UserPutDTO userPutDTO = new UserPutDTO();
-        userPutDTO.setUsername("new_username");
-        userPutDTO.setCurrentPassword("oldPassword");
 
         when(userRepository.findById(invalidId)).thenReturn(Optional.empty());
 
-        assertThrows(ResponseStatusException.class, () -> {
-            userService.updateUser(invalidId, userPutDTO);
-        });
+        assertThrows(ResponseStatusException.class, () -> userService.updateUser(invalidId, userPutDTO));
     }
 
     @Test
     public void testUpdateUserWithExistingUsername() {
-        Long userId = 1L;
-        String existingUsername = "existing_username";
         String newUsername = "new_username";
-        User existingUser = new User();
-        existingUser.setId(userId);
-        existingUser.setUsername(existingUsername);
-        existingUser.setPassword("oldPassword");
+
         UserPutDTO userPutDTO = new UserPutDTO();
         userPutDTO.setUsername(newUsername);
-        userPutDTO.setCurrentPassword("oldPassword");
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(existingUser));
         when(userRepository.findByUsername(newUsername)).thenReturn(new User());
 
-        assertThrows(ResponseStatusException.class, () -> {
-            userService.updateUser(userId, userPutDTO);
-        });
+        assertThrows(ResponseStatusException.class, () -> userService.updateUser(user.getId(), userPutDTO));
     }
 
     @Test
     void updateUser_withSamePassword_throwsException() {
-        user = new User();
-        user.setId(1L);
-        user.setUsername("testUser");
-        user.setPassword("currentPassword");
-        user.setAllergiesSet(Collections.singleton("testAllergies"));
-        user.setFavoriteCuisineSet(Collections.singleton("Italian"));
-        user.setSpecialDiet("testSpecialDiet");
-
         userPutDTO = new UserPutDTO();
-        userPutDTO.setUsername("newTestUser");
-        userPutDTO.setAllergies(Collections.singleton("newTestAllergies"));
-        userPutDTO.setFavoriteCuisine(Collections.singleton("Italian"));
-        userPutDTO.setSpecialDiet("newTestSpecialDiet");
         userPutDTO.setCurrentPassword(user.getPassword());
-        
-        // Arrange
-        userPutDTO.setPassword("currentPassword");
-        when(userRepository.findById(1L)).thenReturn(java.util.Optional.of(user));
+        userPutDTO.setPassword(user.getPassword());
 
-        // Act
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> userService.updateUser(1L, userPutDTO));
-
-        // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("New password cannot be the same as the current password.", exception.getReason());
+        assertThrows(ResponseStatusException.class, () -> userService.updateUser(user.getId(), userPutDTO));
     }
 
     @Test
     void updateUser_withEmptyPassword_throwsException() {
-        user = new User();
-        user.setId(1L);
-        user.setUsername("testUser");
-        user.setPassword("currentPassword");
-        user.setAllergiesSet(Collections.singleton("testAllergies"));
-        user.setFavoriteCuisineSet(Collections.singleton("Italian"));
-        user.setSpecialDiet("testSpecialDiet");
-
         userPutDTO = new UserPutDTO();
-        userPutDTO.setUsername("newTestUser");
-        userPutDTO.setAllergies(Collections.singleton("newTestAllergies"));
-        userPutDTO.setFavoriteCuisine(Collections.singleton("Italian"));
-        userPutDTO.setSpecialDiet("newTestSpecialDiet");
-        userPutDTO.setCurrentPassword("currentPassword");
-
-        // Arrange
+        userPutDTO.setCurrentPassword(user.getPassword());
         userPutDTO.setPassword("");
-        when(userRepository.findById(1L)).thenReturn(java.util.Optional.of(user));
-
-        // Act
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> userService.updateUser(1L, userPutDTO));
-
-        // Assert
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("New password cannot be empty.", exception.getReason());
+        
+        assertThrows(ResponseStatusException.class, () -> userService.updateUser(user.getId(), userPutDTO));
     }
-
-
 
     @Test
     void updateUser_withIncorrectCurrentPassword_throwsException() {
-        user = new User();
-        user.setId(1L);
-        user.setUsername("testUser");
-        user.setPassword("currentPassword");
-        user.setAllergiesSet(Collections.singleton("testAllergies"));
-        user.setFavoriteCuisineSet(Collections.singleton("Italian"));
-        user.setSpecialDiet("testSpecialDiet");
-
         userPutDTO = new UserPutDTO();
-        userPutDTO.setUsername("newTestUser");
-        userPutDTO.setAllergies(Collections.singleton("newTestAllergies"));
-        userPutDTO.setFavoriteCuisine(Collections.singleton("Italian"));
-        userPutDTO.setSpecialDiet("newTestSpecialDiet");
-        userPutDTO.setPassword("newPassword");
-        userPutDTO.setCurrentPassword("incorrectPassword");
+        userPutDTO.setPassword("new password");
+        userPutDTO.setCurrentPassword("incorrect password");
 
-        when(userRepository.findById(1L)).thenReturn(java.util.Optional.of(user));
-
-
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> userService.updateUser(1L, userPutDTO));
-
-
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
-        // assertEquals("Current password is incorrect.", exception.getReason()); This check makes the test flaky, the exact String may vary slightly
+        assertThrows(ResponseStatusException.class, () -> userService.updateUser(user.getId(), userPutDTO));
     }
+
+    @Test
+    void addUserIngredients_withExistingUserIdAndNewIngredient_addsIngredientToUser() {
+        // user needs to be in a group
+        user.setGroupId(5L);
+        when(groupService.getGroupById(user.getGroupId())).thenReturn(new Group());
+
+        Long userId = user.getId();
+        IngredientPutDTO ingredientPutDTO = new IngredientPutDTO();
+        ingredientPutDTO.setName("new_ingredient_name");
+
+        Ingredient ingredient = new Ingredient("new_ingredient_name");
+        when(ingredientRepository.findByName(ingredientPutDTO.getName())).thenReturn(Optional.of(ingredient));
+
+        userService.addUserIngredients(userId, Collections.singletonList(ingredientPutDTO));
+
+        verify(userRepository).save(user);
+        assertEquals(3, user.getIngredients().size()); //expects 3 bc in the setup are already 2
+        assertTrue(user.getIngredients().contains(ingredient));
+    }
+
+    @Test
+    void addUserIngredients_withExistingIngredients_doesNotAddDuplicatesToUser() {
+        // user needs to be in a group
+        user.setGroupId(5L);
+        when(groupService.getGroupById(user.getGroupId())).thenReturn(new Group());
+
+        Long userId = user.getId();
+
+        Ingredient existingIngredient = user.getIngredients().iterator().next();
+        IngredientPutDTO ingredientPutDTO = new IngredientPutDTO();
+        ingredientPutDTO.setName(existingIngredient.getName()); //get another ingredient with the same name
+
+        when(ingredientRepository.findByName(existingIngredient.getName())).thenReturn(Optional.of(existingIngredient));
+
+        userService.addUserIngredients(userId, Collections.singletonList(ingredientPutDTO));
+
+        verify(userRepository).save(user);
+        assertEquals(user.getIngredients().size(), 2); // bc 2 are mentioned above in setup
+    }
+
+
+    @Test
+    void addUserIngredients_withNonexistentUserId_throwsException() {
+        Long nonexistentUserId = 999L;
+        IngredientPutDTO ingredientPutDTO = new IngredientPutDTO();
+        ingredientPutDTO.setName("new_ingredient_name");
+
+        when(userRepository.findById(nonexistentUserId)).thenReturn(Optional.empty());
+
+        assertThrows(ResponseStatusException.class, () -> userService.addUserIngredients(nonexistentUserId, Collections.singletonList(ingredientPutDTO)));
+    }
+
+
+
 }

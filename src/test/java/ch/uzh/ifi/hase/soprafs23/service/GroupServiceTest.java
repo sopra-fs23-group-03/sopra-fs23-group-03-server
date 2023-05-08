@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -18,6 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +28,9 @@ public class GroupServiceTest {
 
     @InjectMocks
     private GroupService groupService;
+
+    @Mock
+    private UserService userService;
 
     private Group group;
 
@@ -73,8 +76,6 @@ public class GroupServiceTest {
         assertThrows(ResponseStatusException.class, () -> groupService.countGuests(2L));
     }
 
-
-
     @Test
     public void getAllMemberIdsOfGroup_test() {
         List<Long> expectedMembers = new ArrayList<>();
@@ -91,8 +92,25 @@ public class GroupServiceTest {
         expectedMembers.add(secondGuestId);
         assertEquals(expectedMembers, groupService.getAllMemberIdsOfGroup(group));
     }
+
     @Test
-    void createGroup_success() {
+    public void getAllGuestIdsOfGroup_test() {
+        List<Long> expectedMembers = new ArrayList<>();
+        assertEquals(expectedMembers, groupService.getAllGuestIdsOfGroup(group));
+
+        Long firstGuestId = 4L;
+        group.addGuestId(firstGuestId);
+        expectedMembers.add(firstGuestId);
+        assertEquals(expectedMembers, groupService.getAllGuestIdsOfGroup(group));
+
+        Long secondGuestId = 7L;
+        group.addGuestId(secondGuestId);
+        expectedMembers.add(secondGuestId);
+        assertEquals(expectedMembers, groupService.getAllGuestIdsOfGroup(group));
+    }
+    
+    @Test
+    public void createGroup_success() {
         // Given
         Group newGroup = new Group();
         newGroup.setGroupName("TestGroup");
@@ -109,4 +127,5 @@ public class GroupServiceTest {
         verify(groupRepository, times(1)).save(newGroup);
         verify(groupRepository, times(1)).flush();
     }
+
 }

@@ -1,8 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
-import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
-import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 
 import java.util.ArrayList;
@@ -11,6 +9,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,17 +19,22 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 @Transactional
 public class GroupService {
+
     private final GroupRepository groupRepository;
+
+    private final UserService userService;
+
     @Autowired
-    public GroupService(@Qualifier("groupRepository") GroupRepository groupRepository) {
+    public GroupService(@Qualifier("groupRepository") GroupRepository groupRepository,
+                        @Lazy @Qualifier("userService") UserService userService) {
         this.groupRepository = groupRepository;
+        this.userService = userService;
     }
 
     public List<Group> getGroups() {
         return this.groupRepository.findAll();
     }
 
-    // creates a new group, throws CONFLICT (409) if something goes wrong
     public Group createGroup(Group newGroup) {
         // check that the username is still free
         checkIfGroupNameExists(newGroup.getGroupName());
@@ -65,22 +69,11 @@ public class GroupService {
         return group.get();
     }
 
-    public Group updateGroup(Long groupId, String newGroupName) {
-        Group groupToUpdate = groupRepository.findById(groupId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
-        groupToUpdate.setGroupName(newGroupName);
-        return groupRepository.save(groupToUpdate);
-    }
-
-
     public int countGuests(Long groupId) {
-        Group group = groupRepository.findById(groupId).orElse(null);
-        if (group == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
-        }
+        Group group = getGroupById(groupId);
+        
         return group.getGuestIds().size();
     }
-
 
     public void addGuestToGroupMembers(Long guestId, Long groupId) {
         Group group = getGroupById(groupId);
@@ -94,11 +87,50 @@ public class GroupService {
         List<Long> memberIds = new ArrayList<>();
 
         memberIds.add(group.getHostId());
-
-        for(Long guestId : group.getGuestIds()) {
-            memberIds.add(guestId);
-        }
+        memberIds.addAll(getAllGuestIdsOfGroup(group));
 
         return memberIds;
     }
+
+    public List<Long> getAllGuestIdsOfGroup(Group group) {
+        List<Long> guestIds = new ArrayList<>();
+
+        for(Long guestId : group.getGuestIds()) {
+            guestIds.add(guestId);
+        }
+
+        return guestIds;
+    }
+
+    public void deleteGroup(Long groupId) {
+        // Check if the group exists
+        Group group = getGroupById(groupId);
+
+        // Remove the group from each user's groupId
+        List<Long> memberIds = getAllMemberIdsOfGroup(group);
+        for (Long memberId : memberIds) {
+            userService.leaveGroup(memberId);
+        }
+
+        // Delete the group
+        groupRepository.delete(group);
+    }
+
+    // This method has no intent to update the actual attributes of the group. It has the puprose to update the group to show the removed guest.
+    public Group updateGroupToRemoveGuest(Group updatedGroup) {
+        Optional<Group> groupOptional = groupRepository.findById(updatedGroup.getId());
+
+        if (!groupOptional.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Group with id %s does not exist", updatedGroup.getId()));
+        }
+
+        Group group = groupOptional.get();
+
+        group = groupRepository.save(group);
+        groupRepository.flush();
+
+        return group;
+    }
+
+
 }

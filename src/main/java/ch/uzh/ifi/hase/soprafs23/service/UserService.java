@@ -1,94 +1,92 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
+import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientPutDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashSet;
-import java.util.ArrayList;
+
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * User Service
- * This class is the "worker" and responsible for all functionality related to
- * the user
- * (e.g., it creates, modifies, deletes, finds). The result will be passed back
- * to the caller.
- */
 @Service
 @Transactional
 public class UserService {
 
-  //private final Logger log = LoggerFactory.getLogger(UserService.class); // unused
+    private final UserRepository userRepository;
+    private final GroupService groupService;
+    @Autowired
+    private final IngredientRepository ingredientRepository;
 
-  private final UserRepository userRepository;
-
-  @Autowired
-  public UserService(@Qualifier("userRepository") UserRepository userRepository) {
-    this.userRepository = userRepository;
-  }
-
-  public List<User> getUsers() {
-    return this.userRepository.findAll();
-  }
-
-  public List getUsersFreeToInvite(){
-      // TODO: List with users which are not in a group yet
-      List L = new ArrayList<>();
-    return L;
-  }
-
-  // returns the userid of the user with the given token
-  // returns 0L if no user has the given token
-  public Long getUseridByToken(String token) {
-    if(token == null) {
-      return 0L;
+    @Autowired
+    public UserService(@Qualifier("userRepository") UserRepository userRepository, IngredientRepository ingredientRepository, @Lazy GroupService groupService) {
+        this.userRepository = userRepository;
+        this.ingredientRepository = ingredientRepository;
+        this.groupService =  groupService;
     }
 
-    List<User> users = userRepository.findByToken(token);
-    assert users.size() <= 1; // if this is not the case, there is duplicate tokens!!!
-
-    if(users.size() == 1) {
-      return users.get(0).getId();
+    public List<User> getUsers() {
+        return this.userRepository.findAll();
     }
 
-    return 0L; 
-  }
-
-  // creates a new user, throws CONFLICT (409) if something goes wrong
-  public User createUser(User newUser) {
-    newUser.setToken(UUID.randomUUID().toString());
-    newUser.setStatus(UserStatus.ONLINE);
-
-    // check that the username is still free
-    checkIfUsernameExists(newUser.getUsername());
-
-    // check if username is only latin letters
-    if (!newUser.getUsername().matches("^[a-zA-Z]+$")) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "The username should only contain Latin letters (a-z, A-Z)!");
+    // returns the userId of the user with the given token
+    // returns 0L if no user has the given token
+    public Long getUseridByToken(String token) {
+        if(token == null) {
+            return 0L;
+        }
+      
+        List<User> users = userRepository.findByToken(token);
+        assert users.size() <= 1; // if this is not the case, there is duplicate tokens!!!
+      
+        if(users.size() == 1) {
+            return users.get(0).getId();
+        }
+      
+        return 0L; 
     }
 
-    // check that username and password are not the same
-    if(newUser.getUsername().equals(newUser.getPassword())) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, "The username and password cannot be the same!");
+    public User createUser(User newUser) {
+        newUser.setToken(UUID.randomUUID().toString());
+        newUser.setStatus(UserStatus.ONLINE);
+      
+        // check that the username is still free
+        checkIfUsernameExists(newUser.getUsername());
+      
+        // check if username is only latin letters
+        if (!newUser.getUsername().matches("^[a-zA-Z]+$")) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The username should only contain Latin letters (a-z, A-Z)!");
+        }
+      
+        // check that username and password are not the same
+        if(newUser.getUsername().equals(newUser.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The username and password cannot be the same!");
+        }
+      
+        // save the user
+        newUser = userRepository.save(newUser);
+        userRepository.flush();
+      
+        return newUser;
     }
 
-    // save the user
-    newUser = userRepository.save(newUser);
-    userRepository.flush();
-
-    return newUser;
-  }
     public User getUserById(Long id) {
         Optional<User> user = this.userRepository.findById(id);
 
@@ -99,7 +97,6 @@ public class UserService {
         return user.get();
     }
 
-    // LOGIN
     public void correctPassword(String username, String password) {
         User user = getUserByUsername(username);
         if (!user.getPassword().equals(password)) {
@@ -120,6 +117,7 @@ public class UserService {
         user = userRepository.save(user);
         userRepository.flush();
     }
+
     public void logout(Long id) {
         User user = getUserById(id);
         user.setStatus(UserStatus.OFFLINE);
@@ -158,22 +156,22 @@ public class UserService {
         }
 
         if(newAllergies != null) {
+            user.removeAllergies();
             for(String allergy : newAllergies) {
-              user.addAllergy(allergy);
+                user.addAllergy(allergy);
             }
         }
 
         if(newFavoriteCuisine != null){
-          for(String cuisine : newFavoriteCuisine) {
-            user.addFavouriteCuisine(cuisine);
-          }
+            user.removeFavouriteCuisines();
+            for(String cuisine : newFavoriteCuisine) {
+                user.addFavouriteCuisine(cuisine);
+            }
         }
 
         if(newSpecialDiet != null){
             user.setSpecialDiet(newSpecialDiet);
         }
-
-
 
         user = userRepository.save(user);
         userRepository.flush();
@@ -183,11 +181,10 @@ public class UserService {
         return storedPassword.equals(providedPassword);
     }
 
-
     public void joinGroup(Long guestId, Long groupId) {
         User guest = getUserById(guestId);
         if(guest.getGroupId() != null) {
-          throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("User with id %s is already in the group with id %d.", guest.getId(), guest.getGroupId()));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("User with id %s is already in the group with id %d.", guest.getId(), guest.getGroupId()));
         }
         
         guest.setGroupId(groupId);
@@ -196,17 +193,60 @@ public class UserService {
         userRepository.flush();
     }
 
+    private void checkIfUsernameExists(String username) {
+        User userByUsername = userRepository.findByUsername(username);
 
-  /**
-  * This is a helper method that will check the uniqueness criteria of the username
-  * defined in the User entity. The method will do nothing if the input is unique
-  * and throw an error (CONFLICT, 409) otherwise.
-  */
-  private void checkIfUsernameExists(String username) {
-    User userByUsername = userRepository.findByUsername(username);
-
-    if (userByUsername != null) {
-      throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("The username %s is already taken!", username));
+        if (userByUsername != null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("The username %s is already taken!", username));
+        }
     }
-  }
+
+    public void addUserIngredients(Long userId, List<IngredientPutDTO> ingredientsPutDTO) {
+        User user = getUserById(userId);
+
+        List<Ingredient> newIngredients = new ArrayList<>();
+
+        if(user.getGroupId() == null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "You must be part of a group to add ingredients.");
+        }
+
+        Group group = groupService.getGroupById(user.getGroupId());
+
+        for (IngredientPutDTO ingredientPutDTO : ingredientsPutDTO) {
+            Optional<Ingredient> ingredientOptional = ingredientRepository.findByName(ingredientPutDTO.getName());
+            Ingredient ingredient;
+            if(ingredientOptional.isPresent()) {
+                ingredient = ingredientOptional.get();
+            } else {
+                ingredient = new Ingredient(ingredientPutDTO.getName());
+            }
+
+            if(ingredient.getGroup() != null && !ingredient.getGroup().getId().equals(group.getId())) {
+                ingredient = new Ingredient(ingredientPutDTO.getName());
+            }
+            ingredient.setGroup(group);
+            newIngredients.add(ingredient);
+
+        }
+
+        user.addIngredient(newIngredients);
+        userRepository.save(user);
+        userRepository.flush();
+    }
+    public void leaveGroup(Long userId) {
+        User user = getUserById(userId);
+        Long groupId = user.getGroupId();
+        if (groupId != null) {
+            Group group = groupService.getGroupById(groupId);
+            group.removeGuestId(userId);
+            groupService.updateGroupToRemoveGuest(group);
+        }
+        user.setGroupId(null);
+        userRepository.save(user);
+        userRepository.flush();
+    }
+    public boolean isUserInGroup(Long userId) {
+        User user = getUserById(userId);
+        return user.getGroupId() != null;
+    }
 }

@@ -1,9 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.rest.dto;
 import java.util.Collections;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
-
+import java.util.List;
 
 public class UserPutDTO {
 
@@ -14,7 +12,7 @@ public class UserPutDTO {
     private String password;
 
     private String currentPassword;
-
+    private List<IngredientPutDTO> ingredients;
 
     public String getUsername() {
         return username;
@@ -36,7 +34,6 @@ public class UserPutDTO {
         }
     }
 
-
     public Set<String> getFavoriteCuisine() {
         return favoriteCuisine;
     }
@@ -48,6 +45,7 @@ public class UserPutDTO {
             this.favoriteCuisine = null;
         }
     }
+
     public String getSpecialDiet(){
         return specialDiet;
     }
@@ -70,6 +68,14 @@ public class UserPutDTO {
 
     public void setCurrentPassword(String currentPassword) {
         this.currentPassword = currentPassword;
+    }
+
+    public List<IngredientPutDTO> getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(List<IngredientPutDTO> ingredients) {
+        this.ingredients = ingredients;
     }
 
 }
