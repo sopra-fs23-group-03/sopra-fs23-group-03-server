@@ -57,7 +57,7 @@ public class APIService {
 
     public List<String> getListOfIngredients(String initialString) {
         String query = URLEncoder.encode(initialString, StandardCharsets.UTF_8);
-        String ingredientsApiUrl = "https://api.spoonacular.com/food/ingredients/search?apiKey=" + apiKey + "&query=" + query + "&number=10";
+        String ingredientsApiUrl = "https://api.spoonacular.com/food/ingredients/search?apiKey=" + apiKey + "&query=" + query + "&number=100";
 
         try {
             ResponseEntity<IngredientSearchResponse> searchResponse = restTemplate.getForEntity(ingredientsApiUrl, IngredientSearchResponse.class);
@@ -76,7 +76,7 @@ public class APIService {
 
             return ingredientNames;
         } catch (HttpServerErrorException e) {
-            throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "stupid sth");
+            throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
         }
     }
     public String getApiKey() {
