@@ -22,6 +22,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.NestedServletException;
 
 import java.util.Collections;
@@ -166,11 +167,11 @@ public class APIControllerTest {
 
     @Test
     void getAllIngredients_validRequest_returnsListOfIngredients() throws Exception {
-        String initialString = "ap";
+        String initialString = "app";
 
         List<String> ingredientNames = new ArrayList<>();
         ingredientNames.add("apple");
-        ingredientNames.add("apricot");
+        ingredientNames.add("apple juice");
 
         // given
         given(userService.getUseridByToken(anyString())).willReturn(1L);
@@ -184,7 +185,7 @@ public class APIControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0]", equalTo("apple")))
-                .andExpect(jsonPath("$[1]", equalTo("apricot")));
+                .andExpect(jsonPath("$[1]", equalTo("apple juice")));
     }
 
     @Test
@@ -218,6 +219,24 @@ public class APIControllerTest {
             HttpClientErrorException cause = (HttpClientErrorException) e.getCause();
             assertEquals(HttpStatus.NOT_FOUND, cause.getStatusCode());
             assertEquals("404 Ingredients not found", cause.getMessage()); // this comes from external API directly then
+        }
+    }
+
+    @Test
+    void getAllIngredients_returnsUnprocessableEntity_whenInvalidLengthProvided() throws Exception {
+        String invalidInitialString = "abcd";
+
+        // Perform the test
+        try {
+            mockMvc.perform(get("/ingredients")
+                            .header("X-Token", "valid-token")
+                            .param("initialString", invalidInitialString)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isUnprocessableEntity()); // 422
+        } catch (NestedServletException e) {
+            HttpClientErrorException cause = (HttpClientErrorException) e.getCause();
+            assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, cause.getStatusCode());
+            assertEquals("422 UnprocessableEntity", cause.getMessage());
         }
     }
 

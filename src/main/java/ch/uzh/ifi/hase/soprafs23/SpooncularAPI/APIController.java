@@ -68,12 +68,21 @@ public class APIController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
         }
 
-        List<String> ingredientNames = apiService.getListOfIngredients(initialString);
+        if (initialString.length() == 3) {
 
-        // when no ingredients were found - 404
-        if (ingredientNames.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No ingredients found for initial string '%s'.", initialString));
+            List<String> ingredientNames = apiService.getListOfIngredients(initialString);
+
+            // when no ingredients were found - 404
+            if (ingredientNames.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No ingredients found for initial string '%s'.", initialString));
+            }
+            return ingredientNames;
+
+            }
+        else{
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("The provided string has to be exactly length 3, you provided '%s'.", initialString)); // 422 - unprocessable entity
         }
-        return ingredientNames;
+
+
     }
 }
