@@ -34,6 +34,9 @@ public class GroupServiceTest {
     @InjectMocks
     private GroupService groupService;
 
+    @Mock
+    private UserService userService;
+
     private Group group;
 
     @BeforeEach
@@ -94,6 +97,22 @@ public class GroupServiceTest {
         expectedMembers.add(secondGuestId);
         assertEquals(expectedMembers, groupService.getAllMemberIdsOfGroup(group));
     }
+
+    @Test
+    public void getAllGuestIdsOfGroup_test() {
+        List<Long> expectedMembers = new ArrayList<>();
+        assertEquals(expectedMembers, groupService.getAllGuestIdsOfGroup(group));
+
+        Long firstGuestId = 4L;
+        group.addGuestId(firstGuestId);
+        expectedMembers.add(firstGuestId);
+        assertEquals(expectedMembers, groupService.getAllGuestIdsOfGroup(group));
+
+        Long secondGuestId = 7L;
+        group.addGuestId(secondGuestId);
+        expectedMembers.add(secondGuestId);
+        assertEquals(expectedMembers, groupService.getAllGuestIdsOfGroup(group));
+    }
     
     @Test
     public void createGroup_success() {
@@ -113,6 +132,7 @@ public class GroupServiceTest {
         verify(groupRepository, times(1)).save(newGroup);
         verify(groupRepository, times(1)).flush();
     }
+
 
     @Test
     public void testCalculateRatingPerGroup_success() {
@@ -158,5 +178,6 @@ public class GroupServiceTest {
         assertThrows(ResponseStatusException.class, () -> groupService.calculateRatingPerGroup(1L));
         verify(ingredientRepository).findByGroupId(1L);
     }
+
 
 }

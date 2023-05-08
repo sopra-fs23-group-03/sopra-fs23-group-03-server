@@ -1,16 +1,20 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
-import ch.uzh.ifi.hase.soprafs23.constant.UserVotingStatus;
+
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
+
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
+import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientPutDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,17 +28,15 @@ import java.util.*;
 public class UserService {
 
     private final UserRepository userRepository;
-
     private final GroupService groupService;
-
     @Autowired
     private final IngredientRepository ingredientRepository;
 
     @Autowired
-    public UserService(@Qualifier("userRepository") UserRepository userRepository, IngredientRepository ingredientRepository, GroupService groupService) {
+    public UserService(@Qualifier("userRepository") UserRepository userRepository, IngredientRepository ingredientRepository, @Lazy GroupService groupService) {
         this.userRepository = userRepository;
         this.ingredientRepository = ingredientRepository;
-        this.groupService = groupService;
+        this.groupService =  groupService;
     }
 
     public List<User> getUsers() {
@@ -218,7 +220,7 @@ public class UserService {
             if(ingredient.getGroup() != null && !ingredient.getGroup().getId().equals(group.getId())) {
                 ingredient = new Ingredient(ingredientPutDTO.getName());
             }
-            ingredient.setGroup(group);    
+            ingredient.setGroup(group);
             newIngredients.add(ingredient);
         }
 
@@ -226,6 +228,7 @@ public class UserService {
         userRepository.save(user);
         userRepository.flush();
     }
+
 
     @Transactional //for Spring; makes all changes to db persisted in one single transaction --> helps rolling back in case of an error (data consistency)
     public void updateIngredientRatings(Long groupId, Long userId, Map <Long, String> ingredientRatings) {
@@ -272,5 +275,22 @@ public class UserService {
         user.setVotingStatus(UserVotingStatus.VOTED);
     }
 
+
+    public void leaveGroup(Long userId) {
+        User user = getUserById(userId);
+        Long groupId = user.getGroupId();
+        if (groupId != null) {
+            Group group = groupService.getGroupById(groupId);
+            group.removeGuestId(userId);
+            groupService.updateGroupToRemoveGuest(group);
+        }
+        user.setGroupId(null);
+        userRepository.save(user);
+        userRepository.flush();
+    }
+    public boolean isUserInGroup(Long userId) {
+        User user = getUserById(userId);
+        return user.getGroupId() != null;
+    }
 
 }

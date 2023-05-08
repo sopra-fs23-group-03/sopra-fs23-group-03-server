@@ -82,6 +82,9 @@
 | Lany        | #84    | Create GET /groups/{id} request                                                  |   X  |
 |             | #187   | Create GET /groups/{id}/members request                                          |   X  |
 | Orestis     |   #57  | Function to randomly select one recipe suggestion from the API                   |  Χ   |
+
+
+
 |             |   #88  | Reopened and fixed the updating attributes and the tests                         |  X   |
 | Kalliopi    |   #43  | Create host and guest view of group forming page                                 |      |
 |             |   #57  | Create "Ingredient Page"                                                         |      |      
