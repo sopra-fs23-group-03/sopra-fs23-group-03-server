@@ -2,6 +2,8 @@ package ch.uzh.ifi.hase.soprafs23.entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 
@@ -17,13 +19,17 @@ public class Ingredient implements Serializable  {
     private String name;
 
     @Column(nullable = true)
-    private Long calculatedRating;
+    private int calculatedRating;
 
     @ManyToMany(mappedBy = "ingredientsSet")
     private Set<User> usersSet;
 
     @ManyToOne
     private Group group;
+
+    @ElementCollection //TODO: makes sense to have own table?
+    @Column(nullable = true)
+    private List<String> singleUserRatings = new ArrayList<>();
 
     public Ingredient() {
         this.usersSet = new HashSet<>();
@@ -51,11 +57,11 @@ public class Ingredient implements Serializable  {
         this.name = name;
     }
 
-    public Long getCalculatedRating() {
+    public int getCalculatedRating() {
         return calculatedRating;
     }
 
-    public void setCalculatedRating(Long calculatedRating) {
+    public void setCalculatedRating(int calculatedRating) {
         this.calculatedRating = calculatedRating;
     }
 
@@ -75,4 +81,11 @@ public class Ingredient implements Serializable  {
         this.group = group;
     }
 
+    public List<String> getSingleUserRatings() {
+        return singleUserRatings;
+    }
+
+    public void setSingleUserRatings(List<String> singleUserRatings) {
+        this.singleUserRatings = singleUserRatings;
+    }
 }

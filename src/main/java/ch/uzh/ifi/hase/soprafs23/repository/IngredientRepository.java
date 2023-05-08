@@ -13,5 +13,7 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
 
     Optional<Ingredient> findById(Long id);
 
+    List<Ingredient> findByGroupId(Long id); //TODO: does it work?
+
 
 }

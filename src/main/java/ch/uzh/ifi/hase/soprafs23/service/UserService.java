@@ -1,11 +1,13 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
-import ch.uzh.ifi.hase.soprafs23.entity.Group;
+
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
+import ch.uzh.ifi.hase.soprafs23.constant.UserVotingStatus;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
@@ -20,11 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -66,6 +64,7 @@ public class UserService {
     public User createUser(User newUser) {
         newUser.setToken(UUID.randomUUID().toString());
         newUser.setStatus(UserStatus.ONLINE);
+        newUser.setVotingStatus(UserVotingStatus.NOT_VOTED);
       
         // check that the username is still free
         checkIfUsernameExists(newUser.getUsername());
@@ -148,7 +147,6 @@ public class UserService {
         } else if(newPassword != null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "To change your password please enter your current password");
         }
-        
 
         if(newUsername != null && !newUsername.equals(user.getUsername())) {
             checkIfUsernameExists(newUsername);
@@ -186,7 +184,6 @@ public class UserService {
         if(guest.getGroupId() != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("User with id %s is already in the group with id %d.", guest.getId(), guest.getGroupId()));
         }
-        
         guest.setGroupId(groupId);
         
         guest = userRepository.save(guest);
@@ -226,13 +223,60 @@ public class UserService {
             }
             ingredient.setGroup(group);
             newIngredients.add(ingredient);
-
         }
 
         user.addIngredient(newIngredients);
         userRepository.save(user);
         userRepository.flush();
     }
+
+
+    @Transactional //for Spring; makes all changes to db persisted in one single transaction --> helps rolling back in case of an error (data consistency)
+    public void updateIngredientRatings(Long groupId, Long userId, Map <Long, String> ingredientRatings) {
+        // fetch User and Group
+        User user = getUserById(userId); // 404 - user not found
+        Group group = groupService.getGroupById(groupId);  // 404 - group not found
+
+        if(user.getVotingStatus() == UserVotingStatus.VOTED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "You voted already"); // 409 - user already voted
+            // TODO: check (or change) enum everytime someone leaves the group, also at the end after planning when redirected to Landing Page
+        }
+
+        // Count entries in map and check if user rated all of them.
+        int countGivenRatings = ingredientRatings.size();
+
+        Set<Ingredient> groupIngredients = group.getIngredients();
+        int countNeededRatings = groupIngredients.size();
+
+        if (countGivenRatings != countNeededRatings) { // 422 - not enough ratings send
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, countGivenRatings + " ratings given, but " + countNeededRatings + " ratings needed. Amount of ratings not matching.");
+        }
+
+        // for each ingredient in ingredientRatings
+        for (Map.Entry<Long, String> entry : ingredientRatings.entrySet()) {
+            Long ingredientId = entry.getKey();
+            String userRating = entry.getValue();
+
+            // find Ingredient based on IngredientID
+            Ingredient ingredient = group.getIngredients()
+                    .stream()
+                    .filter(i -> i.getId().equals(ingredientId))
+                    .findFirst()
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ingredient with given ID " + ingredientId + " not found"));
+
+            // add rating to singleUserRatings list of found Ingredient for the given User
+            List<String> singleUserRatings = ingredient.getSingleUserRatings();
+            singleUserRatings.add(userRating);
+            ingredient.setSingleUserRatings(singleUserRatings);
+
+            ingredientRepository.save(ingredient);
+        }
+
+        ingredientRepository.flush();
+        user.setVotingStatus(UserVotingStatus.VOTED);
+    }
+
+
     public void leaveGroup(Long userId) {
         User user = getUserById(userId);
         Long groupId = user.getGroupId();
@@ -249,4 +293,5 @@ public class UserService {
         User user = getUserById(userId);
         return user.getGroupId() != null;
     }
+
 }

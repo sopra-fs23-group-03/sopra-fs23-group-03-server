@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
+import ch.uzh.ifi.hase.soprafs23.constant.UserVotingStatus;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
@@ -51,11 +52,14 @@ public class UserServiceTest {
         user.setUsername("firstUsername");
         user.setPassword("firstPassword");
         user.setToken("firstToken");
+        user.setVotingStatus(UserVotingStatus.NOT_VOTED);
 
+        // to add to the users
         List<Ingredient> ingredients = new ArrayList<>();
         ingredients.add(new Ingredient("ingredient1"));
         ingredients.add(new Ingredient("ingredient2"));
         user.addIngredient(ingredients);
+
 
         // mocks the save() method of UserRepository
         when(userRepository.save(Mockito.any())).thenReturn(user);
@@ -280,6 +284,103 @@ public class UserServiceTest {
         assertThrows(ResponseStatusException.class, () -> userService.addUserIngredients(nonexistentUserId, Collections.singletonList(ingredientPutDTO)));
     }
 
+    @Test
+    void updateIngredientRatings_whenAllIngredientsRated_updatesUserVotingStatus() {
+        // given
+        Map<Long, String> ingredientRatings = new HashMap<>();
+        ingredientRatings.put(1L, "1");
+        ingredientRatings.put(2L, "-1");
+        User user = new User();
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        // to add to the group
+        Ingredient ingredient1 = new Ingredient("ingredient12");
+        ingredient1.setId(1L);
+        Ingredient ingredient2 = new Ingredient("ingredient23");
+        ingredient2.setId(2L);
+        Set<Ingredient> ingredientsSet = new HashSet<>();
+        ingredientsSet.add(ingredient1);
+        ingredientsSet.add(ingredient2);
+
+        Group group = new Group();
+        group.addIngredient(new ArrayList<>(ingredientsSet));
+
+        when(groupService.getGroupById(group.getId())).thenReturn(group);
+
+        // when
+        userService.updateIngredientRatings(group.getId(), user.getId(), ingredientRatings);
+
+        // then
+        assertEquals(UserVotingStatus.VOTED, user.getVotingStatus());
+    }
+
+    @Test
+    void updateIngredientRatings_withNonexistentUser_throwsException() {
+        // given
+        Long groupId = 1L;
+        Long nonexistentUserId = 999L;
+        Map<Long, String> ingredientRatings = new HashMap<>();
+
+        when(userRepository.findById(nonexistentUserId)).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(ResponseStatusException.class, () -> userService.updateIngredientRatings(groupId, nonexistentUserId, ingredientRatings),
+                "User with given ID " + nonexistentUserId + " not found");
+        verify(groupService, never()).getGroupById(anyLong());
+    }
 
 
+    @Test
+    void updateIngredientRatings_whenUserAlreadyVoted_throwsException() {
+        // given
+        Long groupId = 1L;
+        Map<Long, String> ingredientRatings = new HashMap<>();
+
+        User user = new User();
+        user.setVotingStatus(UserVotingStatus.VOTED);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        Group group = new Group();
+        when(groupService.getGroupById(groupId)).thenReturn(group);
+
+        // then
+        assertThrows(ResponseStatusException.class, () -> userService.updateIngredientRatings(groupId, user.getId(), ingredientRatings),
+                "You voted already");
+    }
+
+    @Test
+    void updateIngredientRatings_withInsufficientRatings_throwsException() {
+        // given
+        Long groupId = 1L;
+        Map<Long, String> ingredientRatings = new HashMap<>();
+        ingredientRatings.put(1L, "-1");
+
+        Group group = new Group();
+        group.setId(groupId);
+
+        // to add to the group
+        Ingredient ingredient1 = new Ingredient("ingredient1");
+        ingredient1.setId(1L);
+        Ingredient ingredient2 = new Ingredient("ingredient2");
+        ingredient2.setId(2L);
+
+        Set<Ingredient> ingredientsSet = new HashSet<>();
+        ingredientsSet.add(ingredient1);
+        ingredientsSet.add(ingredient2);
+
+        group.addIngredient(new ArrayList<>(ingredientsSet));
+
+        User user = new User();
+        user.setVotingStatus(UserVotingStatus.NOT_VOTED);
+
+        // mock necessary repositories and services
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(groupService.getGroupById(groupId)).thenReturn(group);
+
+        // when, then
+        assertThrows(ResponseStatusException.class, () -> userService.updateIngredientRatings(groupId, user.getId(), ingredientRatings));
+        verify(ingredientRepository, never()).save(any());
+        assertEquals(UserVotingStatus.NOT_VOTED, user.getVotingStatus()); // important to check, so user could vote again
+    }
 }

@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.entity;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.constant.UserVotingStatus;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -43,6 +44,9 @@ public class User implements Serializable {
 
     @Column(nullable = true)
     private Long groupId;
+
+    @Column(nullable = false)
+    private UserVotingStatus votingStatus;
 
     @ManyToMany(cascade = CascadeType.ALL) // so all changes are applied to ingredients class which is associated
     @JoinTable(
@@ -163,6 +167,11 @@ public class User implements Serializable {
         return ingredientsSet;
     }
 
+    public UserVotingStatus getVotingStatus() {
+        return votingStatus;
+    }
 
-
+    public void setVotingStatus(UserVotingStatus votingStatus) {
+        this.votingStatus = votingStatus;
+    }
 }

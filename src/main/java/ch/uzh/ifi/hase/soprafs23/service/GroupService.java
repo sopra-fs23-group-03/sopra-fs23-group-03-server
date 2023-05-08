@@ -1,7 +1,9 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
+import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,14 +23,17 @@ import org.springframework.web.server.ResponseStatusException;
 public class GroupService {
 
     private final GroupRepository groupRepository;
+    private final IngredientRepository ingredientRepository;
 
     private final UserService userService;
 
     @Autowired
-    public GroupService(@Qualifier("groupRepository") GroupRepository groupRepository,
+
+    public GroupService(@Qualifier("groupRepository") GroupRepository groupRepository, IngredientRepository ingredientRepository,
                         @Lazy @Qualifier("userService") UserService userService) {
         this.groupRepository = groupRepository;
         this.userService = userService;
+        this.ingredientRepository = ingredientRepository;
     }
 
     public List<Group> getGroups() {
@@ -116,6 +121,32 @@ public class GroupService {
         groupRepository.delete(group);
     }
 
+
+    @Transactional
+    public void calculateRatingPerGroup(Long groupId) {
+        // Fetch all ingredients related to the given groupId
+        List<Ingredient> ingredients = ingredientRepository.findByGroupId(groupId);
+
+        // Throw a 422 error if no ingredients are found
+        if (ingredients.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "No ingredients found for group " + groupId);
+        }
+
+        // Loop through each ingredient and calculate the sum of singleUserRatings --> MAJORITY VOTING LOGIC
+        for (Ingredient ingredient : ingredients) {
+            List<String> singleUserRatings = ingredient.getSingleUserRatings();
+            int sum = 0;
+            for (String rating : singleUserRatings) {
+                sum += Integer.parseInt(rating);
+            }
+
+            // Store the sum in the calculatedRating field for the ingredient and save to the database
+            ingredient.setCalculatedRating(sum);
+            ingredientRepository.save(ingredient);
+        }
+    }
+
+
     // This method has no intent to update the actual attributes of the group. It has the puprose to update the group to show the removed guest.
     public Group updateGroupToRemoveGuest(Group updatedGroup) {
         Optional<Group> groupOptional = groupRepository.findById(updatedGroup.getId());
@@ -131,6 +162,7 @@ public class GroupService {
 
         return group;
     }
+
 
 
 }

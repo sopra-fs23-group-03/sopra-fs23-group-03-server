@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
+import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
@@ -14,6 +15,7 @@ import ch.uzh.ifi.hase.soprafs23.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 
+
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -24,7 +26,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -273,7 +277,7 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
         }
 
-        // retrieve all ingretients available from the members of the group
+        // retrieve all ingredients available from the members of the group
         Set<Ingredient> groupIngredients = group.getIngredients();
 
         // convert to API representation
@@ -378,6 +382,34 @@ public class GroupController {
         }
 
         joinRequestService.rejectJoinRequest(joinRequest);
+    }
+
+    @PutMapping("/groups/{groupId}/ratings/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateRatings(@PathVariable Long groupId, @PathVariable Long userId,
+                                        @RequestBody List<IngredientPutDTO> ingredientPutDTOList,
+                                        HttpServletRequest request) {
+
+        Group group = groupService.getGroupById(groupId); // 404 - group not found
+
+        // check for authorization with request
+        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token")); // 401 - not authorized
+        if(!memberIds.contains(tokenId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
+        }
+
+        // Convert the list of IngredientPutDTOs to a Map of ingredient IDs to ratings
+        Map<Long, String> ingredientRatings = ingredientPutDTOList.stream()
+                .collect(Collectors.toMap(IngredientPutDTO::getId, IngredientPutDTO::getUserRating));
+
+        // Pass the map of ingredient ratings to the service method
+        userService.updateIngredientRatings(groupId, userId, ingredientRatings);
+
+        if(group.getVotingType().equals(VotingType.MAJORITYVOTE)) {
+            // As last step calculate the final ingredientRating per Group and store it in ingredientRepo
+            groupService.calculateRatingPerGroup(groupId);
+        }
     }
 
 }
