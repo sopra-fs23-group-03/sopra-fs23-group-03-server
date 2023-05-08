@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
+import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
@@ -405,9 +406,10 @@ public class GroupController {
         // Pass the map of ingredient ratings to the service method
         userService.updateIngredientRatings(groupId, userId, ingredientRatings);
 
-        // As last step calculate the final ingredientRating per Group and store it in ingredientRepo
-        groupService.calculateRatingPerGroup(groupId);
-
+        if(group.getVotingType().equals(VotingType.MAJORITYVOTE)) {
+            // As last step calculate the final ingredientRating per Group and store it in ingredientRepo
+            groupService.calculateRatingPerGroup(groupId);
+        }
         //TODO: then it depends on votingtype to get final result, so include API Call with voting type?
     }
 

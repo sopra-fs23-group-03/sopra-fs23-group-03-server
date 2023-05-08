@@ -866,6 +866,7 @@ public class GroupControllerTest {
                 .collect(Collectors.toMap(IngredientPutDTO::getId, IngredientPutDTO::getUserRating));
         String requestBody = asJsonString(ingredientPutDTOList);
 
+        group.setVotingType(VotingType.MAJORITYVOTE);
         List<Long> memberIds = new ArrayList<>();
         memberIds.add(group.getHostId());
 
