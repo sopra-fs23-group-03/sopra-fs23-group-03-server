@@ -280,8 +280,6 @@ public class GroupController {
         groupService.calculateRatingPerGroup(groupId);
 
         //TODO: then it depends on votingtype to get final result, so include API Call with voting type?
-
     }
-
 
 }

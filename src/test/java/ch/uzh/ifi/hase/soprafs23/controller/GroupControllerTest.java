@@ -6,10 +6,12 @@ import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupPostDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationPutDTO;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
+import ch.uzh.ifi.hase.soprafs23.constant.UserVotingStatus;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,10 +30,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -829,6 +829,97 @@ public class GroupControllerTest {
         mockMvc.perform(getRequest)
             .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    public void testUpdateRatings_success() throws Exception { // 204 - no content
+        // given
+        List<IngredientPutDTO> ingredientPutDTOList = new ArrayList<>();
+
+        IngredientPutDTO ingredientPutDTO1 = new IngredientPutDTO();
+        ingredientPutDTO1.setId(1L);
+        ingredientPutDTO1.setUserRating("1");
+        IngredientPutDTO ingredientPutDTO2 = new IngredientPutDTO();
+        ingredientPutDTO2.setId(2L);
+        ingredientPutDTO2.setUserRating("-1");
+        ingredientPutDTOList.add(ingredientPutDTO1);
+        ingredientPutDTOList.add(ingredientPutDTO2);
+        Map<Long, String> ingredientRatings = ingredientPutDTOList.stream()
+                .collect(Collectors.toMap(IngredientPutDTO::getId, IngredientPutDTO::getUserRating));
+        String requestBody = asJsonString(ingredientPutDTOList);
+
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(group.getHostId());
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/groups/{groupId}/ratings/{userId}", group.getId(), user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", user.getToken())
+                .content(requestBody);
+
+        mockMvc.perform(putRequest)
+                .andExpect(status().isNoContent());
+
+        // then
+        verify(userService, times(1)).updateIngredientRatings(group.getId(), user.getId(), ingredientRatings);
+        verify(groupService, times(1)).calculateRatingPerGroup(group.getId());
+    }
+
+    @Test
+    public void testUpdateRatings_groupNotFound() throws Exception { // 404 - group not found
+        // given
+        Long nonExistingGroupId = 99L;
+        List<IngredientPutDTO> ingredientPutDTOList = new ArrayList<>();
+        IngredientPutDTO ingredientPutDTO1 = new IngredientPutDTO();
+        ingredientPutDTO1.setId(1L);
+        ingredientPutDTO1.setUserRating("1");
+        ingredientPutDTOList.add(ingredientPutDTO1);
+        String requestBody = asJsonString(ingredientPutDTOList);
+
+        // mocks
+        given(groupService.getGroupById(nonExistingGroupId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/groups/{groupId}/ratings/{userId}", nonExistingGroupId, user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", user.getToken())
+                .content(requestBody);
+
+        // then
+        mockMvc.perform(putRequest)
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testUpdateRatings_notAuthorized() throws Exception { // 401 - not authorized
+        // given
+        Long anotherUserId = 7L;
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(group.getHostId());
+        List<IngredientPutDTO> ingredientPutDTOList = new ArrayList<>();
+        IngredientPutDTO ingredientPutDTO1 = new IngredientPutDTO();
+        ingredientPutDTO1.setId(1L);
+        ingredientPutDTO1.setUserRating("-1");
+        ingredientPutDTOList.add(ingredientPutDTO1);
+        String requestBody = asJsonString(ingredientPutDTOList);
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+        given(userService.getUseridByToken("anotherToken")).willReturn(anotherUserId);
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/groups/{groupId}/ratings/{userId}", group.getId(), user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", "anotherToken")
+                .content(requestBody);
+
+        // then
+        mockMvc.perform(putRequest)
+                .andExpect(status().isUnauthorized());
+    }
+
 
     //Helper Method to convert DTOs into a JSON strings
     private String asJsonString(final Object object) {
