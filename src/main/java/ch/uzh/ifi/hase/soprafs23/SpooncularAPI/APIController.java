@@ -4,17 +4,21 @@ import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
+import ch.uzh.ifi.hase.soprafs23.service.RecipeService;
 import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.APIService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class APIController {
@@ -32,10 +36,14 @@ public class APIController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private RecipeService recipeService;
+
+
     @GetMapping("/groups/{groupId}/result")
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
-    public APIGetDTO getRandomRecipe(@PathVariable Long groupId, HttpServletRequest request) {
+    public ResponseEntity<List<APIGetDTO>> getGroupRecipe(@PathVariable Long groupId, HttpServletRequest request) {
         // 404 - group not found
         Group group = groupService.getGroupById(groupId);
 
@@ -45,18 +53,37 @@ public class APIController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
         }
 
-        Long hostId = group.getHostId();
-        User host = userService.getUserById(hostId);
-        Recipe detailedRecipe = apiService.getHostRecipe(host); //change this
+        List<RecipeInfo> recipeInfos = apiService.getRecipe(group);
 
-        APIGetDTO apiGetDTO = new APIGetDTO();
-        apiGetDTO.setId(detailedRecipe.getId());
-        apiGetDTO.setTitle(detailedRecipe.getTitle());
-        apiGetDTO.setReadyInMinutes(detailedRecipe.getReadyInMinutes());
-        apiGetDTO.setPricePerServing(detailedRecipe.getPricePerServing());
+        if (recipeInfos.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No recipes found");
+        }
 
-        return apiGetDTO;
+        List<APIGetDTO> apiGetDTOS = new ArrayList<>();
+
+        for (RecipeInfo recipeInfo : recipeInfos) {
+            Recipe recipe = new Recipe();
+            recipe.setTitle(recipeInfo.getTitle());
+            recipe.setUsedIngredients(recipeInfo.getUsedIngredients().stream().map(IngredientInfo::getName).collect(Collectors.toList()));
+            recipe.setMissedIngredients(recipeInfo.getMissedIngredients().stream().map(IngredientInfo::getName).collect(Collectors.toList()));
+            recipe.setGroup(group);
+
+            // Save the recipe in the database
+            recipeService.save(recipe);
+
+            APIGetDTO apiGetDTO = new APIGetDTO();
+            apiGetDTO.setId(recipe.getId());
+            apiGetDTO.setTitle(recipe.getTitle());
+            apiGetDTO.setUsedIngredients(recipe.getUsedIngredients());
+            apiGetDTO.setMissedIngredients(recipe.getMissedIngredients());
+            apiGetDTO.setGroupId(groupId);
+
+            apiGetDTOS.add(apiGetDTO);
+        }
+
+        return new ResponseEntity<>(apiGetDTOS, HttpStatus.OK);
     }
+
 
     @GetMapping("/ingredients")
     @ResponseStatus(HttpStatus.OK) // 200

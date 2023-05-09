@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.IngredientAPI;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -14,9 +15,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import ch.uzh.ifi.hase.soprafs23.repository.RecipeRepository;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.nio.charset.StandardCharsets;
+
 import java.util.*;
 import java.net.URLEncoder;
 import java.util.stream.Collectors;
@@ -26,6 +28,7 @@ public class APIService {
 
     @Autowired
     private GroupService groupService;
+    private RecipeRepository recipeRepository;
     private final RestTemplate restTemplate = new RestTemplate();
     private final String apiKey = "355684ee05744c43a90c66aeda3fecd2";
 
@@ -64,36 +67,29 @@ public class APIService {
         }
     }
 
-    public Recipe getRecipe(Group group) { // get recipes based on the ingredients provided by the group
+
+    public List<RecipeInfo> getRecipe(Group group) {
         Set<Ingredient> finalSetIngredients = groupService.getFinalIngredients(group);
-        List<String> listOfIngredients = finalSetIngredients.stream() // need to convert the Set into strings via List<String>
+        List<String> listOfIngredients = finalSetIngredients.stream()
                 .map(Ingredient::getName)
                 .collect(Collectors.toList());
 
-        String ingredients = String.join(",", listOfIngredients);
+        String ingredients = listOfIngredients.stream()
+                .map(ingredient -> URLEncoder.encode(ingredient, StandardCharsets.UTF_8))
+                .collect(Collectors.joining(","));
+
         String searchApiUrl = "https://api.spoonacular.com/recipes/findByIngredients?apiKey=" + apiKey +
-                "&ingredients=" + ingredients + "&number=3&ignorePantry=true&ranking=2";
-
+                "&ingredients=" + ingredients + "&number=1&ignorePantry=true&ranking=2";
         try {
-            ResponseEntity<List<RecipeInfo>> searchResponse = restTemplate.exchange(searchApiUrl, HttpMethod.GET, null, new ParameterizedTypeReference<>() {}); //we use this here bc response has more objects
-            List<RecipeInfo> recipes = searchResponse.getBody();
-            if (recipes != null && !recipes.isEmpty()) {
-                RecipeInfo recipeInfo = recipes.get(0);
-                Recipe recipe = new Recipe();
-                recipe.setTitle(recipeInfo.getTitle());
-                recipe.setUsedIngredients(recipeInfo.getUsedIngredients());
-                return recipe;
-            }
-        } catch (HttpClientErrorException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Group not found");
-            }
+            ResponseEntity<List<RecipeInfo>> searchResponse = restTemplate.exchange(searchApiUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<RecipeInfo>>() {});
+            return searchResponse.getBody();
+        } catch (Exception e) {
+            // TODO: Handle the error
+            e.printStackTrace();
+            return Collections.emptyList();
         }
-
-        return null;
-
-
     }
+
 
 
     public List<String> getListOfIngredients(String initialString) { //for frontend to be displayed in order for the users to choose from

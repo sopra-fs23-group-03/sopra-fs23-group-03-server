@@ -1,17 +1,23 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
+
+import java.util.List;
+
 public class APIGetDTO {
-    private int id;
+    private Long id;
     private String title;
-    private int readyInMinutes;
-    private double pricePerServing;
+    private List<String> usedIngredients;
+    private List<String> missedIngredients;
+    private Long groupId;
 
     // Getters and Setters
-    public int getId() {
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -23,19 +29,27 @@ public class APIGetDTO {
         this.title = title;
     }
 
-    public int getReadyInMinutes() {
-        return readyInMinutes;
+    public List<String> getUsedIngredients() {
+        return usedIngredients;
     }
 
-    public void setReadyInMinutes(int readyInMinutes) {
-        this.readyInMinutes = readyInMinutes;
+    public void setUsedIngredients(List<String> usedIngredients) {
+        this.usedIngredients = usedIngredients;
     }
 
-    public double getPricePerServing() {
-        return pricePerServing;
+    public List<String> getMissedIngredients() {
+        return missedIngredients;
     }
 
-    public void setPricePerServing(double pricePerServing) {
-        this.pricePerServing = pricePerServing;
+    public void setMissedIngredients(List<String> missedIngredients) {
+        this.missedIngredients = missedIngredients;
+    }
+
+    public Long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Long groupId) {
+        this.groupId = groupId;
     }
 }

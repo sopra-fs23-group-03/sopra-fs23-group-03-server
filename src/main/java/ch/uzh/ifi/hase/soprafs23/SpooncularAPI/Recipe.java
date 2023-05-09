@@ -1,25 +1,57 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
+
 
 import java.util.List;
+import javax.persistence.*;
+import java.io.Serializable;
 
-public class Recipe {
-    private int id;
+@Entity
+@Table(name = "RECIPES")
+public class Recipe implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "recipe_id", updatable = false, insertable = false)
+    private Long id;
+    @Column(nullable = false)
     private String title;
+
+    @Column(nullable = true)
     private int readyInMinutes;
+    @Column(nullable = true)
     double pricePerServing;
 
-    private List<IngredientAPI> usedIngredients;
+    @ElementCollection
+    @CollectionTable(name = "USED_INGREDIENTS")
+    private List<String> usedIngredients;
 
-    private List<String> missedIngredients; //keep as string bc they are not in the db yet and we only display them
+    @ElementCollection
+    @CollectionTable(name = "MISSED_INGREDIENTS") //TODO: change this back?
+    @Column(name = "INGREDIENT")
+    private List<String> missedIngredients;
+
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private Group group;
+
+    public Recipe() {}
+
+    public Recipe(String title, List<String> usedIngredients, Group group) {
+        this.title = title;
+        this.usedIngredients = usedIngredients;
+        this.group = group;
+    }
 
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -47,11 +79,11 @@ public class Recipe {
         this.pricePerServing = pricePerServing;
     }
 
-    public List<IngredientAPI> getUsedIngredients() {
+    public List<String> getUsedIngredients() {
         return usedIngredients;
     }
 
-    public void setUsedIngredients(List<IngredientAPI> usedIngredients) {
+    public void setUsedIngredients(List<String> usedIngredients) {
         this.usedIngredients = usedIngredients;
     }
 
@@ -61,5 +93,17 @@ public class Recipe {
 
     public void setMissedIngredients(List<String> missedIngredients) {
         this.missedIngredients = missedIngredients;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public void setGroup(Group group) {
+        this.group = group;
     }
 }
