@@ -363,7 +363,7 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "You are the host. If you want to leave, delete the group"); // 409 - conflict
         }
 
-        // Remove the guest from the group
+        // Remove the guest and their ingredients from the group
         userService.leaveGroup(guestId);
     }
 
