@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -383,6 +384,41 @@ public class GroupController {
 
         joinRequestService.rejectJoinRequest(joinRequest);
     }
+
+    @GetMapping("/groups/{groupId}/requests")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
+    public List<UserGetDTO> getOpenJoinRequests(@PathVariable Long groupId, HttpServletRequest request) {
+        // Check if the group exists
+        Group currentGroup = groupService.getGroupById(groupId);
+
+        // Check if the user is the host of the group
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if (!tokenId.equals(currentGroup.getHostId())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized");
+        }
+
+        // Get a list of open join requests
+        List<JoinRequest> joinRequests = joinRequestService.getOpenJoinRequestsByGroupId(groupId);
+
+        if (joinRequests.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT, "There are no open requests for the group");
+        }
+
+        // Convert JoinRequest objects to UserGetDTOs and return them
+        List<UserGetDTO> userGetDTOs = new ArrayList<>();
+        for (JoinRequest joinRequest : joinRequests) {
+            User guest = userService.getUserById(joinRequest.getGuestId());
+            UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(guest);
+            userGetDTOs.add(userGetDTO);
+        }
+
+        return userGetDTOs;
+    }
+
+
+
+
 
     @PutMapping("/groups/{groupId}/ratings/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
