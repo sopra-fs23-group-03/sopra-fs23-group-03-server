@@ -9,7 +9,6 @@ import ch.uzh.ifi.hase.soprafs23.entity.JoinRequest;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.JoinRequestRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.*;
-import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 import ch.uzh.ifi.hase.soprafs23.service.JoinRequestService;
@@ -40,8 +39,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
 
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
@@ -69,7 +66,6 @@ public class GroupControllerTest {
     private InvitationService invitationService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-
 
     @Mock
     private JoinRequestRepository joinRequestRepository;

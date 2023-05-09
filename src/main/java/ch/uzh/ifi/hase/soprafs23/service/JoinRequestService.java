@@ -51,7 +51,6 @@ public class JoinRequestService {
         return joinRequest;
     }
 
-
     public JoinRequest getJoinRequestByGuestIdAndGroupId(Long guestId, Long groupId) {
         Optional<JoinRequest> joinRequest = joinRequestRepository.findByGuestIdAndGroupId(guestId, groupId);
         if (joinRequest.isEmpty()) {

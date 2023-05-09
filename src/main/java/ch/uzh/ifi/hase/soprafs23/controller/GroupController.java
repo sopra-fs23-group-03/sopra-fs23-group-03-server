@@ -417,10 +417,6 @@ public class GroupController {
         return userGetDTOs;
     }
 
-
-
-
-
     @PutMapping("/groups/{groupId}/ratings/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateRatings(@PathVariable Long groupId, @PathVariable Long userId,
@@ -448,6 +444,7 @@ public class GroupController {
             groupService.calculateRatingPerGroup(groupId);
         }
     }
+
     @PutMapping("/groups/{groupId}/state")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void changeGroupState(@PathVariable Long groupId, @RequestBody GroupState newState, HttpServletRequest request) {
@@ -482,7 +479,5 @@ public class GroupController {
 
         return group.getGroupState();
     }
-
-
 
 }
