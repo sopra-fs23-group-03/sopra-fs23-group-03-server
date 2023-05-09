@@ -160,7 +160,7 @@ public class GroupService {
         return finalIngredients;
     }
 
-    // This method has no intent to update the actual attributes of the group. It has the puprose to update the group to show the removed guest.
+    // This method has no intent to update the actual attributes of the group. It has the purpose to update the group to show the removed guest.
     public Group updateGroupToRemoveGuest(Group updatedGroup) {
         Optional<Group> groupOptional = groupRepository.findById(updatedGroup.getId());
 

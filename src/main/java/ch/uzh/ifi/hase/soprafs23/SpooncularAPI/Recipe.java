@@ -1,10 +1,19 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
+
+import java.util.List;
+
 public class Recipe {
     private int id;
     private String title;
     private int readyInMinutes;
     double pricePerServing;
+
+    private List<IngredientAPI> usedIngredients;
+
+    private List<String> missedIngredients; //keep as string bc they are not in the db yet and we only display them
+
 
     public int getId() {
         return id;
@@ -36,5 +45,21 @@ public class Recipe {
 
     public void setPricePerServing(double pricePerServing) {
         this.pricePerServing = pricePerServing;
+    }
+
+    public List<IngredientAPI> getUsedIngredients() {
+        return usedIngredients;
+    }
+
+    public void setUsedIngredients(List<IngredientAPI> usedIngredients) {
+        this.usedIngredients = usedIngredients;
+    }
+
+    public List<String> getMissedIngredients() {
+        return missedIngredients;
+    }
+
+    public void setMissedIngredients(List<String> missedIngredients) {
+        this.missedIngredients = missedIngredients;
     }
 }

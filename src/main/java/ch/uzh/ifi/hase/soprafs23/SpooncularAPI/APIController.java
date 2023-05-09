@@ -47,7 +47,7 @@ public class APIController {
 
         Long hostId = group.getHostId();
         User host = userService.getUserById(hostId);
-        Recipe detailedRecipe = apiService.getHostRecipe(host);
+        Recipe detailedRecipe = apiService.getHostRecipe(host); //change this
 
         APIGetDTO apiGetDTO = new APIGetDTO();
         apiGetDTO.setId(detailedRecipe.getId());
