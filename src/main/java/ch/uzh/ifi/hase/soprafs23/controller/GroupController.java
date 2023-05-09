@@ -395,7 +395,7 @@ public class GroupController {
         // Check if the user is the host of the group
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
         if (!tokenId.equals(currentGroup.getHostId())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized");
         }
 
         // Get a list of open join requests
