@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -200,6 +201,34 @@ public class GroupServiceTest {
         expectedIngredients.add(potato);
 
         assertEquals(expectedIngredients, groupService.getFinalIngredients(group));
+    }
+
+    @Test
+    public void removeGuestFromGroup_test() {
+        Ingredient apple = new Ingredient("apple");
+        apple.setId(9L);
+        
+        User user = new User();
+        user.setId(5L);
+        user.addIngredient(Collections.singletonList(apple));
+        apple.setUsersSet(Collections.singleton(user));
+
+        group.addGuestId(user.getId());
+        group.addIngredient(Collections.singletonList(apple));
+        apple.setGroup(group);
+
+        // mocks
+        when(userService.getUserById(user.getId())).thenReturn(user);
+        when(ingredientRepository.findById(apple.getId())).thenReturn(Optional.of(apple));
+
+        groupService.removeGuestFromGroup(group, user.getId());
+
+        assertEquals(null, user.getGroupId());
+        assertTrue(user.getIngredients().isEmpty());
+        assertTrue(group.getGuestIds().isEmpty());
+        assertTrue(group.getIngredients().isEmpty());
+
+        verify(ingredientRepository, times(1)).delete(apple);
     }
 
 }

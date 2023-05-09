@@ -179,7 +179,6 @@ public class GroupService {
         Set<Long> ingredientToBeDeletedIds = new HashSet<>();
 
         for (Ingredient ingredient : ingredients) {
-            System.out.println(ingredient.getId());
             Set<User> ingredientUsers = ingredient.getUsersSet();
             if (ingredientUsers.contains(user)) {
                 if (ingredientUsers.size() == 1) {
@@ -191,7 +190,6 @@ public class GroupService {
         }
 
         for (Long id : ingredientToBeDeletedIds) {
-            System.out.println(id);
             Optional<Ingredient> ingredient = ingredientRepository.findById(id);
             if (ingredient.isPresent()) {
                 ingredientRepository.delete(ingredient.get());
