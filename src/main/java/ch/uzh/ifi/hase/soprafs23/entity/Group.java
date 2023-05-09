@@ -42,13 +42,13 @@ public class Group implements Serializable {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private GroupState state;
+    private GroupState groupState;
 
     // constructor
     public Group() {
         this.guestIds = new HashSet<>();
         this.ingredientsSet = new HashSet<>();
-        this.state = GroupState.GROUPFORMING;
+        this.groupState = GroupState.GROUPFORMING;
     }
 
     public Long getId() {
@@ -116,11 +116,11 @@ public class Group implements Serializable {
     }
 
     public GroupState getGroupState() {
-        return state;
+        return groupState;
     }
 
-    public void setGroupState(GroupState state) {
-        this.state = state;
+    public void setGroupState(GroupState groupState) {
+        this.groupState = groupState;
     }
 
 }

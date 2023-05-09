@@ -13,7 +13,7 @@ public class GroupGetDTO {
 
     private String votingType;
 
-    private GroupState state;
+    private GroupState groupState;
 
     public Long getId() {
         return id;
@@ -55,11 +55,10 @@ public class GroupGetDTO {
         this.votingType = votingType;
     }
 
-    public GroupState getState() {
-        return state;
+    public GroupState getGroupState() {
+        return groupState;
     }
-
-    public void setState(GroupState state) {
-        this.state = state;
+    public void setGroupState(GroupState groupState) {
+        this.groupState = groupState;
     }
 }
