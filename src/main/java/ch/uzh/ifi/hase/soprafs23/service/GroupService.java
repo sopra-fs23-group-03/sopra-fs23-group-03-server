@@ -206,20 +206,4 @@ public class GroupService {
         return group;
     }
 
-    // This method has no intent to update the actual attributes of the group. It has the puprose to update the group to show the removed guest.
-    public Group updateGroupToRemoveGuest(Group updatedGroup) {
-        Optional<Group> groupOptional = groupRepository.findById(updatedGroup.getId());
-
-        if (!groupOptional.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Group with id %s does not exist", updatedGroup.getId()));
-        }
-
-        Group group = groupOptional.get();
-
-        group = groupRepository.save(group);
-        groupRepository.flush();
-
-        return group;
-    }
-
 }
