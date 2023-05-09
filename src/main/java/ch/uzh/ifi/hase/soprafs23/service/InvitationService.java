@@ -19,10 +19,12 @@ import ch.uzh.ifi.hase.soprafs23.repository.InvitationRepository;
 public class InvitationService {
 
     private final InvitationRepository invitationRepository;
+    private final GroupService groupService;
 
     @Autowired
-    public InvitationService(@Qualifier("invitationRepository") InvitationRepository invitationRepository) {
+    public InvitationService(@Qualifier("invitationRepository") InvitationRepository invitationRepository, GroupService groupService) {
         this.invitationRepository = invitationRepository;
+        this.groupService = groupService;
     }
 
 
@@ -30,6 +32,11 @@ public class InvitationService {
         List<Invitation> existingInvites = invitationRepository.findByGroupIdAndGuestId(groupId, guestId);
         if (!existingInvites.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Invitation already exists for the given group and guest.")); // 409-error
+        }
+
+        if (!groupService.canUserJoinGroup(groupId)) {
+            String errorMessage = String.format("Group %d is not in the GROUPFORMING state", groupId);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, errorMessage);
         }
 
         // assign guestId and groupId to invite
@@ -67,6 +74,10 @@ public class InvitationService {
     public void deleteInvitation(Invitation invitation) {
         invitationRepository.delete(invitation);
         invitationRepository.flush();
+    }
+    @Transactional
+    public void deleteInvitationsByGroupId(Long groupId) {
+        invitationRepository.deleteAllByGroupId(groupId);
     }
     
 }

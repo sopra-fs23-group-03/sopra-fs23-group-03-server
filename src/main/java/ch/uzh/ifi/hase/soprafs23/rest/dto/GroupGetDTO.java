@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.rest.dto;
 
+import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
+
 public class GroupGetDTO {
     private Long id;
 
@@ -10,6 +12,8 @@ public class GroupGetDTO {
     private String hostName;
 
     private String votingType;
+
+    private GroupState state;
 
     public Long getId() {
         return id;
@@ -51,4 +55,11 @@ public class GroupGetDTO {
         this.votingType = votingType;
     }
 
+    public GroupState getState() {
+        return state;
+    }
+
+    public void setState(GroupState state) {
+        this.state = state;
+    }
 }

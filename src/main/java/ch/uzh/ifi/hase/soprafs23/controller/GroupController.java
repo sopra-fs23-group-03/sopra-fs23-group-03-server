@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
+import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
@@ -447,5 +448,41 @@ public class GroupController {
             groupService.calculateRatingPerGroup(groupId);
         }
     }
+    @PutMapping("/groups/{groupId}/state")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changeGroupState(@PathVariable Long groupId, @RequestBody GroupState newState, HttpServletRequest request) {
+        Group group = groupService.getGroupById(groupId);
+
+        if (group == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
+        }
+
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if (!tokenId.equals(group.getHostId())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized");
+        }
+
+        groupService.changeGroupState(groupId, newState);
+    }
+
+    @GetMapping("/groups/{groupId}/state")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public GroupState getGroupState(@PathVariable Long groupId, HttpServletRequest request) {
+        Group group = groupService.getGroupById(groupId);
+
+        if (group == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
+        }
+
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if (!tokenId.equals(group.getHostId())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized");
+        }
+
+        return group.getGroupState();
+    }
+
+
 
 }

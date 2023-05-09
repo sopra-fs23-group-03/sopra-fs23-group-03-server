@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
+import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
@@ -29,10 +30,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
@@ -41,13 +44,11 @@ import java.util.ArrayList;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(GroupController.class)
 public class GroupControllerTest {
@@ -67,8 +68,8 @@ public class GroupControllerTest {
     @MockBean
     private InvitationService invitationService;
 
-    @Mock
     private final ObjectMapper objectMapper = new ObjectMapper();
+
 
     @Mock
     private JoinRequestRepository joinRequestRepository;
@@ -1482,7 +1483,80 @@ public class GroupControllerTest {
                 // Assert
                 .andExpect(status().isUnauthorized());
     }
+    @Test
+    public void testGetGroupStateNotFound() throws Exception {
+        given(groupService.getGroupById(anyLong())).willReturn(null);
 
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getHeader("X-Token")).thenReturn(user.getToken());
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/groups/1/state")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testGetGroupStateUnauthorized() throws Exception {
+        given(userService.getUseridByToken(anyString())).willReturn(user.getId() + 1L);
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getHeader("X-Token")).thenReturn(user.getToken());
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/groups/1/state")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void testGetGroupStateOk() throws Exception {
+        given(userService.getUseridByToken(anyString())).willReturn(user.getId());
+
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getHeader("X-Token")).thenReturn(user.getToken());
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/groups/1/state")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isOk());
+    }
+    @Test
+    public void changeGroupState_GroupNotFound_404() throws Exception {
+        Long nonExistingGroupId = 99L;
+        given(groupService.getGroupById(nonExistingGroupId)).willReturn(null);
+
+        mockMvc.perform(put("/groups/{groupId}/state", nonExistingGroupId)
+                        .header("X-Token", user.getToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(GroupState.GROUPFORMING)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void changeGroupState_NotAuthorized_401() throws Exception {
+        User anotherUser = new User();
+        anotherUser.setId(3L);
+        anotherUser.setToken("anothertoken");
+        given(userService.getUseridByToken(anotherUser.getToken())).willReturn(anotherUser.getId());
+
+        mockMvc.perform(put("/groups/{groupId}/state", group.getId())
+                        .header("X-Token", anotherUser.getToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(GroupState.GROUPFORMING)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void changeGroupState_Success_200() throws Exception {
+        mockMvc.perform(put("/groups/{groupId}/state", group.getId())
+                        .header("X-Token", user.getToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(GroupState.GROUPFORMING)))
+                .andExpect(status().isNoContent());
+
+        verify(groupService, times(1)).changeGroupState(group.getId(), GroupState.GROUPFORMING);
+    }
 
 
 }

@@ -38,6 +38,11 @@ public class JoinRequestService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, errorMessage);
         }
 
+        if (!groupService.canUserJoinGroup(groupId)) {
+            String errorMessage = String.format("Group %d is not in the GROUPFORMING state", groupId);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, errorMessage);
+        }
+
         JoinRequest joinRequest = new JoinRequest();
         joinRequest.setGuestId(guestId);
         joinRequest.setGroupId(groupId);
@@ -83,7 +88,10 @@ public class JoinRequestService {
     public List<JoinRequest> getOpenJoinRequestsByGroupId(Long groupId) {
         return joinRequestRepository.findAllByGroupId(groupId);
     }
-
+    @Transactional
+    public void deleteJoinRequestsByGroupId(Long groupId) {
+        joinRequestRepository.deleteAllByGroupId(groupId);
+    }
 
 }
 
