@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
+import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 
@@ -163,10 +164,39 @@ public class GroupService {
     public Group removeGuestFromGroup(Group group, Long guestId) {
         group.removeGuestId(guestId);
 
+        removeIngredientsFromUser(group, guestId);
+
         group = groupRepository.save(group);
         groupRepository.flush();
 
         return group;
+    }
+
+    private void removeIngredientsFromUser(Group group, Long userId) {
+        User user = userService.getUserById(userId);
+
+        Set<Ingredient> ingredients = group.getIngredients();
+        Set<Long> ingredientToBeDeletedIds = new HashSet<>();
+
+        for (Ingredient ingredient : ingredients) {
+            System.out.println(ingredient.getId());
+            Set<User> ingredientUsers = ingredient.getUsersSet();
+            if (ingredientUsers.contains(user)) {
+                if (ingredientUsers.size() == 1) {
+                    ingredientToBeDeletedIds.add(ingredient.getId());
+                    group.removeIngredient(ingredient);
+                }
+                user.removeIngredient(ingredient);
+            }
+        }
+
+        for (Long id : ingredientToBeDeletedIds) {
+            System.out.println(id);
+            Optional<Ingredient> ingredient = ingredientRepository.findById(id);
+            if (ingredient.isPresent()) {
+                ingredientRepository.delete(ingredient.get());
+            }
+        }
     }
 
     public Group addGuestToGroup(Group group, Long guestId) {

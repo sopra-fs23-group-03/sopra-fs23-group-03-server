@@ -105,6 +105,10 @@ public class Group implements Serializable {
         }
     }
 
+    public void removeIngredient(Ingredient ingredient) {
+        ingredientsSet.remove(ingredient);
+    }
+
     public Set<Ingredient> getIngredients() {
         return ingredientsSet;
     }
