@@ -11,12 +11,16 @@ import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.JoinRequestRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -26,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@RunWith(MockitoJUnitRunner.class)
 public class JoinRequestServiceTest {
 
     @Mock
@@ -37,7 +42,7 @@ public class JoinRequestServiceTest {
     @InjectMocks
     private JoinRequestService joinRequestService;
 
-    @InjectMocks
+    @Mock
     private GroupService groupService;
 
     @Mock
@@ -153,7 +158,83 @@ public class JoinRequestServiceTest {
         // verify that findByGuestIdAndGroupId() was called exactly once with the given arguments
         verify(joinRequestRepository, times(1)).findByGuestIdAndGroupId(guest.getId(), group.getId());
     }
+    @Test
+    public void testAcceptJoinRequest_validRequest_joinRequestIsDeletedAndUserAddedToGroup() {
+        // Arrange
+        Long guestId = 1L;
+        Long groupId = 2L;
+
+        JoinRequest joinRequest = new JoinRequest();
+        joinRequest.setGuestId(guestId);
+        joinRequest.setGroupId(groupId);
+
+        Group group = new Group();
+        group.setId(groupId);
+
+        User guest = new User();
+        guest.setId(guestId);
+
+        when(joinRequestRepository.findByGuestIdAndGroupId(guestId, groupId)).thenReturn(Optional.of(joinRequest));
+        when(groupService.getGroupById(groupId)).thenReturn((group));
+        when(userService.getUserById(guestId)).thenReturn(guest);
+
+        // Act
+        joinRequestService.acceptJoinRequest(groupId, guestId);
+
+        // Assert
+        verify(joinRequestRepository).delete(joinRequest);
+        verify(groupService).updateGroupToRemoveGuest(group);
+        verify(userService).joinGroup(guestId, groupId);
+    }
 
 
 
+    @Test
+    public void testRejectJoinRequest_validRequest_joinRequestIsDeleted() {
+        // given
+        JoinRequest existingJoinRequest = new JoinRequest();
+        existingJoinRequest.setId(1L);
+        existingJoinRequest.setGuestId(guest.getId());
+        existingJoinRequest.setGroupId(group.getId());
+
+        // when
+        joinRequestService.rejectJoinRequest(existingJoinRequest);
+
+        // then
+        verify(joinRequestRepository, times(1)).delete(existingJoinRequest);
+    }
+
+    @Test
+    public void testDeleteOtherJoinRequests_existingRequests_deletesOtherJoinRequests() {
+        // given
+        Long acceptedGroupId = 2L;
+
+        JoinRequest joinRequest1 = new JoinRequest();
+        joinRequest1.setId(1L);
+        joinRequest1.setGuestId(guest.getId());
+        joinRequest1.setGroupId(3L);
+
+        JoinRequest joinRequest2 = new JoinRequest();
+        joinRequest2.setId(2L);
+        joinRequest2.setGuestId(guest.getId());
+        joinRequest2.setGroupId(acceptedGroupId);
+
+        JoinRequest joinRequest3 = new JoinRequest();
+        joinRequest3.setId(3L);
+        joinRequest3.setGuestId(guest.getId());
+        joinRequest3.setGroupId(4L);
+
+        List<JoinRequest> joinRequests = Arrays.asList(joinRequest1, joinRequest2, joinRequest3);
+
+        // mock the findAllByGuestId() method of JoinRequestRepository
+        when(joinRequestRepository.findAllByGuestId(guest.getId())).thenReturn(joinRequests);
+
+        // when
+        joinRequestService.deleteOtherJoinRequests(guest.getId(), acceptedGroupId);
+
+        // then
+        verify(joinRequestRepository, times(1)).delete(joinRequest1);
+        verify(joinRequestRepository, times(0)).delete(joinRequest2);
+        verify(joinRequestRepository, times(1)).delete(joinRequest3);
+    }
 }
