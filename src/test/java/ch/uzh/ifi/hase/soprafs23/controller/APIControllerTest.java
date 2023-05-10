@@ -141,7 +141,7 @@ public class APIControllerTest {
                 "&intolerances=" + intolerances + "&diet=" + diet + "&cuisine=" + cuisine;
 
         when(restTemplate.getForEntity(searchApiUrl, ComplexSearchResponse.class))
-                .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND, "Not found"));
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found"));
 
         // Act
         try {
@@ -206,7 +206,7 @@ public class APIControllerTest {
 
         // Set up mocks for the case when the API returns 404 status code
         when(apiService.getListOfIngredients(nonExistentIngredient))
-                .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND, "Ingredients not found"));
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Ingredients not found"));
 
         // Perform the test
         try {
@@ -241,3 +241,4 @@ public class APIControllerTest {
     }
 
 }
+    
