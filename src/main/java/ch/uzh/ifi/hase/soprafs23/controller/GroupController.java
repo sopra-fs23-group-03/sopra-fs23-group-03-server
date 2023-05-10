@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
+import ch.uzh.ifi.hase.soprafs23.constant.UserVotingStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
@@ -288,6 +289,41 @@ public class GroupController {
 
         return ingredientGetDTOs;
     }
+
+    @GetMapping("/groups/{groupId}/ingredients/final")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
+    public List<IngredientGetDTO> getFinalIngredientsOfGroupById(@PathVariable Long groupId, HttpServletRequest request) {
+
+        Group group = groupService.getGroupById(groupId); // 404 - group not found
+        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
+
+        // 401 - not authorized if not a member of the group
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if(!memberIds.contains(tokenId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
+        }
+
+        // 409 - One of the members hasn't voted yet
+        for (Long memberId : memberIds) {
+            User member = userService.getUserById(memberId);
+            if (member.getVotingStatus() != UserVotingStatus.VOTED) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Not all members of the group have voted yet.");
+            }
+        }
+
+        // retrieve all ingredients available from the members of the group
+        Set<Ingredient> groupFinalIngredients = groupService.getFinalIngredients(group);
+
+        // convert to API representation
+        List<IngredientGetDTO> ingredientGetDTOs = new ArrayList<>();
+        for(Ingredient ingredient : groupFinalIngredients) {
+            ingredientGetDTOs.add(DTOMapper.INSTANCE.convertEntityToIngredientGetDTO(ingredient));
+        }
+
+        return ingredientGetDTOs;
+    }
+
     @DeleteMapping("/groups/{groupId}")
     @ResponseStatus(HttpStatus.NO_CONTENT) // 204
     public void deleteGroup(@PathVariable Long groupId, HttpServletRequest request) {
@@ -327,7 +363,7 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "You are the host. If you want to leave, delete the group"); // 409 - conflict
         }
 
-        // Remove the guest from the group
+        // Remove the guest and their ingredients from the group
         userService.leaveGroup(guestId);
     }
 

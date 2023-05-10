@@ -183,7 +183,7 @@ public class JoinRequestServiceTest {
 
         // Assert
         verify(joinRequestRepository).delete(joinRequest);
-        verify(groupService).updateGroupToRemoveGuest(group);
+        verify(groupService).addGuestToGroup(group, guestId);
         verify(userService).joinGroup(guestId, groupId);
     }
 
