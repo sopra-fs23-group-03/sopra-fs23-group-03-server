@@ -3,6 +3,8 @@ package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.IngredientAPI;
+import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -19,7 +21,9 @@ import java.net.URLEncoder;
 @Component
 public class APIService {
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String apiKey = "355684ee05744c43a90c66aeda3fecd2";
+    @Autowired
+    private IngredientRepository ingredientRepository;
+    private final String apiKey = "37a966f6312a4880aa8c37faf4e779f4";
 
     public Recipe getHostRecipe(User host) {
         String intolerances = String.join(",", host.getAllergiesSet());
@@ -58,7 +62,7 @@ public class APIService {
 
     public List<String> getListOfIngredients(String initialString) {
         String query = URLEncoder.encode(initialString, StandardCharsets.UTF_8);
-        String ingredientsApiUrl = "https://api.spoonacular.com/food/ingredients/search?apiKey=" + apiKey + "&query=" + query + "&number=100";
+        String ingredientsApiUrl = "https://api.spoonacular.com/food/ingredients/search?apiKey=" + apiKey + "&query=" + query + "&number=1000";
 
         try {
             ResponseEntity<IngredientSearchResponse> searchResponse = restTemplate.getForEntity(ingredientsApiUrl, IngredientSearchResponse.class);
@@ -66,10 +70,17 @@ public class APIService {
 
             List<String> ingredientNames = new ArrayList<>();
 
-            for (IngredientAPI ingredientAPI : ingredientsAPI) {
-                String name = ingredientAPI.getName();
-                ingredientNames.add(name);
-            }
+        for (IngredientAPI ingredientAPI : ingredientsAPI) {
+             String name = ingredientAPI.getName();
+             ingredientNames.add(name);
+
+             // Save the ingredient in the database if not already present
+             Optional<Ingredient> existingIngredient = ingredientRepository.findByName(name);
+             if (!existingIngredient.isPresent()) {
+                 Ingredient newIngredient = new Ingredient(name);
+                 ingredientRepository.save(newIngredient);
+             }
+        }
 
             if (ingredientNames.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no ingredient starting with those letters"); // 404 - error

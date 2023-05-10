@@ -1,7 +1,9 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.APIService;
@@ -15,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class APIController {
@@ -31,6 +34,8 @@ public class APIController {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private IngredientRepository ingredientRepository;
 
     @GetMapping("/groups/{groupId}/result")
     @ResponseStatus(HttpStatus.OK) // 200
@@ -61,28 +66,29 @@ public class APIController {
     @GetMapping("/ingredients")
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
-    public List<String> getAllIngredients(HttpServletRequest request, @RequestParam String initialString){
+    public List<String> getAllIngredients(HttpServletRequest request, @RequestParam String initialString) {
         // check validity of token
         String token = request.getHeader("X-Token"); // 401 - not authorized
-        if(userService.getUseridByToken(token).equals(0L)) {
+        if (userService.getUseridByToken(token).equals(0L)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
         }
 
-        if (initialString.length() == 3) {
+        if (initialString.length() == 1) {
+            List<Ingredient> ingredients = ingredientRepository.findByNameContainingIgnoreCase(initialString);
+            List<String> ingredientNames = ingredients.stream().map(Ingredient::getName).collect(Collectors.toList());
 
-            List<String> ingredientNames = apiService.getListOfIngredients(initialString);
+            // If no ingredients were found in the database, fetch them from the API
+            if (ingredientNames.isEmpty()) {
+                ingredientNames = apiService.getListOfIngredients(initialString);
+            }
 
-            // when no ingredients were found - 404
             if (ingredientNames.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No ingredients found for initial string '%s'.", initialString));
             }
             return ingredientNames;
-
-            }
-        else{
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("The provided string has to be exactly length 3, you provided '%s'.", initialString)); // 422 - unprocessable entity
+        } else {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("The provided string has to be exactly length 1, you provided '%s'.", initialString)); // 422 - unprocessable entity
         }
-
-
     }
+
 }

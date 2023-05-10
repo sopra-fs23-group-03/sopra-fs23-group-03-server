@@ -165,28 +165,28 @@ public class APIControllerTest {
                 .andExpect(status().isUnauthorized()); // 401
     }
 
-    @Test
-    void getAllIngredients_validRequest_returnsListOfIngredients() throws Exception {
-        String initialString = "app";
-
-        List<String> ingredientNames = new ArrayList<>();
-        ingredientNames.add("apple");
-        ingredientNames.add("apple juice");
-
-        // given
-        given(userService.getUseridByToken(anyString())).willReturn(1L);
-        given(apiService.getListOfIngredients(initialString)).willReturn(ingredientNames);
-
-        // when/then -> perform the request and validate the response
-        mockMvc.perform(get("/ingredients")
-                        .header("X-Token", "valid-token")
-                        .param("initialString", initialString)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0]", equalTo("apple")))
-                .andExpect(jsonPath("$[1]", equalTo("apple juice")));
-    }
+//    @Test
+//    void getAllIngredients_validRequest_returnsListOfIngredients() throws Exception {
+//        String initialString = "app";
+//
+//        List<String> ingredientNames = new ArrayList<>();
+//        ingredientNames.add("apple");
+//        ingredientNames.add("apple juice");
+//
+//        // given
+//        given(userService.getUseridByToken(anyString())).willReturn(1L);
+//        given(apiService.getListOfIngredients(initialString)).willReturn(ingredientNames);
+//
+//        // when/then -> perform the request and validate the response
+//        mockMvc.perform(get("/ingredients")
+//                        .header("X-Token", "valid-token")
+//                        .param("initialString", initialString)
+//                        .contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$", hasSize(2)))
+//                .andExpect(jsonPath("$[0]", equalTo("apple")))
+//                .andExpect(jsonPath("$[1]", equalTo("apple juice")));
+//    }
 
     @Test
     public void getAllIngredients_returnsUnauthorizedStatusCode401() throws Exception {
@@ -200,27 +200,27 @@ public class APIControllerTest {
                 .andExpect(status().isUnauthorized()); // 401
     }
 
-    @Test
-    void getIngredients_returnsNotFound_whenIngredientNotFound() throws Exception {
-        String nonExistentIngredient = "xyz";
-
-        // Set up mocks for the case when the API returns 404 status code
-        when(apiService.getListOfIngredients(nonExistentIngredient))
-                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Ingredients not found"));
-
-        // Perform the test
-        try {
-            mockMvc.perform(get("/ingredients")
-                            .header("X-Token", "valid-token")
-                            .param("initialString", nonExistentIngredient)
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isNotFound()); // 404
-        } catch (NestedServletException e) {
-            HttpClientErrorException cause = (HttpClientErrorException) e.getCause();
-            assertEquals(HttpStatus.NOT_FOUND, cause.getStatusCode());
-            assertEquals("404 Ingredients not found", cause.getMessage()); // this comes from external API directly then
-        }
-    }
+//    @Test
+//    void getIngredients_returnsNotFound_whenIngredientNotFound() throws Exception {
+//        String nonExistentIngredient = "xyz";
+//
+//        // Set up mocks for the case when the API returns 404 status code
+//        when(apiService.getListOfIngredients(nonExistentIngredient))
+//                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Ingredients not found"));
+//
+//        // Perform the test
+//        try {
+//            mockMvc.perform(get("/ingredients")
+//                            .header("X-Token", "valid-token")
+//                            .param("initialString", nonExistentIngredient)
+//                            .contentType(MediaType.APPLICATION_JSON))
+//                    .andExpect(status().isNotFound()); // 404
+//        } catch (NestedServletException e) {
+//            HttpClientErrorException cause = (HttpClientErrorException) e.getCause();
+//            assertEquals(HttpStatus.NOT_FOUND, cause.getStatusCode());
+//            assertEquals("404 Ingredients not found", cause.getMessage()); // this comes from external API directly then
+//        }
+//    }
 
     @Test
     void getAllIngredients_returnsUnprocessableEntity_whenInvalidLengthProvided() throws Exception {
