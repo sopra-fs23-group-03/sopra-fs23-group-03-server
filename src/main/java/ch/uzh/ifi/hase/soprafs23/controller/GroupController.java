@@ -452,10 +452,6 @@ public class GroupController {
         return userGetDTOs;
     }
 
-
-
-
-
     @PutMapping("/groups/{groupId}/ratings/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateRatings(@PathVariable Long groupId, @PathVariable Long userId,
