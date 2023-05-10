@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import java.nio.charset.StandardCharsets;
@@ -71,14 +72,15 @@ public class APIService {
             }
 
             if (ingredientNames.isEmpty()) {
-                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "There is no ingredient starting with those letters"); // 404 - error
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no ingredient starting with those letters"); // 404 - error
             }
 
             return ingredientNames;
         } catch (HttpServerErrorException e) {
-            throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
         }
     }
+    
     public String getApiKey() {
         return apiKey;
     }
