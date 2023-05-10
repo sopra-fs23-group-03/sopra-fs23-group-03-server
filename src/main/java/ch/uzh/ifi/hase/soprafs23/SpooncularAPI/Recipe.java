@@ -46,9 +46,8 @@ public class Recipe implements Serializable {
         this.group = group;
     }
 
-
     public long getId() {
-        return id;
+        return id == null ? 0 : id;
     }
 
     public void setId(long id) {
@@ -93,10 +92,6 @@ public class Recipe implements Serializable {
 
     public void setMissedIngredients(List<String> missedIngredients) {
         this.missedIngredients = missedIngredients;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public Group getGroup() {
