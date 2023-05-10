@@ -126,7 +126,6 @@
 | Ann-Kathrin | #105   |  Implement a method for adding the ingredient contributions                      |  X   |
 |             | #210   |  Retrieve all ingredients from external API to avoid spelling mistakes           |  X   |
 |             | #54    |  Take input from REST API per user for all ingredients and transform it ...      |   X  |   
-|             | #55    |    Implement majority logic                                                      |    X | 
 | Chiara      | #94    | Edit change button to edit also username/password                                |  X   |
 |             | #100   | Imprement button voting types in Group Creation page with default for majority   |  X   |
 |             | #112   | Create dropdown for diet preference                                              |  X   |
@@ -149,8 +148,10 @@
 |             |        |                                                                                  |      |
 | Kalliopi    |        |                                                                                  |      |
 |             |        |                                                                                  |      |
-| Ann-Kathrin |        |                                                                                  |      |
-|             |        |                                                                                  |      |
+| Ann-Kathrin |   #58  |     Store the guest and their respective ingredient contributions                |      |
+|             |#172/#55|    Implement default majority logic                                              |    X | 
+|             |    #59 |    Develop endpoint to store and retrieve guest and ingredient contributions     |      |
+|             |   #57  | select one recipe suggestion from the API based on the given ingredients         |      |
 | Chiara      |        |                                                                                  |      |
 |             |        |                                                                                  |      |
     
