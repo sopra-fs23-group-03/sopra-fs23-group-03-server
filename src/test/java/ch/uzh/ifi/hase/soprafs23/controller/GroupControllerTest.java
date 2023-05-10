@@ -8,11 +8,8 @@ import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.JoinRequest;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.JoinRequestRepository;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupPostDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientPutDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.InvitationPutDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.JoinRequestPostDTO;
-import ch.uzh.ifi.hase.soprafs23.rest.dto.JoinRequestPutDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.*;
+import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 import ch.uzh.ifi.hase.soprafs23.service.JoinRequestService;
@@ -1549,6 +1546,60 @@ public class GroupControllerTest {
                         .header("X-Token", "invalid-token")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(joinRequestPutDTO)))
+                .andExpect(status().isUnauthorized());
+    }
+    @Test
+    void getOpenJoinRequests_returns200_whenOpenRequestsPresent() throws Exception {
+        // Arrange
+        JoinRequest joinRequest = new JoinRequest();
+        joinRequest.setGuestId(3L);
+        joinRequest.setGroupId(group.getId());
+
+        List<JoinRequest> joinRequestList = Collections.singletonList(joinRequest);
+        given(joinRequestService.getOpenJoinRequestsByGroupId(group.getId())).willReturn(joinRequestList);
+
+        // Act
+        mockMvc.perform(get("/groups/{groupId}/requests", group.getId())
+                        .header("X-Token", user.getToken()))
+                // Assert
+                .andExpect(status().isOk());
+    }
+    @Test
+    void getOpenJoinRequests_returns204_whenNoOpenRequests() throws Exception {
+        // Arrange
+        given(joinRequestService.getOpenJoinRequestsByGroupId(group.getId())).willReturn(Collections.emptyList());
+
+        // Act
+        mockMvc.perform(get("/groups/{groupId}/requests", group.getId())
+                        .header("X-Token", user.getToken()))
+                // Assert
+                .andExpect(status().isNoContent());
+    }
+    @Test
+    void getOpenJoinRequests_returns404_whenGroupNotFound() throws Exception {
+        // Arrange
+        Long nonExistentGroupId = 99L;
+        given(groupService.getGroupById(nonExistentGroupId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"));
+
+        // Act
+        mockMvc.perform(get("/groups/{groupId}/requests", nonExistentGroupId)
+                        .header("X-Token", user.getToken()))
+                // Assert
+                .andExpect(status().isNotFound());
+    }
+    @Test
+    void getOpenJoinRequests_returns401_whenUserNotHost() throws Exception {
+        // Arrange
+        User nonHostUser = new User();
+        nonHostUser.setId(3L);
+        nonHostUser.setToken("nonhosttoken");
+
+        given(userService.getUseridByToken(nonHostUser.getToken())).willReturn(nonHostUser.getId());
+
+        // Act
+        mockMvc.perform(get("/groups/{groupId}/requests", group.getId())
+                        .header("X-Token", nonHostUser.getToken()))
+                // Assert
                 .andExpect(status().isUnauthorized());
     }
 
