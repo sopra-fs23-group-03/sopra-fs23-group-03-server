@@ -34,7 +34,7 @@ public class APIService {
             List<Recipe> recipes = Objects.requireNonNull(searchResponse.getBody()).getResults();
 
             if (recipes.isEmpty()) {
-                throw new HttpClientErrorException(HttpStatus.CONFLICT, "Results cannot be calculated yet");
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Results cannot be calculated yet");
             }
 
             Random random = new Random();
@@ -47,12 +47,12 @@ public class APIService {
             return detailedRecipe;
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "Group not found");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
             } else {
                 throw e;
             }
         } catch (HttpServerErrorException e) {
-            throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "Not authorized");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized");
         }
     }
 
