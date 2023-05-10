@@ -31,6 +31,16 @@ springBoot {
     mainClass.set('ch.uzh.ifi.hase.soprafs23.Application')
 }
 
+dependencyManagement {
+    dependencies {
+        dependencySet(group: 'com.fasterxml.jackson.core', version: '2.12.5') { //we force everything on this group to use this version
+            entry 'jackson-databind'
+            entry 'jackson-core'
+            entry 'jackson-annotations'
+        }
+    }
+}
+
 dependencies {
     implementation 'org.mapstruct:mapstruct:1.3.1.Final' //or 1.4.2.Final'? //by sopra default it was: 1.3.1.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.3.1.Final'
