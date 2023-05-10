@@ -195,6 +195,4 @@ public class GroupService {
 
         return groupRepository.save(group);
     }
-
-
 }

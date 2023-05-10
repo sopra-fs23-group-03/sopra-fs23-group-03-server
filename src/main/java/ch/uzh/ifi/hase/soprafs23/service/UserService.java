@@ -293,5 +293,4 @@ public class UserService {
         User user = getUserById(userId);
         return user.getGroupId() != null;
     }
-
 }

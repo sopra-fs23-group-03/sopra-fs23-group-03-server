@@ -39,7 +39,7 @@ public class JoinRequestService {
         }
 
         if (!groupService.canUserJoinGroup(groupId)) {
-            String errorMessage = String.format("Group %d is not in the GROUPFORMING state", groupId);
+            String errorMessage = String.format("You cannot make a join request to Group %d because it is not in the GROUPFORMING state", groupId);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, errorMessage);
         }
 
@@ -87,6 +87,7 @@ public class JoinRequestService {
     public List<JoinRequest> getOpenJoinRequestsByGroupId(Long groupId) {
         return joinRequestRepository.findAllByGroupId(groupId);
     }
+
     @Transactional
     public void deleteJoinRequestsByGroupId(Long groupId) {
         joinRequestRepository.deleteAllByGroupId(groupId);

@@ -35,7 +35,7 @@ public class InvitationService {
         }
 
         if (!groupService.canUserJoinGroup(groupId)) {
-            String errorMessage = String.format("Group %d is not in the GROUPFORMING state", groupId);
+            String errorMessage = String.format("You cannot create an invitation for Group %d because it is not in the GROUPFORMING state", groupId);
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, errorMessage);
         }
 
