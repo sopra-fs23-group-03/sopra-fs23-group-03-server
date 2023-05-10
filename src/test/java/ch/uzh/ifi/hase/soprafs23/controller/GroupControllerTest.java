@@ -970,21 +970,13 @@ public class GroupControllerTest {
     }
 
     @Test
-    public void testUpdateRatings_success() throws Exception { // 204 - no content
+    public void testUpdateRatings_success() throws Exception {
         // given
-        List<IngredientPutDTO> ingredientPutDTOList = new ArrayList<>();
+        Map<Long, String> ingredientRatings = new HashMap<>();
+        ingredientRatings.put(1L, "1");
+        ingredientRatings.put(2L, "-1");
 
-        IngredientPutDTO ingredientPutDTO1 = new IngredientPutDTO();
-        ingredientPutDTO1.setId(1L);
-        ingredientPutDTO1.setUserRating("1");
-        IngredientPutDTO ingredientPutDTO2 = new IngredientPutDTO();
-        ingredientPutDTO2.setId(2L);
-        ingredientPutDTO2.setUserRating("-1");
-        ingredientPutDTOList.add(ingredientPutDTO1);
-        ingredientPutDTOList.add(ingredientPutDTO2);
-        Map<Long, String> ingredientRatings = ingredientPutDTOList.stream()
-                .collect(Collectors.toMap(IngredientPutDTO::getId, IngredientPutDTO::getUserRating));
-        String requestBody = asJsonString(ingredientPutDTOList);
+        String requestBody = asJsonString(ingredientRatings);
 
         group.setVotingType(VotingType.MAJORITYVOTE);
         List<Long> memberIds = new ArrayList<>();
@@ -1008,15 +1000,13 @@ public class GroupControllerTest {
     }
 
     @Test
-    public void testUpdateRatings_groupNotFound() throws Exception { // 404 - group not found
+    public void testUpdateRatings_groupNotFound() throws Exception {
         // given
         Long nonExistingGroupId = 99L;
-        List<IngredientPutDTO> ingredientPutDTOList = new ArrayList<>();
-        IngredientPutDTO ingredientPutDTO1 = new IngredientPutDTO();
-        ingredientPutDTO1.setId(1L);
-        ingredientPutDTO1.setUserRating("1");
-        ingredientPutDTOList.add(ingredientPutDTO1);
-        String requestBody = asJsonString(ingredientPutDTOList);
+        Map<Long, String> ingredientRatings = new HashMap<>();
+        ingredientRatings.put(1L, "1");
+
+        String requestBody = asJsonString(ingredientRatings);
 
         // mocks
         given(groupService.getGroupById(nonExistingGroupId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -1033,17 +1023,15 @@ public class GroupControllerTest {
     }
 
     @Test
-    public void testUpdateRatings_notAuthorized() throws Exception { // 401 - not authorized
+    public void testUpdateRatings_notAuthorized() throws Exception {
         // given
         Long anotherUserId = 7L;
         List<Long> memberIds = new ArrayList<>();
         memberIds.add(group.getHostId());
-        List<IngredientPutDTO> ingredientPutDTOList = new ArrayList<>();
-        IngredientPutDTO ingredientPutDTO1 = new IngredientPutDTO();
-        ingredientPutDTO1.setId(1L);
-        ingredientPutDTO1.setUserRating("-1");
-        ingredientPutDTOList.add(ingredientPutDTO1);
-        String requestBody = asJsonString(ingredientPutDTOList);
+        Map<Long, String> ingredientRatings = new HashMap<>();
+        ingredientRatings.put(1L, "-1");
+
+        String requestBody = asJsonString(ingredientRatings);
 
         // mocks
         given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);

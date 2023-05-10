@@ -455,7 +455,7 @@ public class GroupController {
     @PutMapping("/groups/{groupId}/ratings/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateRatings(@PathVariable Long groupId, @PathVariable Long userId,
-                                        @RequestBody List<IngredientPutDTO> ingredientPutDTOList,
+                                        @RequestBody Map<Long, String> ingredientRatings, //I want a Long (ingredient id) and String (rating)
                                         HttpServletRequest request) {
 
         Group group = groupService.getGroupById(groupId); // 404 - group not found
@@ -466,10 +466,6 @@ public class GroupController {
         if(!memberIds.contains(tokenId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
         }
-
-        // Convert the list of IngredientPutDTOs to a Map of ingredient IDs to ratings
-        Map<Long, String> ingredientRatings = ingredientPutDTOList.stream()
-                .collect(Collectors.toMap(IngredientPutDTO::getId, IngredientPutDTO::getUserRating));
 
         // Pass the map of ingredient ratings to the service method
         userService.updateIngredientRatings(groupId, userId, ingredientRatings);
