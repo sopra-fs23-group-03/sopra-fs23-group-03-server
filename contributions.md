@@ -121,8 +121,7 @@
 |             | #168   | implement PUT /groups/{groupId}/requests/reject call                             |      |
 |             | #167   |implement POST /groups/{groupId}/requests call                                    |      |
 |             | #169   | implement PUT /groups/{groupId}/requests/accept call                             |      |    
-| Kalliopi    |        |                                                                                  |      |
-|             | #18    | Implement a function to fetch the recipe suggestion the backend API              |      |
+| Kalliopi    | #18    | Implement a function to fetch the recipe suggestion the backend API              |      |
 |             | #17    | Display the randomly selected recipe suggestion on the screen                    |      |
 | Ann-Kathrin | #105   |  Implement a method for adding the ingredient contributions                      |  X   |
 |             | #210   |  Retrieve all ingredients from external API to avoid spelling mistakes           |  X   |
@@ -143,8 +142,9 @@
 
 | Name        | Issues | Description                                                                      | Done |
 |-------------|--------|----------------------------------------------------------------------------------|------|
-| Lany        |        |                                                                                  |      |
-|             |        |                                                                                  |      |
+| Lany        | #60    | Develop an endpoint to retrieve and return the list of final ingredients.        |      |
+|             | #61    | Develop an endpoint to remove the ingredient contributions of the leaving guest. |      |
+|             | #62    | Implement a function to check if the group is left with only the host, and disband the group if necessary. |      |
 | Orestis     |        |                                                                                  |      |
 |             |        |                                                                                  |      |
 | Kalliopi    |        |                                                                                  |      |
