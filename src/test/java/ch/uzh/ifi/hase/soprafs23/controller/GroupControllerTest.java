@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
+import ch.uzh.ifi.hase.soprafs23.constant.UserVotingStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
@@ -35,8 +36,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.ArrayList;
-
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -748,7 +747,6 @@ public class GroupControllerTest {
         Ingredient apple = new Ingredient();
         apple.setId(19L);
         apple.setName("apple");
-        apple.setCalculatedRating(1);
 
         List<Ingredient> ingredients = new ArrayList<>();
         ingredients.add(apple);
@@ -845,7 +843,133 @@ public class GroupControllerTest {
     }
 
     @Test
+    public void testGetFinalIngredientsOfGroupById_valid_oneIngredient() throws Exception {
+        // given
+        user.setVotingStatus(UserVotingStatus.VOTED);
 
+        Ingredient apple = new Ingredient();
+        apple.setId(19L);
+        apple.setName("apple");
+        apple.setCalculatedRating(1);
+
+        Set<Ingredient> ingredients = new HashSet<>();
+        ingredients.add(apple);
+
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(group.getHostId());
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+        given(groupService.getFinalIngredients(group)).willReturn(ingredients);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/ingredients/final", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].id", is(apple.getId().intValue())))
+            .andExpect(jsonPath("$[0].name", is(apple.getName())));
+    }
+
+    @Test
+    public void testGetFinalIngredientsOfGroupById_valid_multipleIngredients() throws Exception {
+        // given
+        user.setVotingStatus(UserVotingStatus.VOTED);
+
+        Ingredient apple = new Ingredient("apple");
+        Ingredient pear = new Ingredient("pear");
+        Ingredient banana = new Ingredient("banana");
+
+        Set<Ingredient> ingredients = new HashSet<>();
+        ingredients.add(apple);
+        ingredients.add(pear);
+        ingredients.add(banana);
+
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(group.getHostId());
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+        given(groupService.getFinalIngredients(group)).willReturn(ingredients);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/ingredients/final", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(3)));
+    }
+
+    @Test
+    public void testGetFinalIngredientsOfGroupById_notYetVoted() throws Exception {
+        // given
+        user.setVotingStatus(UserVotingStatus.NOT_VOTED);
+
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(group.getHostId());
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/ingredients/final", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void testGetFinalIngredientsOfGroupById_groupNotFound() throws Exception {
+        // given
+        Long anotherGroupId = 17L;
+
+        // mocks
+        given(groupService.getGroupById(anotherGroupId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "error message"));
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/ingredients/final", anotherGroupId)
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testGetFinalIngredientsOfGroupById_notValidToken() throws Exception {
+        // given
+        String anotherToken = "anotherToken";
+        Long anotherUserId = 7L;
+
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(group.getHostId());
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+        given(userService.getUseridByToken(anotherToken)).willReturn(anotherUserId);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/ingredients/final", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", anotherToken);
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     public void testUpdateRatings_success() throws Exception { // 204 - no content
         // given
         List<IngredientPutDTO> ingredientPutDTOList = new ArrayList<>();
@@ -936,8 +1060,7 @@ public class GroupControllerTest {
                 .andExpect(status().isUnauthorized());
     }
 
-
-
+    @Test
     public void testGetGroupGuestsById_valid() throws Exception {
         User guest = new User();
         guest.setId(6L);
@@ -1063,7 +1186,6 @@ public class GroupControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-
     @Test
     public void testDeleteGroup401() throws Exception {
         // Prepare a different user
@@ -1154,7 +1276,6 @@ public class GroupControllerTest {
                 .andExpect(status().reason("You are the host. If you want to leave, delete the group"));
     }
 
-
     @Test
     public void leaveGroup_groupNotFound_404() throws Exception {
         Long groupId = 1L;
@@ -1165,7 +1286,6 @@ public class GroupControllerTest {
                         .header("X-Token", "testtoken"))
                 .andExpect(status().isNotFound());
     }
-
 
     @Test
     public void leaveGroup_unauthorized_401() throws Exception {
@@ -1183,8 +1303,6 @@ public class GroupControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(status().reason("Not authorized"));
     }
-
-
 
     @Test
     void testSendRequestToJoinGroupReturns201() throws Exception {
@@ -1212,6 +1330,7 @@ public class GroupControllerTest {
         // Assert
         assertEquals(HttpStatus.CREATED.value(), mvcResult.getResponse().getStatus());
     }
+    
     @Test
     public void sendRequestToJoinGroup_forbidden_403() throws Exception {
         // Prepare
@@ -1229,6 +1348,7 @@ public class GroupControllerTest {
                         .header("X-Token", guestId))
                 .andExpect(status().isForbidden());
     }
+
     @Test
     public void sendRequestToJoinGroup_unauthorized_401() throws Exception {
         // Prepare
@@ -1249,6 +1369,7 @@ public class GroupControllerTest {
                         .header("X-Token", invalidToken))
                 .andExpect(status().isUnauthorized());
     }
+    
     @Test
     public void sendRequestToJoinGroup_conflict_409() throws Exception {
         // Prepare
@@ -1271,7 +1392,6 @@ public class GroupControllerTest {
                         .header("X-Token", guestId))
                 .andExpect(status().isConflict());
     }
-
 
     @Test
     public void sendRequestToJoinGroup_notFound_404() throws Exception {

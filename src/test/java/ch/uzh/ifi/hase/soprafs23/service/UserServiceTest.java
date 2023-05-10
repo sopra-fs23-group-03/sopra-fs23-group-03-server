@@ -52,6 +52,7 @@ public class UserServiceTest {
         user.setUsername("firstUsername");
         user.setPassword("firstPassword");
         user.setToken("firstToken");
+        user.setGroupId(2L);
         user.setVotingStatus(UserVotingStatus.NOT_VOTED);
 
         // to add to the users
@@ -272,7 +273,6 @@ public class UserServiceTest {
         assertEquals(user.getIngredients().size(), 2); // bc 2 are mentioned above in setup
     }
 
-
     @Test
     void addUserIngredients_withNonexistentUserId_throwsException() {
         Long nonexistentUserId = 999L;
@@ -330,7 +330,6 @@ public class UserServiceTest {
         verify(groupService, never()).getGroupById(anyLong());
     }
 
-
     @Test
     void updateIngredientRatings_whenUserAlreadyVoted_throwsException() {
         // given
@@ -383,4 +382,11 @@ public class UserServiceTest {
         verify(ingredientRepository, never()).save(any());
         assertEquals(UserVotingStatus.NOT_VOTED, user.getVotingStatus()); // important to check, so user could vote again
     }
+
+    @Test
+    void leaveGroup_test() {
+        userService.leaveGroup(user.getId());
+        assertEquals(null, user.getGroupId());
+    }
+
 }
