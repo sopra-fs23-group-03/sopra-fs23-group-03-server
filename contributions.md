@@ -142,8 +142,10 @@
 | Lany        | #60    | Develop an endpoint to retrieve and return the list of final ingredients.        |      |
 |             | #61    | Develop an endpoint to remove the ingredient contributions of the leaving guest. |      |
 |             | #62    | Implement a function to check if the group is left with only the host, and disband the group if necessary. |      |
-| Orestis     |        |                                                                                  |      |
-|             |        |                                                                                  |      |
+| Orestis     | #171   | Create Method to include new guest to group                                      | X    |
+|             | #218   | add GET groups/{groupid}/requests call                                           | X    |
+|             | #77    | Create PUT /groups/{id}/state request                                            |      |
+|             | #170   | Create Method to check if user is allowed to request (group not entered certain stange in planning process). |      |
 | Kalliopi    |        |                                                                                  |      |
 |             |        |                                                                                  |      |
 | Ann-Kathrin |   #58  |     Store the guest and their respective ingredient contributions                |      |
