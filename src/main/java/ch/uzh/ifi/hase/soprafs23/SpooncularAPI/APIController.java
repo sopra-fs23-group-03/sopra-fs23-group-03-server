@@ -1,8 +1,10 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
+import ch.uzh.ifi.hase.soprafs23.entity.FullIngredient;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
@@ -36,6 +38,9 @@ public class APIController {
     private UserService userService;
     @Autowired
     private IngredientRepository ingredientRepository;
+
+    @Autowired
+    private FullIngredientRepository fullIngredientRepository;
 
     @GetMapping("/groups/{groupId}/result")
     @ResponseStatus(HttpStatus.OK) // 200
@@ -73,22 +78,13 @@ public class APIController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
         }
 
-        if (initialString.length() == 1) {
-            List<Ingredient> ingredients = ingredientRepository.findByNameContainingIgnoreCase(initialString);
-            List<String> ingredientNames = ingredients.stream().map(Ingredient::getName).collect(Collectors.toList());
+        List<FullIngredient> fullIngredients = fullIngredientRepository.findByNameContainingIgnoreCase(initialString);
+        List<String> ingredientNames = fullIngredients.stream().map(FullIngredient::getName).collect(Collectors.toList());
 
-            // If no ingredients were found in the database, fetch them from the API
-            if (ingredientNames.isEmpty()) {
-                ingredientNames = apiService.getListOfIngredients(initialString);
-            }
 
-            if (ingredientNames.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No ingredients found for initial string '%s'.", initialString));
-            }
-            return ingredientNames;
-        } else {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("The provided string has to be exactly length 1, you provided '%s'.", initialString)); // 422 - unprocessable entity
+        if (ingredientNames.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No ingredients found for initial string '%s'.", initialString));
         }
+        return ingredientNames;
     }
-
 }

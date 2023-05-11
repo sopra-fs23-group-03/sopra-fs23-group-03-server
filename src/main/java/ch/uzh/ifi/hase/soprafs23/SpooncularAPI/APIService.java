@@ -1,8 +1,11 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
+import ch.uzh.ifi.hase.soprafs23.entity.FullIngredient;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.IngredientAPI;
+import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +16,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.criteria.CriteriaBuilder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -21,9 +25,11 @@ import java.net.URLEncoder;
 @Component
 public class APIService {
     private final RestTemplate restTemplate = new RestTemplate();
+    private final String apiKey = "56638b96d69d409cab5a0cdf9a8a1f5d";
+    @Autowired
+    private FullIngredientRepository fullIngredientRepository;
     @Autowired
     private IngredientRepository ingredientRepository;
-    private final String apiKey = "37a966f6312a4880aa8c37faf4e779f4";
 
     public Recipe getHostRecipe(User host) {
         String intolerances = String.join(",", host.getAllergiesSet());
@@ -60,38 +66,34 @@ public class APIService {
         }
     }
 
-    public List<String> getListOfIngredients(String initialString) {
-        String query = URLEncoder.encode(initialString, StandardCharsets.UTF_8);
-        String ingredientsApiUrl = "https://api.spoonacular.com/food/ingredients/search?apiKey=" + apiKey + "&query=" + query + "&number=1000";
+    @PostConstruct
+    public void init() {
+        // Fetch all ingredients from the API
+        String ingredientsApiUrl = "https://api.spoonacular.com/food/ingredients/search?apiKey=" + apiKey + "&number=1000";
 
-        try {
-            ResponseEntity<IngredientSearchResponse> searchResponse = restTemplate.getForEntity(ingredientsApiUrl, IngredientSearchResponse.class);
-            List<IngredientAPI> ingredientsAPI = Objects.requireNonNull(searchResponse.getBody()).getResults();
-
-            List<String> ingredientNames = new ArrayList<>();
-
-        for (IngredientAPI ingredientAPI : ingredientsAPI) {
-             String name = ingredientAPI.getName();
-             ingredientNames.add(name);
-
-             // Save the ingredient in the database if not already present
-             Optional<Ingredient> existingIngredient = ingredientRepository.findByName(name);
-             if (!existingIngredient.isPresent()) {
-                 Ingredient newIngredient = new Ingredient(name);
-                 ingredientRepository.save(newIngredient);
-             }
-        }
-
-            if (ingredientNames.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no ingredient starting with those letters"); // 404 - error
-            }
-
-            return ingredientNames;
-        } catch (HttpServerErrorException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
+        for (char alphabet = 'a'; alphabet <= 'z'; alphabet++) {
+            String query = Character.toString(alphabet);
+            fetchAndStoreIngredients(ingredientsApiUrl, query);
         }
     }
-    
+
+    private void fetchAndStoreIngredients(String apiUrl, String query) {
+        String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
+        String fullUrl = apiUrl + "&query=" + encodedQuery;
+
+        ResponseEntity<IngredientSearchResponse> searchResponse = restTemplate.getForEntity(fullUrl, IngredientSearchResponse.class);
+        List<IngredientAPI> ingredientsAPI = Objects.requireNonNull(searchResponse.getBody()).getResults();
+
+        for (IngredientAPI ingredientAPI : ingredientsAPI) {
+            String name = ingredientAPI.getName();
+            // Save the ingredient in the FullIngredient table if not already present
+            Optional<FullIngredient> existingIngredient = fullIngredientRepository.findByName(name);
+            if (!existingIngredient.isPresent()) {
+                FullIngredient newIngredient = new FullIngredient(name);
+                fullIngredientRepository.save(newIngredient);
+            }
+        }
+    }
     public String getApiKey() {
         return apiKey;
     }
