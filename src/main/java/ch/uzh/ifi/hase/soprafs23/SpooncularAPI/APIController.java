@@ -83,7 +83,7 @@ public class APIController {
 
 
         if (ingredientNames.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No ingredients found for initial string '%s'.", initialString));
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No ingredients found with the name: '%s'.", initialString));
         }
         return ingredientNames;
     }
