@@ -92,7 +92,7 @@ public class APIService {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Unexpected error occurred while fetching recipe: " + e.getMessage());
-        } //TODO: Add authorization errors?
+        }
     }
 
     public RecipeDetailInfo getRecipeDetails(Long externalRecipeId) {
