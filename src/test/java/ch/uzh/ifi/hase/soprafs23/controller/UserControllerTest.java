@@ -481,11 +481,11 @@ public class UserControllerTest {
 
     @Test
     public void getInvitations_notValidToken() throws Exception {
-      String anotherToken = "anotherToken";
-
-      // mocks
-      given(userService.getUserById(user.getId())).willReturn(user);
-      given(userService.getUseridByToken(anotherToken)).willReturn(0L);
+        String anotherToken = "anotherToken";
+  
+        // mocks
+        given(userService.getUserById(user.getId())).willReturn(user);
+        given(userService.getUseridByToken(anotherToken)).willReturn(0L);
 
         // when
         MockHttpServletRequestBuilder getRequest = get("/users/{userId}/invitations", user.getId())
@@ -574,6 +574,69 @@ public class UserControllerTest {
         verify(userService, times(0)).addUserIngredients(any(), any());
     }
 
+    @Test
+    void getGroupIdOfUser_userInGroup() throws Exception {
+        // given
+        user.setGroupId(5L);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/groups", user.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", is(user.getGroupId().intValue())));
+    }
+
+    @Test
+    void getGroupIdOfUser_userNotInGroup() throws Exception {
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/groups", user.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void getGroupIdOfUser_userNotFound() throws Exception {
+        // given
+        Long anotherUserId = 8L;
+
+        // mocks
+        given(userService.getUserById(anotherUserId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "error message"));
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/groups", anotherUserId)
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getGroupIdOfUser_notValidToken() throws Exception {
+        // given
+        String anotherToken = "another Token";
+
+        // mocks
+        given(userService.getUseridByToken(anotherToken)).willReturn(6L);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/groups", user.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", anotherToken);
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isUnauthorized());
+    }
 
     //Helper Method to convert DTOs into a JSON strings
     private String asJsonString(final Object object) {
