@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +38,11 @@ public class JoinRequestService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, errorMessage);
         }
 
+        if (!groupService.canUserJoinGroup(groupId)) {
+            String errorMessage = String.format("You cannot make a join request to Group %d because it is not in the GROUPFORMING state", groupId);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, errorMessage);
+        }
+
         JoinRequest joinRequest = new JoinRequest();
         joinRequest.setGuestId(guestId);
         joinRequest.setGroupId(groupId);
@@ -44,7 +50,6 @@ public class JoinRequestService {
         joinRequestRepository.save(joinRequest);
         return joinRequest;
     }
-
 
     public JoinRequest getJoinRequestByGuestIdAndGroupId(Long guestId, Long groupId) {
         Optional<JoinRequest> joinRequest = joinRequestRepository.findByGuestIdAndGroupId(guestId, groupId);
@@ -61,8 +66,7 @@ public class JoinRequestService {
         Group group = groupService.getGroupById(groupId);
         User guest = userService.getUserById(guestId);
 
-        group.addGuestId(guest.getId());
-        groupService.updateGroupToRemoveGuest(group);
+        groupService.addGuestToGroup(group, guest.getId());
 
         userService.joinGroup(guestId, groupId);
     }
@@ -79,6 +83,15 @@ public class JoinRequestService {
             }
         }
     }
+    public List<JoinRequest> getOpenJoinRequestsByGroupId(Long groupId) {
+        return joinRequestRepository.findAllByGroupId(groupId);
+    }
+
+    @Transactional
+    public void deleteJoinRequestsByGroupId(Long groupId) {
+        joinRequestRepository.deleteAllByGroupId(groupId);
+    }
+
 }
 
 

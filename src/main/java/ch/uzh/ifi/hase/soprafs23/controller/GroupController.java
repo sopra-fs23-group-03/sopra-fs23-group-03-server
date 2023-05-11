@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
+import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
+import ch.uzh.ifi.hase.soprafs23.constant.UserVotingStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
@@ -17,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -288,6 +291,41 @@ public class GroupController {
 
         return ingredientGetDTOs;
     }
+
+    @GetMapping("/groups/{groupId}/ingredients/final")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
+    public List<IngredientGetDTO> getFinalIngredientsOfGroupById(@PathVariable Long groupId, HttpServletRequest request) {
+
+        Group group = groupService.getGroupById(groupId); // 404 - group not found
+        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
+
+        // 401 - not authorized if not a member of the group
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if(!memberIds.contains(tokenId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
+        }
+
+        // 409 - One of the members hasn't voted yet
+        for (Long memberId : memberIds) {
+            User member = userService.getUserById(memberId);
+            if (member.getVotingStatus() != UserVotingStatus.VOTED) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Not all members of the group have voted yet.");
+            }
+        }
+
+        // retrieve all ingredients available from the members of the group
+        Set<Ingredient> groupFinalIngredients = groupService.getFinalIngredients(group);
+
+        // convert to API representation
+        List<IngredientGetDTO> ingredientGetDTOs = new ArrayList<>();
+        for(Ingredient ingredient : groupFinalIngredients) {
+            ingredientGetDTOs.add(DTOMapper.INSTANCE.convertEntityToIngredientGetDTO(ingredient));
+        }
+
+        return ingredientGetDTOs;
+    }
+
     @DeleteMapping("/groups/{groupId}")
     @ResponseStatus(HttpStatus.NO_CONTENT) // 204
     public void deleteGroup(@PathVariable Long groupId, HttpServletRequest request) {
@@ -327,7 +365,7 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "You are the host. If you want to leave, delete the group"); // 409 - conflict
         }
 
-        // Remove the guest from the group
+        // Remove the guest and their ingredients from the group
         userService.leaveGroup(guestId);
     }
 
@@ -384,10 +422,41 @@ public class GroupController {
         joinRequestService.rejectJoinRequest(joinRequest);
     }
 
+    @GetMapping("/groups/{groupId}/requests")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
+    public List<UserGetDTO> getOpenJoinRequests(@PathVariable Long groupId, HttpServletRequest request) {
+        // Check if the group exists
+        Group currentGroup = groupService.getGroupById(groupId);
+
+        // Check if the user is the host of the group
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if (!tokenId.equals(currentGroup.getHostId())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized");
+        }
+
+        // Get a list of open join requests
+        List<JoinRequest> joinRequests = joinRequestService.getOpenJoinRequestsByGroupId(groupId);
+
+        if (joinRequests.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT, "There are no open requests for the group");
+        }
+
+        // Convert JoinRequest objects to UserGetDTOs and return them
+        List<UserGetDTO> userGetDTOs = new ArrayList<>();
+        for (JoinRequest joinRequest : joinRequests) {
+            User guest = userService.getUserById(joinRequest.getGuestId());
+            UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(guest);
+            userGetDTOs.add(userGetDTO);
+        }
+
+        return userGetDTOs;
+    }
+
     @PutMapping("/groups/{groupId}/ratings/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateRatings(@PathVariable Long groupId, @PathVariable Long userId,
-                                        @RequestBody List<IngredientPutDTO> ingredientPutDTOList,
+                                        @RequestBody Map<Long, String> ingredientRatings, //I want a Long (ingredient id) and String (rating)
                                         HttpServletRequest request) {
 
         Group group = groupService.getGroupById(groupId); // 404 - group not found
@@ -399,10 +468,6 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
         }
 
-        // Convert the list of IngredientPutDTOs to a Map of ingredient IDs to ratings
-        Map<Long, String> ingredientRatings = ingredientPutDTOList.stream()
-                .collect(Collectors.toMap(IngredientPutDTO::getId, IngredientPutDTO::getUserRating));
-
         // Pass the map of ingredient ratings to the service method
         userService.updateIngredientRatings(groupId, userId, ingredientRatings);
 
@@ -410,6 +475,41 @@ public class GroupController {
             // As last step calculate the final ingredientRating per Group and store it in ingredientRepo
             groupService.calculateRatingPerGroup(groupId);
         }
+    }
+
+    @PutMapping("/groups/{groupId}/state")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changeGroupState(@PathVariable Long groupId, @RequestBody GroupState newState, HttpServletRequest request) {
+        Group group = groupService.getGroupById(groupId);
+
+        if (group == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
+        }
+
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if (!tokenId.equals(group.getHostId())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized");
+        }
+
+        groupService.changeGroupState(groupId, newState);
+    }
+
+    @GetMapping("/groups/{groupId}/state")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public GroupState getGroupState(@PathVariable Long groupId, HttpServletRequest request) {
+        Group group = groupService.getGroupById(groupId);
+
+        if (group == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
+        }
+
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if (!tokenId.equals(group.getHostId())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized");
+        }
+
+        return group.getGroupState();
     }
 
 }

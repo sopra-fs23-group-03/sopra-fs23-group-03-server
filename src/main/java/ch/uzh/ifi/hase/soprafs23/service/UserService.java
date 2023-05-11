@@ -276,22 +276,22 @@ public class UserService {
         user.setVotingStatus(UserVotingStatus.VOTED);
     }
 
-
     public void leaveGroup(Long userId) {
         User user = getUserById(userId);
         Long groupId = user.getGroupId();
+
         if (groupId != null) {
             Group group = groupService.getGroupById(groupId);
-            group.removeGuestId(userId);
-            groupService.updateGroupToRemoveGuest(group);
+            groupService.removeGuestFromGroup(group, userId);
         }
+
         user.setGroupId(null);
         userRepository.save(user);
         userRepository.flush();
     }
+
     public boolean isUserInGroup(Long userId) {
         User user = getUserById(userId);
         return user.getGroupId() != null;
     }
-
 }

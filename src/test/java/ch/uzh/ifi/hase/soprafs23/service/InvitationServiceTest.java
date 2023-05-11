@@ -4,10 +4,13 @@ import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.repository.InvitationRepository;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,7 +19,7 @@ import static org.mockito.Mockito.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
+@RunWith(MockitoJUnitRunner.class)
 public class InvitationServiceTest {
     
     @Mock
@@ -24,6 +27,8 @@ public class InvitationServiceTest {
 
     @InjectMocks
     private InvitationService invitationService;
+    @Mock
+    private GroupService groupService;
 
     private Invitation invitation;
 
@@ -54,6 +59,9 @@ public class InvitationServiceTest {
         // mocks the findByGroupIdAndGuestId() method of InvitationRepository
         when(invitationRepository.findByGroupIdAndGuestId(anyLong(), anyLong())).thenReturn(existingInvites);
 
+        // mocks the canUserJoinGroup() method of GroupService
+        when(groupService.canUserJoinGroup(anyLong())).thenReturn(true);
+
         // when
         Invitation createdInvite = invitationService.createInvitation(groupId, guestId);
 
@@ -65,6 +73,28 @@ public class InvitationServiceTest {
         assertEquals(createdInvite.getGroupId(), invitation.getGroupId());
         assertEquals(createdInvite.getGuestId(), invitation.getGuestId());
     }
+
+    @Test
+    public void createInvitation_groupNotInGroupFormingState_forbidden() {
+        // given
+        Long groupId = 2L;
+        Long guestId = 3L;
+
+        // mocks the findByGroupIdAndGuestId() method of InvitationRepository
+        when(invitationRepository.findByGroupIdAndGuestId(anyLong(), anyLong())).thenReturn(new ArrayList<>());
+
+        // mocks the canUserJoinGroup() method of GroupService to return false (not in the GROUPFORMING state)
+        when(groupService.canUserJoinGroup(anyLong())).thenReturn(false);
+
+        // when
+        Throwable exception = assertThrows(ResponseStatusException.class, () -> invitationService.createInvitation(groupId, guestId));
+
+        // then
+        assertEquals(HttpStatus.FORBIDDEN, ((ResponseStatusException) exception).getStatus());
+        assertTrue(exception.getMessage().contains("Group"));
+        assertTrue(exception.getMessage().contains("is not in the GROUPFORMING state"));
+    }
+
 
     @Test
     public void createInvitation_existingInvitation_conflictException() {

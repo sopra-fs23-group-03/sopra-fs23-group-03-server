@@ -1,7 +1,9 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
+import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
+import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 
@@ -26,16 +28,19 @@ public class GroupService {
 
     private final GroupRepository groupRepository;
     private final IngredientRepository ingredientRepository;
-
+    private final JoinRequestService joinRequestService;
+    private final InvitationService invitationService;
     private final UserService userService;
 
     @Autowired
-
     public GroupService(@Qualifier("groupRepository") GroupRepository groupRepository, IngredientRepository ingredientRepository,
-                        @Lazy @Qualifier("userService") UserService userService) {
+                        @Lazy @Qualifier("userService") UserService userService,
+                        @Lazy JoinRequestService joinRequestService, @Lazy InvitationService invitationService) {
         this.groupRepository = groupRepository;
         this.userService = userService;
         this.ingredientRepository = ingredientRepository;
+        this.joinRequestService = joinRequestService;
+        this.invitationService = invitationService;
     }
 
     public List<Group> getGroups() {
@@ -160,15 +165,10 @@ public class GroupService {
         return finalIngredients;
     }
 
-    // This method has no intent to update the actual attributes of the group. It has the purpose to update the group to show the removed guest.
-    public Group updateGroupToRemoveGuest(Group updatedGroup) {
-        Optional<Group> groupOptional = groupRepository.findById(updatedGroup.getId());
+    public Group removeGuestFromGroup(Group group, Long guestId) {
+        group.removeGuestId(guestId);
 
-        if (!groupOptional.isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Group with id %s does not exist", updatedGroup.getId()));
-        }
-
-        Group group = groupOptional.get();
+        removeIngredientsFromUser(group, guestId);
 
         group = groupRepository.save(group);
         groupRepository.flush();
@@ -176,6 +176,53 @@ public class GroupService {
         return group;
     }
 
+    private void removeIngredientsFromUser(Group group, Long userId) {
+        User user = userService.getUserById(userId);
 
+        Set<Ingredient> ingredients = group.getIngredients();
+        Set<Long> ingredientToBeDeletedIds = new HashSet<>();
 
+        for (Ingredient ingredient : ingredients) {
+            Set<User> ingredientUsers = ingredient.getUsersSet();
+            if (ingredientUsers.contains(user)) {
+                if (ingredientUsers.size() == 1) {
+                    ingredientToBeDeletedIds.add(ingredient.getId());
+                    group.removeIngredient(ingredient);
+                }
+                user.removeIngredient(ingredient);
+            }
+        }
+
+        for (Long id : ingredientToBeDeletedIds) {
+            Optional<Ingredient> ingredient = ingredientRepository.findById(id);
+            if (ingredient.isPresent()) {
+                ingredientRepository.delete(ingredient.get());
+            }
+        }
+    }
+
+    public Group addGuestToGroup(Group group, Long guestId) {
+        group.addGuestId(guestId);
+
+        group = groupRepository.save(group);
+        groupRepository.flush();
+
+        return group;
+    }
+    public boolean canUserJoinGroup(Long groupId) {
+        Group group = getGroupById(groupId);
+        return group.getGroupState() == GroupState.GROUPFORMING;
+    }
+    public Group changeGroupState(Long groupId, GroupState newState) {
+        Group group = getGroupById(groupId);
+        group.setGroupState(newState);
+
+        // If the new state is not GROUPFORMING, delete pending join requests and invitations
+        if (newState != GroupState.GROUPFORMING) {
+            joinRequestService.deleteJoinRequestsByGroupId(groupId);
+            invitationService.deleteInvitationsByGroupId(groupId);
+        }
+
+        return groupRepository.save(group);
+    }
 }

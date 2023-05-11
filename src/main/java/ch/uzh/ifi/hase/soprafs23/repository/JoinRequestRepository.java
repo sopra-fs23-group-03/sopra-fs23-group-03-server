@@ -12,4 +12,6 @@ public interface JoinRequestRepository extends JpaRepository<JoinRequest, Long> 
     Optional<JoinRequest> findByGuestIdAndGroupId(Long guestId, Long groupId);
 
     List<JoinRequest> findAllByGuestId(Long guestId);
+    List<JoinRequest> findAllByGroupId(Long groupId);
+    void deleteAllByGroupId(Long groupId);
 }
