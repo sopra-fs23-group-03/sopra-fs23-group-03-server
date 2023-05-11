@@ -19,7 +19,7 @@ import java.net.URLEncoder;
 @Component
 public class APIService {
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String apiKey = "355684ee05744c43a90c66aeda3fecd2";
+    private final String apiKey = "56638b96d69d409cab5a0cdf9a8a1f5d";
 
     public Recipe getHostRecipe(User host) {
         String intolerances = String.join(",", host.getAllergiesSet());
