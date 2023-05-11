@@ -17,7 +17,6 @@ import ch.uzh.ifi.hase.soprafs23.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 
-
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -247,8 +246,15 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
         }
 
-        // get and return the allergies of the members of the group
-        return groupService.getGroupMemberAllergies(group);
+        // get the allergies of the members of the group
+        Set<String> allergies = groupService.getGroupMemberAllergies(group);
+
+        // 204 - none of the members have allergies 
+        if (allergies.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
+        }
+
+        return allergies;
     }
 
     @GetMapping("/groups/{groupId}/guests")
