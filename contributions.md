@@ -116,11 +116,11 @@
 | Lany        | #88 & #126 | Reopened and fixed                                                           | X     |
 |             | #64    | Create an endpoint to retrieve and return the list of ingredients and guest contributions |  X   |
 |             | #65    | Create an endpoint to store and update the ingredient ratings for each guest     | X    |
-| Orestis     | #69    | Create the PUT /groups/{id}/leave request                                        |      |
-|             | #114   | Create the DELETE /groups/{id} request                                           |      |
-|             | #168   | implement PUT /groups/{groupId}/requests/reject call                             |      |
-|             | #167   |implement POST /groups/{groupId}/requests call                                    |      |
-|             | #169   | implement PUT /groups/{groupId}/requests/accept call                             |      |    
+| Orestis     | #69    | Create the PUT /groups/{id}/leave request                                        | X    |
+|             | #114   | Create the DELETE /groups/{id} request                                           | X    |
+|             | #168   | implement PUT /groups/{groupId}/requests/reject call                             | X    |
+|             | #167   |implement POST /groups/{groupId}/requests call                                    | X    |
+|             | #169   | implement PUT /groups/{groupId}/requests/accept call                             | X    |    
 | Kalliopi    | #18    | Implement a function to fetch the recipe suggestion the backend API              |      |
 |             | #17    | Display the randomly selected recipe suggestion on the screen                    |      |
 | Ann-Kathrin | #105   |  Implement a method for adding the ingredient contributions                      |  X   |
