@@ -17,6 +17,7 @@ import ch.uzh.ifi.hase.soprafs23.service.UserService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,8 +39,6 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.ArrayList;
-
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -1537,6 +1536,7 @@ public class GroupControllerTest {
                         .content(new ObjectMapper().writeValueAsString(joinRequestPutDTO)))
                 .andExpect(status().isUnauthorized());
     }
+    
     @Test
     void getOpenJoinRequests_returns200_whenOpenRequestsPresent() throws Exception {
         // Arrange
@@ -1553,6 +1553,7 @@ public class GroupControllerTest {
                 // Assert
                 .andExpect(status().isOk());
     }
+    
     @Test
     void getOpenJoinRequests_returns204_whenNoOpenRequests() throws Exception {
         // Arrange
@@ -1564,6 +1565,7 @@ public class GroupControllerTest {
                 // Assert
                 .andExpect(status().isNoContent());
     }
+    
     @Test
     void getOpenJoinRequests_returns404_whenGroupNotFound() throws Exception {
         // Arrange
@@ -1576,6 +1578,7 @@ public class GroupControllerTest {
                 // Assert
                 .andExpect(status().isNotFound());
     }
+    
     @Test
     void getOpenJoinRequests_returns401_whenUserNotHost() throws Exception {
         // Arrange
@@ -1591,6 +1594,7 @@ public class GroupControllerTest {
                 // Assert
                 .andExpect(status().isUnauthorized());
     }
+    
     @Test
     public void testGetGroupStateNotFound() throws Exception {
         given(groupService.getGroupById(anyLong())).willReturn(null);
@@ -1629,6 +1633,7 @@ public class GroupControllerTest {
                         .header("X-Token", user.getToken()))
                 .andExpect(status().isOk());
     }
+    
     @Test
     public void changeGroupState_GroupNotFound_404() throws Exception {
         Long nonExistingGroupId = 99L;
@@ -1666,5 +1671,78 @@ public class GroupControllerTest {
         verify(groupService, times(1)).changeGroupState(group.getId(), GroupState.GROUPFORMING);
     }
 
+    @Test
+    public void getGroupMemberAllergiesById_returnsAllergies() throws Exception {
+        // given
+        String allergy = "Peanut";
+        Set<String> allergies = Collections.singleton(allergy);
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(Arrays.asList(group.getHostId()));
+        given(groupService.getGroupMemberAllergies(group)).willReturn(allergies);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/members/allergies", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0]", is(allergy)));
+    }
+
+    @Test
+    public void getGroupMemberAllergiesById_noAllergies() throws Exception {
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(Arrays.asList(group.getHostId()));
+        given(groupService.getGroupMemberAllergies(group)).willReturn(new HashSet<>());
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/members/allergies", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void getGroupMemberAllergiesById_groupNotFound() throws Exception {
+        Long anotherGroupId = 6L;
+
+        // mocks
+        given(groupService.getGroupById(anotherGroupId)).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "error message"));
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/members/allergies", anotherGroupId)
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getGroupMemberAllergiesById_notValidToken() throws Exception {
+        String anotherToken = "another Token";
+
+        // mocks
+        given(userService.getUseridByToken(anotherToken)).willReturn(6L);
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(Arrays.asList(group.getHostId()));
+        // given(groupService.getGroupMemberAllergies(group)).willReturn(new HashSet<>());
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/members/allergies", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", anotherToken);
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isUnauthorized());
+    }
 
 }
