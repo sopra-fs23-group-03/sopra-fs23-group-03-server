@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -233,6 +231,24 @@ public class GroupController {
         }
 
         return userGetDTOs;
+    }
+
+    @GetMapping("/groups/{groupId}/members/allergies")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
+    public Set<String> getGroupMemberAllergiesById(@PathVariable Long groupId, HttpServletRequest request) {
+        // 404 - group not found
+        Group group = groupService.getGroupById(groupId);
+
+        // 401 - not authorized if not a member of the group
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
+        if(!memberIds.contains(tokenId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
+        }
+
+        // get and return the allergies of the members of the group
+        return groupService.getGroupMemberAllergies(group);
     }
 
     @GetMapping("/groups/{groupId}/guests")
