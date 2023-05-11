@@ -92,6 +92,13 @@ public class JoinRequestService {
         joinRequestRepository.deleteAllByGroupId(groupId);
     }
 
+    public void deleteAllJoinRequests(Long guestId) {
+        List<JoinRequest> joinRequests = joinRequestRepository.findAllByGuestId(guestId);
+        for (JoinRequest joinRequest : joinRequests) {
+            joinRequestRepository.delete(joinRequest);
+        }
+    }
+
 }
 
 

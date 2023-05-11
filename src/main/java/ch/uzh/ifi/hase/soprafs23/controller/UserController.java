@@ -10,7 +10,9 @@ import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
+import ch.uzh.ifi.hase.soprafs23.service.JoinRequestService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,10 +40,13 @@ public class UserController {
 
     private final InvitationService invitationService;
 
-    public UserController(UserService userService, GroupService groupService, InvitationService invitationService) {
+    private final JoinRequestService joinRequestService;
+
+    public UserController(UserService userService, GroupService groupService, InvitationService invitationService,@Lazy JoinRequestService joinRequestService) {
         this.userService = userService;
         this.groupService = groupService;
         this.invitationService = invitationService;
+        this.joinRequestService = joinRequestService;
     }
 
     @GetMapping("/users")
@@ -126,8 +131,13 @@ public class UserController {
         if(!tokenId.equals(userId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
         }
+
+        // delete all join requests of the user
+        joinRequestService.deleteAllJoinRequests(userId);
+
         userService.logout(userId);
     }
+
 
     @PutMapping("/users/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT) //NO CONTENT IS 204
