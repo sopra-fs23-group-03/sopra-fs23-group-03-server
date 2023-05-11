@@ -38,8 +38,6 @@ public class UserServiceTest {
 
     private UserPutDTO userPutDTO;
 
-    private IngredientPutDTO ingredientPutDTO;
-
     private User user;
 
     @BeforeEach

@@ -1,8 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
-import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
-import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.IngredientAPI;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -11,7 +9,6 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.net.URLEncoder;
