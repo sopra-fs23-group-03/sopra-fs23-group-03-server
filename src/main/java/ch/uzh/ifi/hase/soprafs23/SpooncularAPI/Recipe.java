@@ -1,6 +1,5 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
-import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 
 
