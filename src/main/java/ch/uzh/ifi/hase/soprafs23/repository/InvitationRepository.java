@@ -15,5 +15,6 @@ public interface InvitationRepository extends JpaRepository<Invitation, Long> {
     List<Invitation> findByGuestId(Long guestId);
 
     List<Invitation> findByGroupIdAndGuestId(Long groupId, Long guestId);
+    void deleteAllByGroupId(Long groupId);
     
 }

@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
+import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
@@ -27,16 +28,19 @@ public class GroupService {
 
     private final GroupRepository groupRepository;
     private final IngredientRepository ingredientRepository;
-
+    private final JoinRequestService joinRequestService;
+    private final InvitationService invitationService;
     private final UserService userService;
 
     @Autowired
-
     public GroupService(@Qualifier("groupRepository") GroupRepository groupRepository, IngredientRepository ingredientRepository,
-                        @Lazy @Qualifier("userService") UserService userService) {
+                        @Lazy @Qualifier("userService") UserService userService,
+                        @Lazy JoinRequestService joinRequestService, @Lazy InvitationService invitationService) {
         this.groupRepository = groupRepository;
         this.userService = userService;
         this.ingredientRepository = ingredientRepository;
+        this.joinRequestService = joinRequestService;
+        this.invitationService = invitationService;
     }
 
     public List<Group> getGroups() {
@@ -205,5 +209,20 @@ public class GroupService {
 
         return group;
     }
+    public boolean canUserJoinGroup(Long groupId) {
+        Group group = getGroupById(groupId);
+        return group.getGroupState() == GroupState.GROUPFORMING;
+    }
+    public Group changeGroupState(Long groupId, GroupState newState) {
+        Group group = getGroupById(groupId);
+        group.setGroupState(newState);
 
+        // If the new state is not GROUPFORMING, delete pending join requests and invitations
+        if (newState != GroupState.GROUPFORMING) {
+            joinRequestService.deleteJoinRequestsByGroupId(groupId);
+            invitationService.deleteInvitationsByGroupId(groupId);
+        }
+
+        return groupRepository.save(group);
+    }
 }

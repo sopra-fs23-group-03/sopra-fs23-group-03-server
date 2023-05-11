@@ -23,10 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -92,7 +89,9 @@ public class JoinRequestServiceTest {
         joinRequest.setGuestId(joinRequestPostDTO.getGuestId());
         joinRequest.setGroupId(group.getId());
 
-        when(joinRequestRepository.save(joinRequest)).thenReturn(joinRequest);
+        when(joinRequestRepository.findByGuestIdAndGroupId(joinRequestPostDTO.getGuestId(), group.getId())).thenReturn(Optional.empty());
+        when(groupService.canUserJoinGroup(group.getId())).thenReturn(true);
+        when(joinRequestRepository.save(any(JoinRequest.class))).thenReturn(joinRequest);
 
         // when
         JoinRequest createdJoinRequest = joinRequestService.createJoinRequest(joinRequestPostDTO, group.getId());
@@ -101,6 +100,21 @@ public class JoinRequestServiceTest {
         assertEquals(createdJoinRequest.getGuestId(), joinRequestPostDTO.getGuestId());
         assertEquals(createdJoinRequest.getGroupId(), group.getId());
     }
+
+    @Test
+    public void testCreateJoinRequest_withGroupNotInGroupFormingState_throwsForbiddenException() {
+        // given
+        when(joinRequestRepository.findByGuestIdAndGroupId(joinRequestPostDTO.getGuestId(), group.getId())).thenReturn(Optional.empty());
+        when(groupService.canUserJoinGroup(group.getId())).thenReturn(false);
+
+        // when
+        Throwable exception = assertThrows(ResponseStatusException.class, () -> joinRequestService.createJoinRequest(joinRequestPostDTO, group.getId()));
+
+        // then
+        assertEquals(HttpStatus.FORBIDDEN, ((ResponseStatusException) exception).getStatus());
+        assertTrue(exception.getMessage().contains("You cannot make a join request to Group " + group.getId() + " because it is not in the GROUPFORMING state"));
+    }
+
 
     @Test
     public void testCreateJoinRequest_withExistingJoinRequest_throwsConflictException() {

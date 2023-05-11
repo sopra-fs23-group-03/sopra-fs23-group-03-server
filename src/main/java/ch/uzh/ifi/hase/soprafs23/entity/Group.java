@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.entity;
 
 import javax.persistence.*;
 
+import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 
 import java.io.Serializable;
@@ -39,10 +40,15 @@ public class Group implements Serializable {
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
     private Set<Ingredient> ingredientsSet;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private GroupState groupState;
+
     // constructor
     public Group() {
         this.guestIds = new HashSet<>();
         this.ingredientsSet = new HashSet<>();
+        this.groupState = GroupState.GROUPFORMING;
     }
 
     public Long getId() {
@@ -111,6 +117,14 @@ public class Group implements Serializable {
 
     public Set<Ingredient> getIngredients() {
         return ingredientsSet;
+    }
+
+    public GroupState getGroupState() {
+        return groupState;
+    }
+
+    public void setGroupState(GroupState groupState) {
+        this.groupState = groupState;
     }
 
 }
