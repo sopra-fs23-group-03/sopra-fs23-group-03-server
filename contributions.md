@@ -84,8 +84,6 @@
 |             |   #58  | Create ingredient input field and a button for adding an ingredient to the meal  |      |  
 |             |   #59  | Create a button to remove an ingredient from the meal                            |      |      
 |             |   #60  | Display all ingredients added to the meal in a separate section                  |      |   
-|             |   #60  | Display all ingredients added to the meal in a separate section                  |      |     
-|             |   #61  | Ensure that at least one ingredient is added before allowing the user to submit  |      |    
 | Ann-Kathrin |  #106  |  Update fields for allergies/cuisine to List/Set and adjust all tests            |  X   |
 |             | #132   | Create POST /groups/{groupId}/invitations                                        |  X   |
 |             | #198   | make GET /groups/{groupId}/ingredients call                                      |  X   |
@@ -122,7 +120,11 @@
 |             | #167   |implement POST /groups/{groupId}/requests call                                    | X    |
 |             | #169   | implement PUT /groups/{groupId}/requests/accept call                             | X    |    
 | Kalliopi    | #18    | Implement a function to fetch the recipe suggestion the backend API              |      |
-|             | #17    | Display the randomly selected recipe suggestion on the screen                    |      |
+|             | #17    | Display the randomly selected recipe suggestion on the screen                    |  X   |
+|             | #55    | Display all active planning groups with their group name, host and guests        |  X   |
+|             | #67    | Redirect user to landing page if invitation is rejected                          |  X   |    
+|             | #65    | Add red notification signal when user gets a new notification                    |  X   | 
+|             | #66    | Path to be redirected to Group Forming Page - Group Overview if user accepts invitation |  X   |   
 | Ann-Kathrin | #105   |  Implement a method for adding the ingredient contributions                      |  X   |
 |             | #210   |  Retrieve all ingredients from external API to avoid spelling mistakes           |  X   |
 |             | #54    |  Take input from REST API per user for all ingredients and transform it ...      |  X   |   
@@ -147,6 +149,12 @@
 |             | #77    | Create PUT /groups/{id}/state request                                            |      |
 |             | #170   | Create Method to check if user is allowed to request (group not entered certain stange in planning process). |      |
 | Kalliopi    |        |                                                                                  |      |
+|             | #58    | Ingredient input-field + button for adding ingredients to the meal(Improvements) |   X  |
+|             | #59    | Create a button to remove an ingredient from the meal (Improvements)             |   X  |
+|             | #60    | Display all ingredients added to the meal in a separate section   (Improvements) |   X  |
+|             | #61    | Ensure that at least one ingredient is added before allowing the user to submit  |   X  |
+|             | #62    | Implement API call to submit the ingredient contributions                        |   X  |
+|             | #63    | Button to submit final contributions and transition to next page  (Improvements) |  X   |
 |             |        |                                                                                  |      |
 | Ann-Kathrin |   #58  |     Store the guest and their respective ingredient contributions                |      |
 |             |#172/#55|    Implement default majority logic                                              |    X | 
