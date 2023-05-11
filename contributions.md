@@ -78,12 +78,12 @@
 |             | #187   | Create GET /groups/{id}/members request                                          |  X   |
 | Orestis     |   #57  | Function to randomly select one recipe suggestion from the API                   |      |
 |             |   #88  | Reopened and fixed the updating attributes and the tests                         |  X   |
-| Kalliopi    |   #43  | Create host and guest view of group forming page                                 |      |
-|             |   #57  | Create "Ingredient Page"                                                         |      |      
-|             |   #63  | Create a button to submit the final contributions and transition to next page    |      |   
-|             |   #58  | Create ingredient input field and a button for adding an ingredient to the meal  |      |  
-|             |   #59  | Create a button to remove an ingredient from the meal                            |      |      
-|             |   #60  | Display all ingredients added to the meal in a separate section                  |      |   
+| Kalliopi    |   #42  | Create host view of group forming page                                           |  X   |
+|             |   #43  | Create guest view of group forming page                                          |  X   |
+|             |   #57  | Create "Ingredient Page"                                                         |  X   |     
+|             |   #63  | Create a button to submit the final contributions and transition to next page    |  X   |   
+|             |   #58  | Create ingredient input field and a button for adding an ingredient to the meal  |  X   |  
+|             |   #59  | Create a button to remove an ingredient from the meal                            |  X   |        
 | Ann-Kathrin |  #106  |  Update fields for allergies/cuisine to List/Set and adjust all tests            |  X   |
 |             | #132   | Create POST /groups/{groupId}/invitations                                        |  X   |
 |             | #198   | make GET /groups/{groupId}/ingredients call                                      |  X   |
@@ -151,7 +151,7 @@
 | Kalliopi    |        |                                                                                  |      |
 |             | #58    | Ingredient input-field + button for adding ingredients to the meal(Improvements) |   X  |
 |             | #59    | Create a button to remove an ingredient from the meal (Improvements)             |   X  |
-|             | #60    | Display all ingredients added to the meal in a separate section   (Improvements) |   X  |
+|             | #60    | Display all ingredients added to the meal in a separate section                  |   X  |
 |             | #61    | Ensure that at least one ingredient is added before allowing the user to submit  |   X  |
 |             | #62    | Implement API call to submit the ingredient contributions                        |   X  |
 |             | #63    | Button to submit final contributions and transition to next page  (Improvements) |  X   |
