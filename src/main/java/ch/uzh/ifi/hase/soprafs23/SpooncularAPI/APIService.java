@@ -4,8 +4,6 @@ import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
-import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.IngredientAPI;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -30,9 +28,9 @@ public class APIService {
     private GroupService groupService;
     private RecipeRepository recipeRepository;
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String apiKey = "355684ee05744c43a90c66aeda3fecd2";
+    private final String apiKey = "56638b96d69d409cab5a0cdf9a8a1f5d";
 
-    public Recipe getHostRecipe(User host) { //TODO: delete at some point bc we use getRecipe then
+    public Recipe getHostRecipe(User host) { //TODO: use for Solo trip?
         String intolerances = String.join(",", host.getAllergiesSet());
         String diet = host.getSpecialDiet();
         String cuisine = String.join(",", host.getFavoriteCuisineSet());
@@ -79,17 +77,40 @@ public class APIService {
                 .collect(Collectors.joining(","));
 
         String searchApiUrl = "https://api.spoonacular.com/recipes/findByIngredients?apiKey=" + apiKey +
-                "&ingredients=" + ingredients + "&number=1&ignorePantry=true&ranking=2";
+                "&ingredients=" + ingredients + "&number=1&ignorePantry=true&ranking=1"; //1 means maximizes used ingredients first
         try {
             ResponseEntity<List<RecipeInfo>> searchResponse = restTemplate.exchange(searchApiUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<RecipeInfo>>() {});
-            return searchResponse.getBody();
+            List<RecipeInfo> recipeInfos = searchResponse.getBody();
+
+            if (recipeInfos.isEmpty()) {
+                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "No recipes found for the given ingredients");
+            }
+            return recipeInfos;
+        } catch (HttpClientErrorException e) {
+            throw new HttpClientErrorException(e.getStatusCode(), "Error occurred while fetching recipe: " + e.getMessage());
         } catch (Exception e) {
-            // TODO: Handle the error
             e.printStackTrace();
-            return Collections.emptyList();
-        }
+            throw new RuntimeException("Unexpected error occurred while fetching recipe: " + e.getMessage());
+        } //TODO: Add authorization errors?
     }
 
+    public RecipeDetailInfo getRecipeDetails(Long externalRecipeId) {
+        String informationApiUrl = "https://api.spoonacular.com/recipes/" + externalRecipeId + "/information?apiKey=" + apiKey;
+        try {
+            ResponseEntity<RecipeDetailInfo> infoResponse = restTemplate.exchange(informationApiUrl, HttpMethod.GET, null, new ParameterizedTypeReference<RecipeDetailInfo>() {});
+            RecipeDetailInfo detailInfo = infoResponse.getBody();
+
+            if (detailInfo == null) {
+                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "No details found for the given recipe ID");
+            }
+            return detailInfo;
+        } catch (HttpClientErrorException e) {
+            throw new HttpClientErrorException(e.getStatusCode(), "Error occurred while fetching recipe details: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Unexpected error occurred while fetching recipe details: " + e.getMessage());
+        }
+    }
 
 
     public List<String> getListOfIngredients(String initialString) { //for frontend to be displayed in order for the users to choose from

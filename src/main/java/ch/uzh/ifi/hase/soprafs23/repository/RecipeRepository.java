@@ -18,4 +18,5 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     @Query("SELECT r FROM Recipe r WHERE r.group = :group")
     List<Recipe> findAllByGroup(@Param("group") Group group);
 
+    Recipe findByExternalRecipeIdAndGroupId(Long externalRecipeId, Long groupId);
 }

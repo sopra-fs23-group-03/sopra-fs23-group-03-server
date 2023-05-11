@@ -11,6 +11,10 @@ public class APIGetDTO {
     private List<String> missedIngredients;
     private Long groupId;
 
+    private String instructions;
+    private String image;
+    private int readyInMinutes;
+
     // Getters and Setters
 
     public Long getId() {
@@ -51,5 +55,29 @@ public class APIGetDTO {
 
     public void setGroupId(Long groupId) {
         this.groupId = groupId;
+    }
+
+    public String getInstructions() {
+        return instructions;
+    }
+
+    public void setInstructions(String instructions) {
+        this.instructions = instructions;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public int getReadyInMinutes() {
+        return readyInMinutes;
+    }
+
+    public void setReadyInMinutes(int readyInMinutes) {
+        this.readyInMinutes = readyInMinutes;
     }
 }

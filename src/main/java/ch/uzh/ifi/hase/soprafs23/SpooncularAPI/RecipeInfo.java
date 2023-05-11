@@ -2,7 +2,9 @@ package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.IngredientInfo;
 import java.util.List;
 
-    public class RecipeInfo { // maps exactly response from spoonacular API
+    public class RecipeInfo {
+        // this class is to store the information from the external spoonacular API, regarding the first call.
+
         private Long id;
         private String title;
         private String image;
