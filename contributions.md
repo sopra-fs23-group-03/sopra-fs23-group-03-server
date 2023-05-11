@@ -125,12 +125,10 @@
 |             | #17    | Display the randomly selected recipe suggestion on the screen                    |      |
 | Ann-Kathrin | #105   |  Implement a method for adding the ingredient contributions                      |  X   |
 |             | #210   |  Retrieve all ingredients from external API to avoid spelling mistakes           |  X   |
-|             | #54    |  Take input from REST API per user for all ingredients and transform it ...      |   X  |   
+|             | #54    |  Take input from REST API per user for all ingredients and transform it ...      |  X   |   
 | Chiara      | #94    | Edit change button to edit also username/password                                |  X   |
 |             | #100   | Imprement button voting types in Group Creation page with default for majority   |  X   |
 |             | #112   | Create dropdown for diet preference                                              |  X   |
-|             | #78    | Redirect host to Group Forming Page - Host View when clicking on Continue        |      |
-|             | #77    | Create Group Forming Page - Host View                                            |      |
     
 
 </p>
@@ -152,8 +150,14 @@
 |             |#172/#55|    Implement default majority logic                                              |    X | 
 |             |    #59 |    Develop endpoint to store and retrieve guest and ingredient contributions     |      |
 |             |   #57  | select one recipe suggestion from the API based on the given ingredients         |      |
-| Chiara      |        |                                                                                  |      |
-|             |        |                                                                                  |      |
+| Chiara      |   #99  | Add description text in group creation for describing the default logic          |   X  |
+|             |   #101 | Send the voting type to backend when creating the group                          |   X  |
+|             |   #13  | Make yes/no/indifferent buttons available                                        |   X  |
+|             |   #126 | Create a voting page that displays all typed in ingredients to be voted          |   X  |
+|             |   #125 | Display an overview of all typed-in ingredients so that they can rate them       |   X  |
+|             |   #127 | Create a final ingredients page with the ingredients that have been selected after the voting  |   X  |
+
+
     
 
 </p>
