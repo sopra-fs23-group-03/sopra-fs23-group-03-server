@@ -88,7 +88,7 @@
 |             | #132   | Create POST /groups/{groupId}/invitations                                        |  X   |
 |             | #198   | make GET /groups/{groupId}/ingredients call                                      |  X   |
 |             | #197   | make PUT /user/{userId}/ingredients call                                         |  X   |
-|             | #104   | Create a new Ingredient class for storing the ingredients contributed by the user|  X   |
+|             | #104/#58| Create a new Ingredient class for storing the ingredients contributed by the user|  X   |
 | Chiara      | #69    | Create Group Creation page                                                       |  X   |
 |             | #16    | Create a button to enable the user to return to the Landing Page                 |  X   |
 |             | #76    | Redirect host to landing page when pressing Delete Group button                  |  X   |
