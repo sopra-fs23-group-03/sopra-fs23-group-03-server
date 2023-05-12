@@ -1,9 +1,13 @@
 package ch.uzh.ifi.hase.soprafs23.rest.mapper;
 
+import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.IngredientInfo;
+import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.RecipeInfo;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientInfoDTO;
+import ch.uzh.ifi.hase.soprafs23.rest.dto.RecipeInfoDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
@@ -52,5 +56,10 @@ public interface DTOMapper {
     @Mapping(source = "id", target = "id")
     @Mapping(source = "name", target = "name")
     IngredientGetDTO convertEntityToIngredientGetDTO(Ingredient ingredient);
+
+
+    RecipeInfoDTO convertEntityToRecipeInfoDTO(RecipeInfo recipeInfo);
+    IngredientInfoDTO convertEntityToIngredientInfoDTO(IngredientInfo ingredientInfo);
+
 
 }
