@@ -329,6 +329,12 @@ public class GroupController {
         // Check if the group exists
         Group group = groupService.getGroupById(groupId); // 404 - group not found
 
+        // Check that group state is either GROUPFORMING or FINAL
+        GroupState groupState = group.getGroupState();
+        if(!groupState.equals(GroupState.GROUPFORMING) && !groupState.equals(GroupState.FINAL)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You currenty can't delete the group");
+        }
+
         // Check the validity of the token
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
         if (!tokenId.equals(group.getHostId())) {
