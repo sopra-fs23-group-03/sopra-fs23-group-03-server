@@ -8,6 +8,7 @@ import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -209,10 +210,12 @@ public class GroupService {
 
         return group;
     }
+
     public boolean canUserJoinGroup(Long groupId) {
         Group group = getGroupById(groupId);
         return group.getGroupState() == GroupState.GROUPFORMING;
     }
+
     public Group changeGroupState(Long groupId, GroupState newState) {
         Group group = getGroupById(groupId);
         group.setGroupState(newState);
@@ -224,5 +227,20 @@ public class GroupService {
         }
 
         return groupRepository.save(group);
+    }
+
+    public Set<String> getGroupMemberAllergies(Group group) {
+        List<Long> memberIds = getAllMemberIdsOfGroup(group);
+        Set<String> allergies = new HashSet<>();
+
+        for (Long userId : memberIds) {
+            Set<String> userAllergies = userService.getAllergiesById(userId);
+            for (String allergy : userAllergies) {
+                String[] allergyArray = allergy.split(",");
+                allergies.addAll(Arrays.asList(allergyArray));
+            }
+        }
+        
+        return allergies;
     }
 }
