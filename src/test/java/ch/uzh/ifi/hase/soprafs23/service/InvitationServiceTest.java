@@ -19,6 +19,7 @@ import static org.mockito.Mockito.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 @RunWith(MockitoJUnitRunner.class)
 public class InvitationServiceTest {
     
