@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
+import java.util.List;
+
 public class IngredientAPI {
     private int id;
     private String name;
