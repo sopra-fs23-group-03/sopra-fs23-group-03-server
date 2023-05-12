@@ -870,11 +870,14 @@ public class GroupControllerTest {
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].id", is(apple.getId().intValue())))
             .andExpect(jsonPath("$[0].name", is(apple.getName())));
+
+        verify(groupService, times(1)).changeGroupState(group.getId(), GroupState.FINAL);
     }
 
     @Test
     public void testGetFinalIngredientsOfGroupById_valid_multipleIngredients() throws Exception {
         // given
+        group.setGroupState(GroupState.FINAL);
         user.setVotingStatus(UserVotingStatus.VOTED);
 
         Ingredient apple = new Ingredient("apple");
@@ -902,6 +905,8 @@ public class GroupControllerTest {
         mockMvc.perform(getRequest)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(3)));
+
+        verify(groupService, times(0)).changeGroupState(any(), any());
     }
 
     @Test
@@ -1141,7 +1146,6 @@ public class GroupControllerTest {
         verify(userService, times(0)).getUserById(any());
     }
 
-
     //Helper Method to convert DTOs into a JSON strings
     private String asJsonString(final Object object) {
         try {
@@ -1159,6 +1163,15 @@ public class GroupControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(groupService).deleteGroup(group.getId());
+    }
+
+    @Test
+    public void testDeleteGroup400() throws Exception {
+        group.setGroupState(GroupState.INGREDIENTENTERING);
+
+        mockMvc.perform(delete("/groups/{groupId}", group.getId())
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -1212,6 +1225,15 @@ public class GroupControllerTest {
 
         // Verify that userService.leaveGroup was called with the correct guestId
         verify(userService).leaveGroup(guestId);
+    }
+
+    @Test
+    public void leaveGroup_groupInWrongState_400() throws Exception {
+        group.setGroupState(GroupState.INGREDIENTENTERING);
+
+        mockMvc.perform(put("/groups/{groupId}/leave", group.getId())
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
