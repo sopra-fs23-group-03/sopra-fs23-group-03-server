@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,8 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-
 
 @RestController
 public class GroupController {
@@ -348,6 +345,12 @@ public class GroupController {
         // Check if the group exists
         Group group = groupService.getGroupById(groupId); // 404 - group not found
 
+        // Check that group state is either GROUPFORMING or FINAL
+        GroupState groupState = group.getGroupState();
+        if(!groupState.equals(GroupState.GROUPFORMING) && !groupState.equals(GroupState.FINAL)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You currenty can't leave the group");
+        }
+
         // Check the validity of the token
         Long guestId = userService.getUseridByToken(request.getHeader("X-Token"));
         if (guestId.equals(0L)) {
@@ -367,6 +370,12 @@ public class GroupController {
 
         // Remove the guest and their ingredients from the group
         userService.leaveGroup(guestId);
+
+        // Check if host is now alone & group state was FINAL -> delete group
+        memberIds = groupService.getAllMemberIdsOfGroup(group);
+        if(groupState.equals(GroupState.FINAL) && memberIds.size() == 1) {
+            groupService.deleteGroup(groupId);
+        }
     }
 
     @PostMapping("/groups/{groupId}/requests")
