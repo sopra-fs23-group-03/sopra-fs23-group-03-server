@@ -293,7 +293,6 @@ public class GroupController {
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
     public List<IngredientGetDTO> getFinalIngredientsOfGroupById(@PathVariable Long groupId, HttpServletRequest request) {
-
         Group group = groupService.getGroupById(groupId); // 404 - group not found
         List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
 
@@ -303,13 +302,18 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
         }
 
-        // 409 - One of the members hasn't voted yet
-        for (Long memberId : memberIds) {
-            User member = userService.getUserById(memberId);
-            if (member.getVotingStatus() != UserVotingStatus.VOTED) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Not all members of the group have voted yet.");
+        // Check that group state is FINAL / that all members have voted
+        GroupState groupState = group.getGroupState();
+        if(!groupState.equals(GroupState.FINAL)) {
+            for (Long memberId : memberIds) {
+                User member = userService.getUserById(memberId);
+                if (member.getVotingStatus() != UserVotingStatus.VOTED) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Not all members of the group have voted yet."); // 409
+                }
             }
+            groupService.changeGroupState(groupId, GroupState.FINAL); // if all members have voted change state to FINAL and continue
         }
+        
 
         // retrieve all ingredients available from the members of the group
         Set<Ingredient> groupFinalIngredients = groupService.getFinalIngredients(group);
