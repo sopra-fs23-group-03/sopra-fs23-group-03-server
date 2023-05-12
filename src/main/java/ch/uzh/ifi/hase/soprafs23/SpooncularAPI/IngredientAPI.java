@@ -4,6 +4,14 @@ public class IngredientAPI {
     private int id;
     private String name;
     private String image;
+    private double amount;
+    private String unit;
+    private String unitLong;
+    private String unitShort;
+    private String aisle;
+    private String original;
+    private String originalName;
+    private List<String> meta;
 
     public int getId() {
         return id;
