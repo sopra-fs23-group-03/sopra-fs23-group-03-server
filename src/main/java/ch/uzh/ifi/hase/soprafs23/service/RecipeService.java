@@ -1,10 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.Recipe;
-import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
-import ch.uzh.ifi.hase.soprafs23.service.GroupService;
-import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.IngredientAPI;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ch.uzh.ifi.hase.soprafs23.repository.RecipeRepository;
