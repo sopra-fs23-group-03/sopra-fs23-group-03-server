@@ -332,7 +332,7 @@ public class GroupController {
             for (Long memberId : memberIds) {
                 User member = userService.getUserById(memberId);
                 if (member.getVotingStatus() != UserVotingStatus.VOTED) {
-                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Not all members of the group have voted yet."); // 409
+                    throw new ResponseStatusException(HttpStatus.ACCEPTED, "Not all members of the group have voted yet."); // 200
                 }
             }
             groupService.changeGroupState(groupId, GroupState.FINAL); // if all members have voted change state to FINAL and continue
@@ -548,7 +548,8 @@ public class GroupController {
         }
 
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
-        if (!tokenId.equals(group.getHostId())) {
+        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
+        if (!memberIds.contains(tokenId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized");
         }
 
