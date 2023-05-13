@@ -291,14 +291,25 @@ public class GroupController {
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
     public List<IngredientGetDTO> getIngredientsOfGroupById(@PathVariable Long groupId, HttpServletRequest request) {
-
-        Group group = groupService.getGroupById(groupId); // 404 - group not found
+        // 404 - group not found
+        Group group = groupService.getGroupById(groupId);
         List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
 
         // 401 - not authorized if not a member of the group
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
         if(!memberIds.contains(tokenId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
+        }
+
+        // Check that groupState is INGREDIENTVOTING / that all members have entered ingredients
+        GroupState groupState = group.getGroupState();
+        if(!groupState.equals(GroupState.INGREDIENTVOTING)) {
+            for (Long memberId : memberIds) {
+                if(!userService.userHasIngredients(memberId)) {
+                    throw new ResponseStatusException(HttpStatus.ACCEPTED, "Not all members of the group have entered ingredients yet"); // 202
+                }
+            }
+            groupService.changeGroupState(groupId, GroupState.INGREDIENTVOTING); // if all members have entered ingredients change state and continue
         }
 
         // retrieve all ingredients available from the members of the group
@@ -317,7 +328,8 @@ public class GroupController {
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
     public List<IngredientGetDTO> getFinalIngredientsOfGroupById(@PathVariable Long groupId, HttpServletRequest request) {
-        Group group = groupService.getGroupById(groupId); // 404 - group not found
+        // 404 - group not found
+        Group group = groupService.getGroupById(groupId);
         List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
 
         // 401 - not authorized if not a member of the group
@@ -332,7 +344,7 @@ public class GroupController {
             for (Long memberId : memberIds) {
                 User member = userService.getUserById(memberId);
                 if (member.getVotingStatus() != UserVotingStatus.VOTED) {
-                    throw new ResponseStatusException(HttpStatus.ACCEPTED, "Not all members of the group have voted yet."); // 200
+                    throw new ResponseStatusException(HttpStatus.ACCEPTED, "Not all members of the group have voted yet"); // 200
                 }
             }
             groupService.changeGroupState(groupId, GroupState.FINAL); // if all members have voted change state to FINAL and continue
