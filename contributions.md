@@ -174,7 +174,7 @@
 | Lany        | #234   | independent: create GET /users/{userId}/groups                                   | X    |
 |             | #235   | independent: create GET /groups/{groupId}/members/allergies                      | X    |
 |             | #69 & #114 | Edited for added functionality                                               | X    |
-|             | #67 & #114 | Implemented previously, connected to corresponding commits.                  | X    |
+|             | #67 & #173 | Implemented previously, connected to corresponding commits.                  | X    |
 | Orestis     |        |                                                                                  |      |
 |             |        |                                                                                  |      |
 | Kalliopi    |        |                                                                                  |      |
