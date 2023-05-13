@@ -927,7 +927,7 @@ public class GroupControllerTest {
 
         // then
         mockMvc.perform(getRequest)
-            .andExpect(status().isConflict());
+            .andExpect(status().isAccepted());
     }
 
     @Test
@@ -1642,7 +1642,7 @@ public class GroupControllerTest {
 
     @Test
     public void testGetGroupStateOk() throws Exception {
-        given(userService.getUseridByToken(anyString())).willReturn(user.getId());
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(Collections.singletonList(user.getId()));
 
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getHeader("X-Token")).thenReturn(user.getToken());
