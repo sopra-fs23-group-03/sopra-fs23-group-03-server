@@ -387,4 +387,16 @@ public class UserServiceTest {
         assertEquals(null, user.getGroupId());
     }
 
+    @Test
+    void userHasIngredients_test() {
+        assertTrue(userService.userHasIngredients(user.getId()));
+
+        User user_noIngredients = new User();
+        user_noIngredients.setId(5L);
+
+        when(userRepository.findById(user_noIngredients.getId())).thenReturn(Optional.of(user_noIngredients));
+
+        assertFalse(userService.userHasIngredients(user_noIngredients.getId()));
+    }
+
 }

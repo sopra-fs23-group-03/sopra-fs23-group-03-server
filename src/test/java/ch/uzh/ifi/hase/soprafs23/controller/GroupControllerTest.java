@@ -754,6 +754,7 @@ public class GroupControllerTest {
 
         // mocks
         given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+        given(userService.userHasIngredients(group.getHostId())).willReturn(true);
 
         // when
         MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/ingredients", group.getId())
@@ -786,6 +787,7 @@ public class GroupControllerTest {
 
         // mocks
         given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+        given(userService.userHasIngredients(group.getHostId())).willReturn(true);
 
         // when
         MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/ingredients", group.getId())
@@ -796,6 +798,25 @@ public class GroupControllerTest {
         mockMvc.perform(getRequest)
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(3)));
+    }
+
+    @Test
+    public void testGetIngredientsOfGroupById_notYetEnteredIngredients() throws Exception {
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(group.getHostId());
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+        given(userService.userHasIngredients(group.getHostId())).willReturn(false);
+
+        // when
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/ingredients", group.getId())
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .header("X-Token", user.getToken());
+
+        // then
+        mockMvc.perform(getRequest)
+            .andExpect(status().isAccepted());
     }
 
     @Test

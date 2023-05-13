@@ -296,5 +296,11 @@ public class UserService {
         User user = getUserById(userId);
         return user.getAllergiesSet();
     }
+
+    public boolean userHasIngredients(Long userId) {
+        User user = getUserById(userId);
+        int ingredientSetSize = user.getIngredients().size();
+        return ingredientSetSize > 0;
+    }
     
 }
