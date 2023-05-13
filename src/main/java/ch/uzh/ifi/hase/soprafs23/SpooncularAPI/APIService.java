@@ -3,7 +3,12 @@ package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 import ch.uzh.ifi.hase.soprafs23.entity.FullIngredient;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
-import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.IngredientAPI;
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
+import ch.uzh.ifi.hase.soprafs23.service.GroupService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
@@ -14,16 +19,23 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import ch.uzh.ifi.hase.soprafs23.repository.RecipeRepository;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.criteria.CriteriaBuilder;
 import java.nio.charset.StandardCharsets;
+
 import java.util.*;
 import java.net.URLEncoder;
+import java.util.stream.Collectors;
 
 @Component
 public class APIService {
+
+    @Autowired
+    private GroupService groupService;
+    private RecipeRepository recipeRepository;
     private final RestTemplate restTemplate = new RestTemplate();
     private final String apiKey = "355684ee05744c43a90c66aeda3fecd2";
     @Autowired
@@ -66,6 +78,52 @@ public class APIService {
         }
     }
 
+
+    public List<RecipeInfo> getRecipe(Group group) {
+        Set<Ingredient> finalSetIngredients = groupService.getFinalIngredients(group);
+        List<String> listOfIngredients = finalSetIngredients.stream()
+                .map(Ingredient::getName)
+                .collect(Collectors.toList());
+
+        String ingredients = listOfIngredients.stream()
+                .map(ingredient -> URLEncoder.encode(ingredient, StandardCharsets.UTF_8))
+                .collect(Collectors.joining(","));
+
+        String searchApiUrl = "https://api.spoonacular.com/recipes/findByIngredients?apiKey=" + apiKey +
+                "&ingredients=" + ingredients + "&number=1&ignorePantry=true&ranking=1"; //1 means maximizes used ingredients first
+        try {
+            ResponseEntity<List<RecipeInfo>> searchResponse = restTemplate.exchange(searchApiUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<RecipeInfo>>() {});
+            List<RecipeInfo> recipeInfos = searchResponse.getBody();
+
+            if (recipeInfos.isEmpty()) {
+                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "No recipes found for the given ingredients");
+            }
+            return recipeInfos;
+        } catch (HttpClientErrorException e) {
+            throw new HttpClientErrorException(e.getStatusCode(), "Error occurred while fetching recipe: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Unexpected error occurred while fetching recipe: " + e.getMessage());
+        }
+    }
+
+    public RecipeDetailInfo getRecipeDetails(Long externalRecipeId) {
+        String informationApiUrl = "https://api.spoonacular.com/recipes/" + externalRecipeId + "/information?apiKey=" + apiKey;
+        try {
+            ResponseEntity<RecipeDetailInfo> infoResponse = restTemplate.exchange(informationApiUrl, HttpMethod.GET, null, new ParameterizedTypeReference<RecipeDetailInfo>() {});
+            RecipeDetailInfo detailInfo = infoResponse.getBody();
+
+            if (detailInfo == null) {
+                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "No details found for the given recipe ID");
+            }
+            return detailInfo;
+        } catch (HttpClientErrorException e) {
+            throw new HttpClientErrorException(e.getStatusCode(), "Error occurred while fetching recipe details: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Unexpected error occurred while fetching recipe details: " + e.getMessage());
+        }
+    }
     @PostConstruct
     public void init() {
         // Fetch all ingredients from the API
@@ -94,6 +152,8 @@ public class APIService {
             }
         }
     }
+
+
 
     public String getApiKey() {
         return apiKey;

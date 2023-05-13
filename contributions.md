@@ -88,7 +88,7 @@
 |             | #132   | Create POST /groups/{groupId}/invitations                                        |  X   |
 |             | #198   | make GET /groups/{groupId}/ingredients call                                      |  X   |
 |             | #197   | make PUT /user/{userId}/ingredients call                                         |  X   |
-|             | #104   | Create a new Ingredient class for storing the ingredients contributed by the user|  X   |
+|             | #104/#58| Create a new Ingredient class for storing the ingredients contributed by the user|  X   |
 | Chiara      | #69    | Create Group Creation page                                                       |  X   |
 |             | #16    | Create a button to enable the user to return to the Landing Page                 |  X   |
 |             | #76    | Redirect host to landing page when pressing Delete Group button                  |  X   |
@@ -156,10 +156,10 @@
 |             | #62    | Implement API call to submit the ingredient contributions                        |   X  |
 |             | #63    | Button to submit final contributions and transition to next page  (Improvements) |  X   |
 |             |        |                                                                                  |      |
-| Ann-Kathrin |   #58  |     Store the guest and their respective ingredient contributions                |      |
-|             |#172/#55|    Implement default majority logic                                              |    X | 
+| Ann-Kathrin |#172/#55|    Implement default majority logic                                              |    X | 
 |             |    #59 |    Develop endpoint to store and retrieve guest and ingredient contributions     |      |
 |             |   #57  | select one recipe suggestion from the API based on the given ingredients         |      |
+|             |        |                                                                                  |      |    
 | Chiara      |   #99  | Add description text in group creation for describing the default logic          |   X  |
 |             |   #101 | Send the voting type to backend when creating the group                          |   X  |
 |             |   #13  | Make yes/no/indifferent buttons available                                        |   X  |

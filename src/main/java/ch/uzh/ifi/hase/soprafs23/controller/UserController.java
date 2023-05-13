@@ -167,11 +167,32 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
         }
 
-        // fetch all users in the internal representation
+        // fetch the user in the internal representation
         User user = userService.getUserById(userId);
         UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
 
         return userGetDTO;
+    }
+
+    @GetMapping("/users/{userId}/groups")
+    @ResponseStatus(HttpStatus.OK) // OK IS 200
+    @ResponseBody
+    public Long getGroupIdOfUser(@PathVariable Long userId, HttpServletRequest request) {
+        // 404 - user not found
+        User user = userService.getUserById(userId);
+
+        // check validity of token
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if(!tokenId.equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
+        }
+
+        // 204 - user is not in a group
+        if(user.getGroupId() == null) {
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
+        }
+
+        return user.getGroupId();
     }
 
     @GetMapping("/users/{userId}/invitations")
