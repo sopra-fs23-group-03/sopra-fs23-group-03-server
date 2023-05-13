@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 @RestController
 public class GroupController {
     private final GroupService groupService;
@@ -318,7 +317,6 @@ public class GroupController {
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
     public List<IngredientGetDTO> getFinalIngredientsOfGroupById(@PathVariable Long groupId, HttpServletRequest request) {
-
         Group group = groupService.getGroupById(groupId); // 404 - group not found
         List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
 
@@ -328,13 +326,18 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
         }
 
-        // 409 - One of the members hasn't voted yet
-        for (Long memberId : memberIds) {
-            User member = userService.getUserById(memberId);
-            if (member.getVotingStatus() != UserVotingStatus.VOTED) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Not all members of the group have voted yet.");
+        // Check that group state is FINAL / that all members have voted
+        GroupState groupState = group.getGroupState();
+        if(!groupState.equals(GroupState.FINAL)) {
+            for (Long memberId : memberIds) {
+                User member = userService.getUserById(memberId);
+                if (member.getVotingStatus() != UserVotingStatus.VOTED) {
+                    throw new ResponseStatusException(HttpStatus.ACCEPTED, "Not all members of the group have voted yet."); // 200
+                }
             }
+            groupService.changeGroupState(groupId, GroupState.FINAL); // if all members have voted change state to FINAL and continue
         }
+        
 
         // retrieve all ingredients available from the members of the group
         Set<Ingredient> groupFinalIngredients = groupService.getFinalIngredients(group);
@@ -354,6 +357,12 @@ public class GroupController {
         // Check if the group exists
         Group group = groupService.getGroupById(groupId); // 404 - group not found
 
+        // Check that group state is either GROUPFORMING or FINAL
+        GroupState groupState = group.getGroupState();
+        if(!groupState.equals(GroupState.GROUPFORMING) && !groupState.equals(GroupState.FINAL)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You currenty can't delete the group");
+        }
+
         // Check the validity of the token
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
         if (!tokenId.equals(group.getHostId())) {
@@ -369,6 +378,12 @@ public class GroupController {
     public void leaveGroup(@PathVariable Long groupId, HttpServletRequest request) {
         // Check if the group exists
         Group group = groupService.getGroupById(groupId); // 404 - group not found
+
+        // Check that group state is either GROUPFORMING or FINAL
+        GroupState groupState = group.getGroupState();
+        if(!groupState.equals(GroupState.GROUPFORMING) && !groupState.equals(GroupState.FINAL)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You currenty can't leave the group");
+        }
 
         // Check the validity of the token
         Long guestId = userService.getUseridByToken(request.getHeader("X-Token"));
@@ -389,6 +404,12 @@ public class GroupController {
 
         // Remove the guest and their ingredients from the group
         userService.leaveGroup(guestId);
+
+        // Check if host is now alone & group state was FINAL -> delete group
+        memberIds = groupService.getAllMemberIdsOfGroup(group);
+        if(groupState.equals(GroupState.FINAL) && memberIds.size() == 1) {
+            groupService.deleteGroup(groupId);
+        }
     }
 
     @PostMapping("/groups/{groupId}/requests")
@@ -527,7 +548,8 @@ public class GroupController {
         }
 
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
-        if (!tokenId.equals(group.getHostId())) {
+        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
+        if (!memberIds.contains(tokenId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized");
         }
 
