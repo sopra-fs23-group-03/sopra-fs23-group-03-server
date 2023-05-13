@@ -7,6 +7,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.constant.UserVotingStatus;
+import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
@@ -282,6 +283,7 @@ public class UserService {
             groupService.removeGuestFromGroup(group, userId);
         }
 
+        user.setVotingStatus(UserVotingStatus.NOT_VOTED);
         user.setGroupId(null);
         userRepository.save(user);
         userRepository.flush();
