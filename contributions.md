@@ -1,6 +1,6 @@
 # SOPRA Group 3 - Contributions
 
-## **Week 1** 
+## **Week 1**
 
 <p>
 
@@ -29,9 +29,9 @@
 |             | #2     | Write error messages                                                             |  X   |
 |             | #3     | Create path to direct to personal profile                                        |  X   |
 
-</p>         
+</p>
 
-## **Week 2** 
+## **Week 2**
 
 <p>
 
@@ -47,12 +47,12 @@
 |             | #87    | Create method for returning the user profile                                     |  X   |
 | Kalliopi    | #80    | Create navigation bar                                                            |  X   |
 |             | #52    | Create a landing page with sections for displaying the users and active groups.  |  X   |
-|             | #9     | Display user as logged in                                                        |  X   | 
+|             | #9     | Display user as logged in                                                        |  X   |
 |             | #11    | Set user to offline and delete localStorage                                      |      |
 |             | #10    | Make Logout Button accessible                                                    |  X   |
-|             | #79    | Implement method to sort the users based on their online/offline status          |  X   |  
-|             | #68    | Create the Form Group button in the Landing Page                                 |  X   | 
-|             | #56    | Νavigation to the respective user profile page when a username is clicked        |      |    
+|             | #79    | Implement method to sort the users based on their online/offline status          |  X   |
+|             | #68    | Create the Form Group button in the Landing Page                                 |  X   |
+|             | #56    | Νavigation to the respective user profile page when a username is clicked        |      |
 |             | #53    | API calls to retrieve registered users and active groups from the backend        |      |
 |             | #54    | Display all users with online users at the beginning of the list                 |      |
 |             | #55    | Display all active planning groups with their group name, host and guests        |      |
@@ -68,7 +68,7 @@
 
 </p>
 
-## **Week 3** 
+## **Week 3**
 
 <p>
 
@@ -80,10 +80,10 @@
 |             |   #88  | Reopened and fixed the updating attributes and the tests                         |  X   |
 | Kalliopi    |   #42  | Create host view of group forming page                                           |  X   |
 |             |   #43  | Create guest view of group forming page                                          |  X   |
-|             |   #57  | Create "Ingredient Page"                                                         |  X   |     
-|             |   #63  | Create a button to submit the final contributions and transition to next page    |  X   |   
-|             |   #58  | Create ingredient input field and a button for adding an ingredient to the meal  |  X   |  
-|             |   #59  | Create a button to remove an ingredient from the meal                            |  X   |        
+|             |   #57  | Create "Ingredient Page"                                                         |  X   |
+|             |   #63  | Create a button to submit the final contributions and transition to next page    |  X   |
+|             |   #58  | Create ingredient input field and a button for adding an ingredient to the meal  |  X   |
+|             |   #59  | Create a button to remove an ingredient from the meal                            |  X   |
 | Ann-Kathrin |  #106  |  Update fields for allergies/cuisine to List/Set and adjust all tests            |  X   |
 |             | #132   | Create POST /groups/{groupId}/invitations                                        |  X   |
 |             | #198   | make GET /groups/{groupId}/ingredients call                                      |  X   |
@@ -105,7 +105,7 @@
 
 <p>
 
-## **Week 4** 
+## **Week 4**
 
 <p>
 
@@ -118,20 +118,19 @@
 |             | #114   | Create the DELETE /groups/{id} request                                           | X    |
 |             | #168   | implement PUT /groups/{groupId}/requests/reject call                             | X    |
 |             | #167   |implement POST /groups/{groupId}/requests call                                    | X    |
-|             | #169   | implement PUT /groups/{groupId}/requests/accept call                             | X    |    
+|             | #169   | implement PUT /groups/{groupId}/requests/accept call                             | X    |
 | Kalliopi    | #18    | Implement a function to fetch the recipe suggestion the backend API              |      |
 |             | #17    | Display the randomly selected recipe suggestion on the screen                    |  X   |
 |             | #55    | Display all active planning groups with their group name, host and guests        |  X   |
-|             | #67    | Redirect user to landing page if invitation is rejected                          |  X   |    
-|             | #65    | Add red notification signal when user gets a new notification                    |  X   | 
-|             | #66    | Path to be redirected to Group Forming Page - Group Overview if user accepts invitation |  X   |   
+|             | #67    | Redirect user to landing page if invitation is rejected                          |  X   |
+|             | #65    | Add red notification signal when user gets a new notification                    |  X   |
+|             | #66    | Path to be redirected to Group Forming Page - Group Overview if user accepts invitation |  X   |
 | Ann-Kathrin | #105   |  Implement a method for adding the ingredient contributions                      |  X   |
 |             | #210   |  Retrieve all ingredients from external API to avoid spelling mistakes           |  X   |
-|             | #54    |  Take input from REST API per user for all ingredients and transform it ...      |  X   |   
+|             | #54    |  Take input from REST API per user for all ingredients and transform it ...      |  X   |
 | Chiara      | #94    | Edit change button to edit also username/password                                |  X   |
 |             | #100   | Imprement button voting types in Group Creation page with default for majority   |  X   |
 |             | #112   | Create dropdown for diet preference                                              |  X   |
-    
 
 </p>
 
@@ -141,25 +140,22 @@
 
 | Name        | Issues | Description                                                                      | Done |
 |-------------|--------|----------------------------------------------------------------------------------|------|
-| Lany        | #60    | Develop an endpoint to retrieve and return the list of final ingredients.        |      |
-|             | #61    | Develop an endpoint to remove the ingredient contributions of the leaving guest. |      |
-|             | #62    | Implement a function to check if the group is left with only the host, and disband the group if necessary. |      |
+| Lany        | #60    | Develop an endpoint to retrieve and return the list of final ingredients.        | X    |
+|             | #61    | Develop an endpoint to remove the ingredient contributions of the leaving guest. | X    |
+|             | #62    | Implement a function to check if the group is left with only the host, and disband the group if necessary. | X    |
 | Orestis     | #171   | Create Method to include new guest to group                                      | X    |
 |             | #218   | add GET groups/{groupid}/requests call                                           | X    |
 |             | #77    | Create PUT /groups/{id}/state request                                            |      |
 |             | #170   | Create Method to check if user is allowed to request (group not entered certain stange in planning process). |      |
-| Kalliopi    |        |                                                                                  |      |
-|             | #58    | Ingredient input-field + button for adding ingredients to the meal(Improvements) |   X  |
+| Kalliopi    | #58    | Ingredient input-field + button for adding ingredients to the meal(Improvements) |   X  |
 |             | #59    | Create a button to remove an ingredient from the meal (Improvements)             |   X  |
 |             | #60    | Display all ingredients added to the meal in a separate section                  |   X  |
 |             | #61    | Ensure that at least one ingredient is added before allowing the user to submit  |   X  |
 |             | #62    | Implement API call to submit the ingredient contributions                        |   X  |
 |             | #63    | Button to submit final contributions and transition to next page  (Improvements) |  X   |
-|             |        |                                                                                  |      |
-| Ann-Kathrin |#172/#55|    Implement default majority logic                                              |    X | 
+| Ann-Kathrin |#172/#55|    Implement default majority logic                                              |    X |
 |             |    #59 |    Develop endpoint to store and retrieve guest and ingredient contributions     |      |
 |             |   #57  | select one recipe suggestion from the API based on the given ingredients         |      |
-|             |        |                                                                                  |      |    
 | Chiara      |   #99  | Add description text in group creation for describing the default logic          |   X  |
 |             |   #101 | Send the voting type to backend when creating the group                          |   X  |
 |             |   #13  | Make yes/no/indifferent buttons available                                        |   X  |
@@ -167,8 +163,26 @@
 |             |   #125 | Display an overview of all typed-in ingredients so that they can rate them       |   X  |
 |             |   #127 | Create a final ingredients page with the ingredients that have been selected after the voting  |   X  |
 
+</p>
 
-    
+## **Week 6** 
+
+<p>
+
+| Name        | Issues | Description                                                                      | Done |
+|-------------|--------|----------------------------------------------------------------------------------|------|
+| Lany        | #234   | independent: create GET /users/{userId}/groups                                   | X    |
+|             | #235   | independent: create GET /groups/{groupId}/members/allergies                      | X    |
+|             | #69 & #114 | Edited for added functionality                                               | X    |
+|             | #67 & #114 | Implemented previously, connected to corresponding commits.                  | X    |
+| Orestis     |        |                                                                                  |      |
+|             |        |                                                                                  |      |
+| Kalliopi    |        |                                                                                  |      |
+|             |        |                                                                                  |      |
+| Ann-Kathrin |        |                                                                                  |      |
+|             |        |                                                                                  |      |
+| Chiara      |        |                                                                                  |      |
+|             |        |                                                                                  |      |
 
 </p>
 
