@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupGetDTO;
@@ -134,8 +135,32 @@ public class UserController {
         // delete all join requests of the user
         joinRequestService.deleteAllJoinRequests(userId);
 
+        // Check if the user is a host of a group
+        Group hostedGroup = null;
+        try {
+            hostedGroup = groupService.getGroupByHostId(userId);
+            if (hostedGroup != null) {
+                // delete all the invitations that were sent out for this group
+                invitationService.deleteInvitationsByGroupId(hostedGroup.getId());
+
+                // delete all the join requests to join this group
+                joinRequestService.deleteJoinRequestsByGroupId(hostedGroup.getId());
+
+                // delete the group
+                groupService.deleteGroup(hostedGroup.getId());
+            }
+        } catch (ResponseStatusException ex) {
+            // If the user is not a host, they might still be a member of a group
+            if(userService.isUserInGroup(userId)) {
+                userService.leaveGroup(userId);
+            }
+        }
+
         userService.logout(userId);
     }
+
+
+
 
 
     @PutMapping("/users/{userId}")
