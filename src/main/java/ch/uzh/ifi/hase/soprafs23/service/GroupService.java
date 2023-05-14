@@ -261,4 +261,15 @@ public class GroupService {
         return group;
     }
 
+    public Group getGroupByUserId(Long userId) {
+        User user = userService.getUserById(userId);
+        Long groupId = user.getGroupId();
+
+        if (groupId == null) {
+            return null;
+        } else {
+            return getGroupById(groupId);
+        }
+    }
+
 }
