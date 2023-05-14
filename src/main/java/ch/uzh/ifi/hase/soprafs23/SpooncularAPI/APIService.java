@@ -124,8 +124,15 @@ public class APIService {
             throw new RuntimeException("Unexpected error occurred while fetching recipe details: " + e.getMessage());
         }
     }
+
     @PostConstruct
     public void init() {
+        long count = fullIngredientRepository.count();
+
+        // If the FullIngredient table is already populated, return and do not fetch ingredients from the API
+        if (count > 0) {
+            return;
+        }
         // Fetch all ingredients from the API
         String ingredientsApiUrl = "https://api.spoonacular.com/food/ingredients/search?apiKey=" + apiKey + "&number=1000";
 
@@ -152,8 +159,6 @@ public class APIService {
             }
         }
     }
-
-
 
     public String getApiKey() {
         return apiKey;
