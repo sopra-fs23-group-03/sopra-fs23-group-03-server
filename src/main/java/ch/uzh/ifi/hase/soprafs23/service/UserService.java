@@ -10,6 +10,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.constant.UserVotingStatus;
 import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
+import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
@@ -309,6 +310,7 @@ public class UserService {
             groupService.removeGuestFromGroup(group, userId);
         }
 
+        user.setVotingStatus(UserVotingStatus.NOT_VOTED);
         user.setGroupId(null);
         userRepository.save(user);
         userRepository.flush();
@@ -322,6 +324,12 @@ public class UserService {
     public Set<String> getAllergiesById(Long userId) {
         User user = getUserById(userId);
         return user.getAllergiesSet();
+    }
+
+    public boolean userHasIngredients(Long userId) {
+        User user = getUserById(userId);
+        int ingredientSetSize = user.getIngredients().size();
+        return ingredientSetSize > 0;
     }
 
 }

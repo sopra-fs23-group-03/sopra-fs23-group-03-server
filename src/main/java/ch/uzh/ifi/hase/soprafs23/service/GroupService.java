@@ -182,16 +182,22 @@ public class GroupService {
 
         Set<Ingredient> ingredients = group.getIngredients();
         Set<Long> ingredientToBeDeletedIds = new HashSet<>();
+        Set<Ingredient> ingredientsToBeRemoved = new HashSet<>();
 
         for (Ingredient ingredient : ingredients) {
             Set<User> ingredientUsers = ingredient.getUsersSet();
             if (ingredientUsers.contains(user)) {
                 if (ingredientUsers.size() == 1) {
                     ingredientToBeDeletedIds.add(ingredient.getId());
-                    group.removeIngredient(ingredient);
+                    ingredientsToBeRemoved.add(ingredient); // Don't remove it yet, just note it for removal
                 }
                 user.removeIngredient(ingredient);
             }
+        }
+
+        // Now it's safe to remove the ingredients from the group
+        for (Ingredient ingredient : ingredientsToBeRemoved) {
+            group.removeIngredient(ingredient);
         }
 
         for (Long id : ingredientToBeDeletedIds) {
@@ -201,6 +207,7 @@ public class GroupService {
             }
         }
     }
+
 
     public Group addGuestToGroup(Group group, Long guestId) {
         group.addGuestId(guestId);
