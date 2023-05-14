@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
@@ -40,6 +41,7 @@ import java.util.*;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -302,6 +304,25 @@ public class UserControllerTest {
         verify(userService, times(1)).logout(userId);
         verify(joinRequestService, times(1)).deleteAllJoinRequests(userId);
     }
+
+    @Test
+    public void testLogoutUserWhenInGroupNotInFormingState() throws Exception {
+        Group group = new Group();
+        group.setId(1L);
+        group.setGroupName("Test Group");
+        group.setGroupState(GroupState.FINAL);
+        group.setHostId(user.getId());
+
+        given(groupService.getGroupByUserId(user.getId())).willReturn(group);
+
+        mockMvc.perform(post("/users/{userId}/logout", user.getId())
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isForbidden())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResponseStatusException))
+                .andExpect(result -> assertEquals("403 FORBIDDEN \"You cannot logout while your group is beyond the forming stage.\"",
+                        Objects.requireNonNull(result.getResolvedException()).getMessage()));
+    }
+
 
     @Test
     public void testGetUserByIdReturns200() throws Exception {
