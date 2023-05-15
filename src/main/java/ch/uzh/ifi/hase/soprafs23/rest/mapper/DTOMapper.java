@@ -41,6 +41,7 @@ public interface DTOMapper {
     @Mapping(source = "hostId", target = "hostId")
     @Mapping(source = "hostName", target = "hostName")
     @Mapping(source = "votingType", target = "votingType")
+    @Mapping(source = "groupState", target = "groupState")
     GroupGetDTO convertEntityToGroupGetDTO(Group group);
 
 
