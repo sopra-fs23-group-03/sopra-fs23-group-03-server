@@ -258,7 +258,7 @@ public class UserController {
     public void updateUserIngredients(@PathVariable Long userId,
                                       @RequestBody List<IngredientPutDTO> ingredientsPutDTO, // I get list of objects (arrays)
                                       @RequestHeader(name = "X-Token") String xToken) {
-        userService.getUserById(userId);
+        User user = userService.getUserById(userId);
 
         Long tokenId = userService.getUseridByToken(xToken);
         if (!tokenId.equals(userId)) {
@@ -266,6 +266,20 @@ public class UserController {
         }
 
         userService.addUserIngredients(userId, ingredientsPutDTO);
+
+        // Check if all members of group have entered ingredients, change state if so
+        Group group = groupService.getGroupById(user.getGroupId());
+        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
+        boolean changeState = true;
+        for (Long memberId : memberIds) {
+            if(!userService.userHasIngredients(memberId)) {
+                changeState = false;
+                break;
+            }
+        }
+        if (changeState) {
+            groupService.changeGroupState(group.getId(), GroupState.INGREDIENTVOTING); // if all members have entered ingredients change state and continue
+        }
     }
 
 

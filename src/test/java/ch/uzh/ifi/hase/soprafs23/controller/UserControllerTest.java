@@ -575,6 +575,11 @@ public class UserControllerTest {
         IngredientPutDTO ingredientPutDTO2 = new IngredientPutDTO();
         ingredientPutDTO2.setName("beer");
 
+        Group group = new Group();
+
+        // mocks
+        given(groupService.getGroupById(any())).willReturn(group);
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(Collections.singletonList(user.getId()));
 
         // when/then -> do the request
         String xToken = user.getToken();
