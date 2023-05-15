@@ -302,18 +302,12 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
         }
 
-        // Check that groupState is INGREDIENTVOTING / that all members have entered ingredients
-        // TODO: change to only check the state
+        // Check that groupState is INGREDIENTVOTING
         GroupState groupState = group.getGroupState();
         if(!groupState.equals(GroupState.INGREDIENTVOTING)) {
-            for (Long memberId : memberIds) {
-                if(!userService.userHasIngredients(memberId)) {
-                    throw new ResponseStatusException(HttpStatus.ACCEPTED, "Not all members of the group have entered ingredients yet"); // 202
-                }
-            }
-            groupService.changeGroupState(groupId, GroupState.INGREDIENTVOTING); // if all members have entered ingredients change state and continue
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Not all members of the group have entered ingredients yet"); // 202        }
         }
-
+        
         // retrieve all ingredients available from the members of the group
         Set<Ingredient> groupIngredients = group.getIngredients();
 
@@ -343,7 +337,7 @@ public class GroupController {
         // Check that group state is FINAL
         GroupState groupState = group.getGroupState();
         if(!groupState.equals(GroupState.FINAL)) {
-            throw new ResponseStatusException(HttpStatus.ACCEPTED, "Not all members of the group have voted yet"); // 200
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Not all members of the group have voted yet"); // 200
         }
 
         // retrieve all ingredients available from the members of the group
@@ -527,18 +521,15 @@ public class GroupController {
         }
 
         /// Check if all members of group have voted, change state if so
-        GroupState groupState = group.getGroupState();
         boolean changeState = true;
-        if(!groupState.equals(GroupState.FINAL)) {
-            for (Long memberId : memberIds) {
-                User member = userService.getUserById(memberId);
-                if (member.getVotingStatus() != UserVotingStatus.VOTED) {
-                    changeState = false;
-                }
+        for (Long memberId : memberIds) {
+            User member = userService.getUserById(memberId);
+            if (member.getVotingStatus() != UserVotingStatus.VOTED) {
+                changeState = false;
             }
-            if(changeState) {
-                groupService.changeGroupState(groupId, GroupState.FINAL); // if all members have voted change state to FINAL and continue
-            }
+        }
+        if(changeState) {
+            groupService.changeGroupState(groupId, GroupState.FINAL); // if all members have voted change state to FINAL and continue
         }
     }
 
