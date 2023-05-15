@@ -250,4 +250,26 @@ public class GroupService {
         
         return allergies;
     }
+
+    public Group getGroupByHostId(Long hostId) {
+        Group group = this.groupRepository.findByHostId(hostId);
+
+        if (group == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Group with host id %s does not exist", hostId));
+        }
+
+        return group;
+    }
+
+    public Group getGroupByUserId(Long userId) {
+        User user = userService.getUserById(userId);
+        Long groupId = user.getGroupId();
+
+        if (groupId == null) {
+            return null;
+        } else {
+            return getGroupById(groupId);
+        }
+    }
+
 }

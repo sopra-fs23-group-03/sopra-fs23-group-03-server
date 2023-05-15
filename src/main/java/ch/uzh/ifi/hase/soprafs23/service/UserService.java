@@ -118,10 +118,14 @@ public class UserService {
 
     public void logout(Long id) {
         User user = getUserById(id);
+        if(isUserInGroup(id)){
+            leaveGroup(id);
+        }
         user.setStatus(UserStatus.OFFLINE);
         user = userRepository.save(user);
         userRepository.flush();
     }
+
 
     public void updateUser(Long id, UserPutDTO userPutDTO) {
         User user = getUserById(id);

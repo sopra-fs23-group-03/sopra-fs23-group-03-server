@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
+import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupGetDTO;
@@ -10,6 +12,7 @@ import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
+import ch.uzh.ifi.hase.soprafs23.service.JoinRequestService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -38,10 +41,13 @@ public class UserController {
 
     private final InvitationService invitationService;
 
-    public UserController(UserService userService, GroupService groupService, InvitationService invitationService) {
+    private final JoinRequestService joinRequestService;
+
+    public UserController(UserService userService, GroupService groupService, InvitationService invitationService, JoinRequestService joinRequestService) {
         this.userService = userService;
         this.groupService = groupService;
         this.invitationService = invitationService;
+        this.joinRequestService = joinRequestService;
     }
 
     @GetMapping("/users")
@@ -126,8 +132,43 @@ public class UserController {
         if(!tokenId.equals(userId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
         }
+
+        // Check if the user is in a group that is not in the GROUPFORMING state
+        Group currentGroup = groupService.getGroupByUserId(userId); // Replace this with the actual method
+        if(currentGroup != null && currentGroup.getGroupState() != GroupState.GROUPFORMING) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot logout while your group is beyond the forming stage.");
+        }
+
+        // delete all join requests of the user
+        joinRequestService.deleteAllJoinRequests(userId);
+
+        // Check if the user is a host of a group
+        Group hostedGroup = null;
+        try {
+            hostedGroup = groupService.getGroupByHostId(userId);
+            if (hostedGroup != null) {
+                // delete all the invitations that were sent out for this group
+                invitationService.deleteInvitationsByGroupId(hostedGroup.getId());
+
+                // delete all the join requests to join this group
+                joinRequestService.deleteJoinRequestsByGroupId(hostedGroup.getId());
+
+                // delete the group
+                groupService.deleteGroup(hostedGroup.getId());
+            }
+        } catch (ResponseStatusException ex) {
+            // If the user is not a host, they might still be a member of a group
+            if(userService.isUserInGroup(userId)) {
+                userService.leaveGroup(userId);
+            }
+        }
+
         userService.logout(userId);
     }
+
+
+
+
 
     @PutMapping("/users/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT) //NO CONTENT IS 204

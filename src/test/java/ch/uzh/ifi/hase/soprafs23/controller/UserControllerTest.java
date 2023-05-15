@@ -3,38 +3,45 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientPutDTO;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
+import ch.uzh.ifi.hase.soprafs23.service.JoinRequestService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Collections;
-import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
 
+import static org.assertj.core.api.BDDAssertions.then;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -58,6 +65,12 @@ public class UserControllerTest {
     @MockBean
     private InvitationService invitationService;
 
+    @MockBean
+    private JoinRequestService joinRequestService;
+
+    @Mock
+    private UserRepository userRepository;
+
     private User user;
 
     @BeforeEach
@@ -74,6 +87,13 @@ public class UserControllerTest {
         // mocks that are used in most tests
         given(userService.getUseridByToken(user.getToken())).willReturn(user.getId());
         given(userService.getUserById(user.getId())).willReturn(user);
+        given(userService.isUserInGroup(user.getId())).willReturn(true);
+
+    }
+
+    @BeforeEach
+    public void setup1() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -260,6 +280,49 @@ public class UserControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResponseStatusException));
     }
+
+    @Test
+    public void logoutUser_shouldDeleteJoinRequestsAndLogoutUser() throws Exception {
+        // Arrange
+        String token = "testToken";
+        Long userId = 1L;
+        User user = new User();
+        user.setId(userId);
+        user.setToken(token);
+        user.setStatus(UserStatus.ONLINE);
+
+        given(userService.getUseridByToken(token)).willReturn(userId);
+        given(userService.getUserById(userId)).willReturn(user);
+
+        // Act
+        mockMvc.perform(post("/users/{userId}/logout", userId)
+                        .header("X-Token", token)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        // Assert
+        verify(userService, times(1)).logout(userId);
+        verify(joinRequestService, times(1)).deleteAllJoinRequests(userId);
+    }
+
+    @Test
+    public void testLogoutUserWhenInGroupNotInFormingState() throws Exception {
+        Group group = new Group();
+        group.setId(1L);
+        group.setGroupName("Test Group");
+        group.setGroupState(GroupState.FINAL);
+        group.setHostId(user.getId());
+
+        given(groupService.getGroupByUserId(user.getId())).willReturn(group);
+
+        mockMvc.perform(post("/users/{userId}/logout", user.getId())
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isForbidden())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResponseStatusException))
+                .andExpect(result -> assertEquals("403 FORBIDDEN \"You cannot logout while your group is beyond the forming stage.\"",
+                        Objects.requireNonNull(result.getResolvedException()).getMessage()));
+    }
+
 
     @Test
     public void testGetUserByIdReturns200() throws Exception {
