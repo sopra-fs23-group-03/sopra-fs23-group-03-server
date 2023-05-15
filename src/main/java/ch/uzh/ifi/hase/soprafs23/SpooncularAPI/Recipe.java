@@ -15,7 +15,7 @@ public class Recipe implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "recipe_id", updatable = false, insertable = false)
-    private Long id; //ToDO here its a Long not long
+    private Long id;
     @Column(nullable = false)
     private String title;
 
@@ -24,7 +24,7 @@ public class Recipe implements Serializable {
     @Column(nullable = true)
     private String image;
 
-    @Column(nullable = true, length = 1000) //increase size of column //TODO: use @Lob to make it a text type?
+    @Column(nullable = true, length = 1500)
     private String instructions;
 
     @Column(name = "external_recipe_id")
