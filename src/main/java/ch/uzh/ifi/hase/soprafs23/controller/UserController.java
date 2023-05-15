@@ -266,6 +266,8 @@ public class UserController {
         }
 
         userService.addUserIngredients(userId, ingredientsPutDTO);
+
+        // TODO: check if all members of group have entered ingredients, change state if so
     }
 
 
