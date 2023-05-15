@@ -175,7 +175,7 @@ public class GroupService {
         Set<Ingredient> badIngredients = new HashSet<>();
 
         for (Ingredient ingredient : ingredients) {
-            if (ingredient.getCalculatedRating() < 0) {
+            if (ingredient.getCalculatedRating() <= -1) {
                 badIngredients.add(ingredient);
             }
         }
