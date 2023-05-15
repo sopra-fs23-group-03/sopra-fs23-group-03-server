@@ -134,7 +134,7 @@ public class UserController {
         }
 
         // Check if the user is in a group that is not in the GROUPFORMING state
-        Group currentGroup = groupService.getGroupByUserId(userId); // Replace this with the actual method
+        Group currentGroup = groupService.getGroupByUserId(userId);
         if(currentGroup != null && currentGroup.getGroupState() != GroupState.GROUPFORMING) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You cannot logout while your group is beyond the forming stage.");
         }
@@ -165,10 +165,6 @@ public class UserController {
 
         userService.logout(userId);
     }
-
-
-
-
 
     @PutMapping("/users/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT) //NO CONTENT IS 204

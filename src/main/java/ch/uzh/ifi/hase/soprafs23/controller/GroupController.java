@@ -187,6 +187,7 @@ public class GroupController {
 
         // delete invitation
         invitationService.deleteInvitation(invitation);
+        joinRequestService.deleteAllJoinRequests(guestId);
     }
 
     @GetMapping("/groups/{groupId}")
