@@ -1068,6 +1068,34 @@ public class GroupControllerTest {
     }
 
     @Test
+    public void testUpdateRatings_invalidIngredientRatings() throws Exception {
+        // given
+        Map<Long, String> ingredientRatings = new HashMap<>();
+        ingredientRatings.put(1L, "1");
+        ingredientRatings.put(2L, "-5");
+
+        String requestBody = asJsonString(ingredientRatings);
+
+        group.setVotingType(VotingType.MAJORITYVOTE);
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(group.getHostId());
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/groups/{groupId}/ratings/{userId}", group.getId(), user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", user.getToken())
+                .content(requestBody);
+
+        mockMvc.perform(putRequest)
+                .andExpect(status().isBadRequest());
+    }
+
+
+
+    @Test
     public void testGetGroupGuestsById_valid() throws Exception {
         User guest = new User();
         guest.setId(6L);
