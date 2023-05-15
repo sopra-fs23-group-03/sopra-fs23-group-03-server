@@ -69,7 +69,10 @@ public class APIService {
 
 
     public List<RecipeInfo> getRecipe(Group group) {
-        Set<Ingredient> finalSetIngredients = groupService.getFinalIngredients(group);
+        Set<Ingredient> finalSetIngredients = groupService.getFinalIngredients(group);// good Ingredients
+
+
+
         List<String> listOfIngredients = finalSetIngredients.stream()
                 .map(Ingredient::getName)
                 .collect(Collectors.toList());

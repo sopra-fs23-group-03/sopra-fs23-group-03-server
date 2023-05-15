@@ -50,6 +50,7 @@ public class APIController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
         }
 
+
         List<RecipeInfo> recipeInfos = apiService.getRecipe(group);
 
         if (recipeInfos.isEmpty()) {
