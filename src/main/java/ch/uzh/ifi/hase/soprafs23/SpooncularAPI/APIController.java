@@ -40,6 +40,7 @@ public class APIController {
     @Autowired
     private IngredientRepository ingredientRepository;
 
+    private final String apiKey = "355684ee05744c43a90c66aeda3fecd2";
     @Autowired
     private FullIngredientRepository fullIngredientRepository;
 
@@ -121,13 +122,20 @@ public class APIController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
         }
 
+        // Fetch ingredients from the API if not already in the database
+        for (char ch : initialString.toCharArray()) {
+            String apiUrl = "https://api.spoonacular.com/food/ingredients/search?apiKey=" + apiKey + "&number=1000";
+            apiService.fetchAndStoreIngredients(apiUrl, String.valueOf(ch));
+        }
+
         List<FullIngredient> fullIngredients = fullIngredientRepository.findByNameContainingIgnoreCase(initialString);
         List<String> ingredientNames = fullIngredients.stream().map(FullIngredient::getName).collect(Collectors.toList());
-
 
         if (ingredientNames.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No ingredients found with the name: '%s'.", initialString));
         }
         return ingredientNames;
     }
+
+
 }

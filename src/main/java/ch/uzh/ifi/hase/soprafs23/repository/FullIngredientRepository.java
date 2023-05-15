@@ -9,4 +9,9 @@ import java.util.Optional;
 public interface FullIngredientRepository extends JpaRepository<FullIngredient, Long> {
     Optional<FullIngredient> findByName(String name);
     List<FullIngredient> findByNameContainingIgnoreCase(String initialString);
+    boolean existsByQuery(String query);
 }
+
+
+
+

@@ -14,11 +14,16 @@ public class FullIngredient implements Serializable {
     @Column(nullable = false)
     private String name;
 
+
+    @Column(nullable = false)
+    private String query;
+
     public FullIngredient() {
     }
 
-    public FullIngredient(String name) {
+    public FullIngredient(String name, String query) {
         this.name = name;
+        this.query = query;
     }
 
     public String getName() {
@@ -35,5 +40,13 @@ public class FullIngredient implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getQuery() {
+        return query;
+    }
+
+    public void setQuery(String query) {
+        this.query = query;
     }
 }

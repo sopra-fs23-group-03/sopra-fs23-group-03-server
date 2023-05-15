@@ -244,7 +244,7 @@ public class UserServiceTest {
         ingredientPutDTO = new IngredientPutDTO();
         ingredientPutDTO.setName("newIngredient");
 
-        FullIngredient fullIngredient = new FullIngredient("newIngredient");
+        FullIngredient fullIngredient = new FullIngredient("newIngredient", "new");
         when(fullIngredientRepository.findByName("newIngredient")).thenReturn(Optional.of(fullIngredient));
         when(ingredientRepository.findByName("newIngredient")).thenReturn(Optional.empty());
 
@@ -265,7 +265,7 @@ public class UserServiceTest {
         ingredientPutDTO = new IngredientPutDTO();
         ingredientPutDTO.setName("ingredient1");
 
-        FullIngredient fullIngredient = new FullIngredient("ingredient1");
+        FullIngredient fullIngredient = new FullIngredient("ingredient1", "ing");
         when(fullIngredientRepository.findByName("ingredient1")).thenReturn(Optional.of(fullIngredient));
 
         Ingredient existingIngredient = new Ingredient("ingredient1");

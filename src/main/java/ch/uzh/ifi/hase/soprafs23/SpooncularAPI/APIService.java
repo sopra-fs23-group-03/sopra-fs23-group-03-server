@@ -37,7 +37,7 @@ public class APIService {
     private GroupService groupService;
     private RecipeRepository recipeRepository;
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String apiKey = "56638b96d69d409cab5a0cdf9a8a1f5d";
+    private final String apiKey = "355684ee05744c43a90c66aeda3fecd2";
     @Autowired
     private FullIngredientRepository fullIngredientRepository;
     @Autowired
@@ -125,40 +125,28 @@ public class APIService {
         }
     }
 
-    @PostConstruct
-    public void init() {
-        long count = fullIngredientRepository.count();
+    public void fetchAndStoreIngredients(String apiUrl, String query) {
+        // Fetch only if there's no record of that character in the database.
+        if (!fullIngredientRepository.existsByQuery(query)) {
+            String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
+            String fullUrl = apiUrl + "&query=" + encodedQuery;
 
-        // If the FullIngredient table is already populated, return and do not fetch ingredients from the API
-        if (count > 0) {
-            return;
-        }
-        // Fetch all ingredients from the API
-        String ingredientsApiUrl = "https://api.spoonacular.com/food/ingredients/search?apiKey=" + apiKey + "&number=1000";
+            ResponseEntity<IngredientSearchResponse> searchResponse = restTemplate.getForEntity(fullUrl, IngredientSearchResponse.class);
+            List<IngredientAPI> ingredientsAPI = Objects.requireNonNull(searchResponse.getBody()).getResults();
 
-        for (char alphabet = 'a'; alphabet <= 'z'; alphabet++) {
-            String query = Character.toString(alphabet);
-            fetchAndStoreIngredients(ingredientsApiUrl, query);
-        }
-    }
-
-    private void fetchAndStoreIngredients(String apiUrl, String query) {
-        String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
-        String fullUrl = apiUrl + "&query=" + encodedQuery;
-
-        ResponseEntity<IngredientSearchResponse> searchResponse = restTemplate.getForEntity(fullUrl, IngredientSearchResponse.class);
-        List<IngredientAPI> ingredientsAPI = Objects.requireNonNull(searchResponse.getBody()).getResults();
-
-        for (IngredientAPI ingredientAPI : ingredientsAPI) {
-            String name = ingredientAPI.getName();
-            // Save the ingredient in the FullIngredient table if not already present
-            Optional<FullIngredient> existingIngredient = fullIngredientRepository.findByName(name);
-            if (!existingIngredient.isPresent()) {
-                FullIngredient newIngredient = new FullIngredient(name);
-                fullIngredientRepository.save(newIngredient);
+            for (IngredientAPI ingredientAPI : ingredientsAPI) {
+                String name = ingredientAPI.getName();
+                // Save the ingredient in the FullIngredient table if not already present
+                Optional<FullIngredient> existingIngredient = fullIngredientRepository.findByName(name);
+                if (!existingIngredient.isPresent()) {
+                    FullIngredient newIngredient = new FullIngredient(name, query);
+                    fullIngredientRepository.save(newIngredient);
+                }
             }
         }
     }
+
+
 
     public String getApiKey() {
         return apiKey;
