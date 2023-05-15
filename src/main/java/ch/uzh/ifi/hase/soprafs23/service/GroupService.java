@@ -125,6 +125,10 @@ public class GroupService {
             userService.leaveGroup(memberId);
         }
 
+        // Delete open invitations and join requests of that group
+        invitationService.deleteInvitationsByGroupId(groupId);
+        joinRequestService.deleteJoinRequestsByGroupId(groupId);
+
         // Delete the group
         groupRepository.delete(group);
     }
