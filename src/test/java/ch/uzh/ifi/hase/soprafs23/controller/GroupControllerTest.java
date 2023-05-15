@@ -741,6 +741,8 @@ public class GroupControllerTest {
     @Test
     public void testGetIngredientsOfGroupById_valid_oneIngredient() throws Exception {
         // given
+        group.setGroupState(GroupState.INGREDIENTVOTING);
+
         Ingredient apple = new Ingredient();
         apple.setId(19L);
         apple.setName("apple");
@@ -754,7 +756,6 @@ public class GroupControllerTest {
 
         // mocks
         given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
-        given(userService.userHasIngredients(group.getHostId())).willReturn(true);
 
         // when
         MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/ingredients", group.getId())
@@ -772,6 +773,8 @@ public class GroupControllerTest {
     @Test
     public void testGetIngredientsOfGroupById_valid_multipleIngredients() throws Exception {
         // given
+        group.setGroupState(GroupState.INGREDIENTVOTING);
+
         Ingredient apple = new Ingredient("apple");
         Ingredient pear = new Ingredient("pear");
         Ingredient banana = new Ingredient("banana");
@@ -787,7 +790,6 @@ public class GroupControllerTest {
 
         // mocks
         given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
-        given(userService.userHasIngredients(group.getHostId())).willReturn(true);
 
         // when
         MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/ingredients", group.getId())
@@ -801,13 +803,12 @@ public class GroupControllerTest {
     }
 
     @Test
-    public void testGetIngredientsOfGroupById_notYetEnteredIngredients() throws Exception {
+    public void testGetIngredientsOfGroupById_notYetIngredientVoting() throws Exception {
         List<Long> memberIds = new ArrayList<>();
         memberIds.add(group.getHostId());
 
         // mocks
         given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
-        given(userService.userHasIngredients(group.getHostId())).willReturn(false);
 
         // when
         MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/ingredients", group.getId())
@@ -816,7 +817,7 @@ public class GroupControllerTest {
 
         // then
         mockMvc.perform(getRequest)
-            .andExpect(status().isAccepted());
+            .andExpect(status().isConflict());
     }
 
     @Test
@@ -863,7 +864,7 @@ public class GroupControllerTest {
     @Test
     public void testGetFinalIngredientsOfGroupById_valid_oneIngredient() throws Exception {
         // given
-        user.setVotingStatus(UserVotingStatus.VOTED);
+        group.setGroupState(GroupState.FINAL);
 
         Ingredient apple = new Ingredient();
         apple.setId(19L);
@@ -891,15 +892,12 @@ public class GroupControllerTest {
             .andExpect(jsonPath("$", hasSize(1)))
             .andExpect(jsonPath("$[0].id", is(apple.getId().intValue())))
             .andExpect(jsonPath("$[0].name", is(apple.getName())));
-
-        verify(groupService, times(1)).changeGroupState(group.getId(), GroupState.FINAL);
     }
 
     @Test
     public void testGetFinalIngredientsOfGroupById_valid_multipleIngredients() throws Exception {
         // given
         group.setGroupState(GroupState.FINAL);
-        user.setVotingStatus(UserVotingStatus.VOTED);
 
         Ingredient apple = new Ingredient("apple");
         Ingredient pear = new Ingredient("pear");
@@ -931,10 +929,8 @@ public class GroupControllerTest {
     }
 
     @Test
-    public void testGetFinalIngredientsOfGroupById_notYetVoted() throws Exception {
+    public void testGetFinalIngredientsOfGroupById_notYetFinal() throws Exception {
         // given
-        user.setVotingStatus(UserVotingStatus.NOT_VOTED);
-
         List<Long> memberIds = new ArrayList<>();
         memberIds.add(group.getHostId());
 
@@ -948,7 +944,7 @@ public class GroupControllerTest {
 
         // then
         mockMvc.perform(getRequest)
-            .andExpect(status().isAccepted());
+            .andExpect(status().isConflict());
     }
 
     @Test

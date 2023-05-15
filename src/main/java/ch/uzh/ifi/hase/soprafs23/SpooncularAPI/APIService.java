@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import ch.uzh.ifi.hase.soprafs23.repository.RecipeRepository;
@@ -30,20 +29,24 @@ import java.util.*;
 import java.net.URLEncoder;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger; //needed for more information in the log --> for testing
+import org.slf4j.LoggerFactory;
+
+
 @Component
 public class APIService {
-
+    private static final Logger logger = LoggerFactory.getLogger(APIService.class);
     @Autowired
     private GroupService groupService;
     private RecipeRepository recipeRepository;
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String apiKey = "355684ee05744c43a90c66aeda3fecd2";
+    private final String apiKey = "56638b96d69d409cab5a0cdf9a8a1f5d";
     @Autowired
     private FullIngredientRepository fullIngredientRepository;
     @Autowired
     private IngredientRepository ingredientRepository;
 
-    public Recipe getHostRecipe(User host) {
+    public Recipe getHostRecipe(User host) { //TODO: use for Solo trip?
         String intolerances = String.join(",", host.getAllergiesSet());
         String diet = host.getSpecialDiet();
         String cuisine = String.join(",", host.getFavoriteCuisineSet());
@@ -67,13 +70,11 @@ public class APIService {
             Recipe detailedRecipe = informationResponse.getBody();
 
             return detailedRecipe;
-        } catch (HttpClientErrorException e) {
-            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
-            } else {
-                throw e;
-            }
-        } catch (HttpServerErrorException e) {
+        }
+        catch (ResponseStatusException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
+        }
+        catch(HttpServerErrorException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized");
         }
     }
@@ -96,15 +97,16 @@ public class APIService {
             List<RecipeInfo> recipeInfos = searchResponse.getBody();
 
             if (recipeInfos.isEmpty()) {
-                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "No recipes found for the given ingredients");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No recipes found for the given ingredients");
             }
             return recipeInfos;
-        } catch (HttpClientErrorException e) {
-            throw new HttpClientErrorException(e.getStatusCode(), "Error occurred while fetching recipe: " + e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Unexpected error occurred while fetching recipe: " + e.getMessage());
-        }
+        } catch (ResponseStatusException e) {
+        logger.error("Error occurred while fetching recipe: " + e.getMessage(), e);
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Error occurred while fetching recipe: " + e.getMessage());
+    } catch (Exception e) {
+        logger.error("Unexpected error occurred while fetching recipe: " + e.getMessage(), e);
+        throw new RuntimeException("Unexpected error occurred while fetching recipe: " + e.getMessage());
+    }
     }
 
     public RecipeDetailInfo getRecipeDetails(Long externalRecipeId) {
@@ -114,16 +116,14 @@ public class APIService {
             RecipeDetailInfo detailInfo = infoResponse.getBody();
 
             if (detailInfo == null) {
-                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "No details found for the given recipe ID");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No details found for the given recipe ID");
             }
             return detailInfo;
-        } catch (HttpClientErrorException e) {
-            throw new HttpClientErrorException(e.getStatusCode(), "Error occurred while fetching recipe details: " + e.getMessage());
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Unexpected error occurred while fetching recipe details: " + e.getMessage());
+        } catch (ResponseStatusException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Error occurred while fetching recipe details: " + e.getMessage());
         }
     }
+
 
     public void fetchAndStoreIngredients(String apiUrl, String query) {
         // Fetch only if there's no record of that character in the database.
@@ -145,8 +145,6 @@ public class APIService {
             }
         }
     }
-
-
 
     public String getApiKey() {
         return apiKey;

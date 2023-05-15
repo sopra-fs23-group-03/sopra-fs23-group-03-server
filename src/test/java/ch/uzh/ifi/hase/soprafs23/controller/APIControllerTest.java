@@ -2,50 +2,40 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.*;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
+import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.IngredientInfo;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
+import ch.uzh.ifi.hase.soprafs23.service.RecipeService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.web.util.NestedServletException;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
-
 @ExtendWith(SpringExtension.class)
-@SpringBootTest
-@AutoConfigureMockMvc
+@WebMvcTest(APIController.class) //bc we focus on testing the web layer
 @Import(RestTemplateConfig.class)
 public class APIControllerTest {
 
@@ -60,14 +50,22 @@ public class APIControllerTest {
 
     @MockBean
     private APIService apiService;
-    @Mock
-    private RestTemplate restTemplate;
-    @InjectMocks
-    private APIController apiController;
+
+    @MockBean
+    private RecipeService recipeService;
+
+    @MockBean
+    private IngredientInfo ingredientInfo;
+
 
     private Group testGroup;
     private User testUser;
     private Recipe testRecipe;
+    private RecipeInfo testRecipeInfo;
+    private RecipeDetailInfo testRecipeDetails;
+
+    private IngredientInfo testIngredientInfo;
+
 
     @BeforeEach
     public void setUp() {
@@ -78,80 +76,104 @@ public class APIControllerTest {
         testUser = new User();
         testUser.setId(1L);
 
+        testIngredientInfo = new IngredientInfo();
+        List<IngredientInfo> ingredientsUsed = new ArrayList<>();
+        testIngredientInfo.setName("Tomato");
+        ingredientsUsed.add(testIngredientInfo);
+
+        List<IngredientInfo> ingredientsMissed = new ArrayList<>();
+        testIngredientInfo.setName("Cheese");
+        ingredientsMissed.add(testIngredientInfo);
+
         testRecipe = new Recipe();
         testRecipe.setId(1);
-        testRecipe.setTitle("Test Recipe");
         testRecipe.setReadyInMinutes(30);
 
-        doReturn(testGroup).when(groupService).getGroupById(anyLong());
-        doReturn(testUser).when(userService).getUserById(anyLong());
-        doReturn(1L).when(userService).getUseridByToken("valid-token");
-        doReturn(testRecipe).when(apiService).getHostRecipe(testUser);
+        testRecipeInfo = new RecipeInfo();
+        testRecipeInfo.setId(1L);
+        testRecipeInfo.setTitle("Test Recipe");
+        testRecipeInfo.setUsedIngredients(ingredientsUsed);
+        testRecipeInfo.setMissedIngredients(ingredientsMissed);
+
+        List<RecipeInfo> recipesList = List.of(testRecipeInfo);
+
+        testRecipeDetails = new RecipeDetailInfo();
+        testRecipeDetails.setReadyInMinutes(30);
+
+        doReturn(testGroup).when(groupService).getGroupById(Mockito.any());
+        doReturn(testUser).when(userService).getUserById(Mockito.any());
+        doReturn(1L).when(userService).getUseridByToken(Mockito.any());
+        doReturn(recipesList).when(apiService).getRecipe(Mockito.any());
+
+        doReturn(testRecipe).when(recipeService).findByExternalRecipeIdAndGroupId(Mockito.any(), Mockito.any());
+        doReturn(testRecipeDetails).when(apiService).getRecipeDetails(Mockito.any());
     }
 
 
-//    @Test
-//    public void getRandomRecipe_success_200() throws Exception {
-//        mockMvc.perform(get("/groups/{groupId}/result", 1L)
-//                        .header("X-Token", "valid-token")
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk()) // 200
-//                .andExpect(jsonPath("$.id").value(testRecipe.getId()))
-//                .andExpect(jsonPath("$.title").value(testRecipe.getTitle()))
-//                .andExpect(jsonPath("$.readyInMinutes").value(testRecipe.getReadyInMinutes()))
-//                .andExpect(jsonPath("$.pricePerServing").value(testRecipe.getPricePerServing()));
-//    }
-//
-//    @Test
-//    public void getHostRecipe_returnsConflictStatusCode_whenNoRecipesFound_409() {
-//        // Arrange
-//        User host = new User(); // Set up a User object with necessary data
-//        String intolerances = String.join(",", host.getAllergiesSet());
-//        String diet = host.getSpecialDiet();
-//        String cuisine = String.join(",", host.getFavoriteCuisineSet());
-//
-//        String searchApiUrl = "https://api.spoonacular.com/recipes/complexSearch?apiKey=" + apiService.getApiKey() +
-//                "&intolerances=" + intolerances + "&diet=" + diet + "&cuisine=" + cuisine;
-//
-//        ComplexSearchResponse emptyResponse = new ComplexSearchResponse();
-//        emptyResponse.setResults(Collections.emptyList());
-//
-//        when(restTemplate.getForEntity(searchApiUrl, ComplexSearchResponse.class))
-//                .thenReturn(new ResponseEntity<>(emptyResponse, HttpStatus.OK));
-//
-//        // Act
-//        try {
-//            apiService.getHostRecipe(host);
-//        } catch (HttpClientErrorException e) {
-//            // Assert
-//            assertEquals(HttpStatus.CONFLICT, e.getStatusCode()); // 409
-//            assertEquals("Results cannot be calculated yet", e.getMessage());
-//        }
-//    }
-//
-//    @Test
-//    public void getHostRecipe_returnsNotFoundStatusCode_whenApiReturns_404() {
-//        // Arrange
-//        User host = new User(); // Set up a User object with necessary data
-//        String intolerances = String.join(",", host.getAllergiesSet());
-//        String diet = host.getSpecialDiet();
-//        String cuisine = String.join(",", host.getFavoriteCuisineSet());
-//
-//        String searchApiUrl = "https://api.spoonacular.com/recipes/complexSearch?apiKey=" + apiService.getApiKey() +
-//                "&intolerances=" + intolerances + "&diet=" + diet + "&cuisine=" + cuisine;
-//
-//        when(restTemplate.getForEntity(searchApiUrl, ComplexSearchResponse.class))
-//                .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND, "Not found"));
-//
-//        // Act
-//        try {
-//            apiService.getHostRecipe(host);
-//        } catch (HttpClientErrorException e) {
-//            // Assert
-//            assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode()); // 404
-//            assertEquals("Group not found", e.getMessage());
-//        }
-//    }
+    @Test
+    public void getGroupRecipe_success_200() throws Exception {
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/result", 1L)
+                .header("X-Token", "valid-token")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(getRequest).andExpect(status().is2xxSuccessful());
+    }
+
+
+    @Test
+    public void getGroupRecipe_unauthorizedUser_401() throws Exception {
+        doReturn(0L).when(userService).getUseridByToken(Mockito.any());
+
+        mockMvc.perform(get("/groups/{groupId}/result", 1L)
+                        .header("X-Token", "invalid-token")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void getGroupRecipe_noRecipesFound_404() throws Exception {
+        List<RecipeInfo> emptyRecipeList = new ArrayList<>();
+        doReturn(emptyRecipeList).when(apiService).getRecipe(Mockito.any());
+
+        mockMvc.perform(get("/groups/{groupId}/result", 1L)
+                        .header("X-Token", "valid-token")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+
+    @Test
+    public void getGroupRecipe_withDetailsFetched() throws Exception {
+        testRecipeDetails.setInstructions("Test instructions");
+        testRecipeDetails.setImage("test-image.jpg");
+        doReturn(testRecipeDetails).when(apiService).getRecipeDetails(Mockito.any());
+
+        mockMvc.perform(get("/groups/{groupId}/result", 1L)
+                        .header("X-Token", "valid-token")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(testRecipe.getId()))
+                .andExpect(jsonPath("$[0].title").value(testRecipe.getTitle()))
+                .andExpect(jsonPath("$[0].usedIngredients[0]").value(testIngredientInfo.getName()))
+                .andExpect(jsonPath("$[0].missedIngredients[0]").value(testIngredientInfo.getName()))
+                .andExpect(jsonPath("$[0].instructions").value(testRecipeDetails.getInstructions()))
+                .andExpect(jsonPath("$[0].image").value(testRecipeDetails.getImage()))
+                .andExpect(jsonPath("$[0].readyInMinutes").value(testRecipe.getReadyInMinutes()))
+                .andExpect(jsonPath("$[0].groupId").value(testGroup.getId()));
+    }
+
+    @Test
+    public void getGroupRecipe_groupNotFound() throws Exception {
+        doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found")) // TODO: not sure if this is cheating though! Had difficulties with calling the getGroupId otherwise
+                .when(groupService).getGroupById(Mockito.any());
+
+
+        mockMvc.perform(get("/groups/{groupId}/result", 1L)
+                        .header("X-Token", "valid-token")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
 //
 //    @Test
 //    public void getRandomRecipe_returnsUnauthorizedStatusCode401() throws Exception {
