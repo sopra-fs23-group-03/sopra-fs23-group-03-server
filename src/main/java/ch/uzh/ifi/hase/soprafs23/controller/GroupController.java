@@ -500,7 +500,7 @@ public class GroupController {
     @PutMapping("/groups/{groupId}/ratings/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateRatings(@PathVariable Long groupId, @PathVariable Long userId,
-                                        @RequestBody Map<Long, String> ingredientRatings, //I want a Long (ingredient id) and String (rating)
+                                        @RequestBody Map<Long, String> ingredientRatings,
                                         HttpServletRequest request) {
 
         Group group = groupService.getGroupById(groupId); // 404 - group not found
@@ -510,6 +510,13 @@ public class GroupController {
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token")); // 401 - not authorized
         if(!memberIds.contains(tokenId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
+        }
+
+        // Validate ingredientRatings - 400 bad request
+        for (String rating : ingredientRatings.values()) {
+            if (!rating.equals("-1") && !rating.equals("0") && !rating.equals("1")) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid ingredient rating. Ratings should be -1, 0, or 1.");
+            }
         }
 
         // Pass the map of ingredient ratings to the service method
