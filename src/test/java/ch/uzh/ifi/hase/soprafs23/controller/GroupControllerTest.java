@@ -1249,6 +1249,8 @@ public class GroupControllerTest {
 
     @Test
     public void testDeleteGroup204() throws Exception {
+        group.setGroupState(GroupState.GROUPFORMING);
+
         mockMvc.perform(delete("/groups/{groupId}", group.getId())
                         .header("X-Token", user.getToken()))
                 .andExpect(status().isNoContent());
@@ -1257,12 +1259,12 @@ public class GroupControllerTest {
     }
 
     @Test
-    public void testDeleteGroup400() throws Exception {
+    public void testDeleteGroup409() throws Exception {
         group.setGroupState(GroupState.INGREDIENTENTERING);
 
         mockMvc.perform(delete("/groups/{groupId}", group.getId())
                         .header("X-Token", user.getToken()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isConflict());
     }
 
     @Test
@@ -1300,6 +1302,7 @@ public class GroupControllerTest {
         Group group = new Group();
         group.setId(groupId);
         group.setHostId(hostId);
+        group.setGroupState(GroupState.GROUPFORMING);
 
         User guest = new User();
         guest.setId(guestId);
@@ -1324,7 +1327,7 @@ public class GroupControllerTest {
 
         mockMvc.perform(put("/groups/{groupId}/leave", group.getId())
                         .header("X-Token", user.getToken()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isConflict());
     }
 
     @Test

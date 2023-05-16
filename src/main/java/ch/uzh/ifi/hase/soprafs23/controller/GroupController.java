@@ -364,10 +364,10 @@ public class GroupController {
         // Check if the group exists
         Group group = groupService.getGroupById(groupId); // 404 - group not found
 
-        // Check that group state is either GROUPFORMING or FINAL
+        // 409 - groupState is not GROUPFORMING
         GroupState groupState = group.getGroupState();
-        if(!groupState.equals(GroupState.GROUPFORMING) && !groupState.equals(GroupState.FINAL)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You currenty can't delete the group");
+        if(!groupState.equals(GroupState.GROUPFORMING)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not GROUPFORMING"); // 409
         }
 
         // Check the validity of the token
@@ -386,10 +386,10 @@ public class GroupController {
         // Check if the group exists
         Group group = groupService.getGroupById(groupId); // 404 - group not found
 
-        // Check that group state is either GROUPFORMING or FINAL
+        // 409 - groupState is not GROUPFORMING
         GroupState groupState = group.getGroupState();
-        if(!groupState.equals(GroupState.GROUPFORMING) && !groupState.equals(GroupState.FINAL)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You currenty can't leave the group");
+        if(!groupState.equals(GroupState.GROUPFORMING)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not GROUPFORMING"); // 409
         }
 
         // Check the validity of the token
