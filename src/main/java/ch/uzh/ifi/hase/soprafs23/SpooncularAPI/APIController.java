@@ -52,6 +52,9 @@ public class APIController {
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
     public ResponseEntity<List<APIGetDTO>> getGroupRecipe(@PathVariable Long groupId, HttpServletRequest request) {
+        // change state
+        groupService.changeGroupState(groupId, GroupState.RECIPE);
+
         // 404 - group not found
         Group group = groupService.getGroupById(groupId);
 
