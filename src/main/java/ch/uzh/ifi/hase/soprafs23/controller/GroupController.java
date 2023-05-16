@@ -115,6 +115,12 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized.")); // 401 - not authorized
         }
 
+        // 409 - groupState is not GROUPFORMING
+        GroupState groupState = currentGroup.getGroupState();
+        if(!groupState.equals(GroupState.GROUPFORMING)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not GROUPFORMING"); // 409
+        }
+
         // Loop through each guest id and create an invitation for them:
         // idea--> create InvitationPostDTO object for each guest id, set guest id in it, then use DTOMapper to convert it to an Invit entity
         for (Long guestId : ListGuestIds) {

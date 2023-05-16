@@ -591,6 +591,8 @@ public class GroupControllerTest {
         Long firstInviteeId = 3L;
         Long secondInviteeId = 4L;
         List<Long> guestIds = Arrays.asList(firstInviteeId, secondInviteeId);
+        
+        group.setGroupState(GroupState.GROUPFORMING);
 
         // when and then
         MockHttpServletRequestBuilder postRequest = post("/groups/" + group.getId() + "/invitations")
@@ -605,6 +607,24 @@ public class GroupControllerTest {
         // verify
         verify(invitationService, times(1)).createInvitation(group.getId(), firstInviteeId);
         verify(invitationService, times(1)).createInvitation(group.getId(), secondInviteeId);
+    }
+
+    @Test
+    public void sendInvitation_returns409_whenWrongGroupState() throws Exception {
+        // given
+        List<Long> guestIds = new ArrayList<>();
+        
+        group.setGroupState(GroupState.INGREDIENTENTERING);
+
+        // when and then
+        MockHttpServletRequestBuilder postRequest = post("/groups/" + group.getId() + "/invitations")
+                                                    .header("X-Token", user.getToken())
+                                                    .content(new ObjectMapper().writeValueAsString(guestIds))
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .accept(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(postRequest)
+                .andExpect(status().isConflict());
     }
     
     @Test
