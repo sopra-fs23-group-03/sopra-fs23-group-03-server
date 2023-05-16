@@ -21,7 +21,7 @@ import java.util.*;
 import java.net.URLEncoder;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger; //needed for more information in the log --> for testing
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
@@ -34,7 +34,9 @@ public class APIService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String apiKey = "56638b96d69d409cab5a0cdf9a8a1f5d";
 
-    public Recipe getHostRecipe(User host) { //TODO: use for Solo trip?
+    // TODO: give basic basic default recipe
+
+    public Recipe getRandomRecipe(User host) { //TODO: use for Solo trip and for trouble shooting in case answer from Group is zero due to restrictions
         String intolerances = String.join(",", host.getAllergiesSet());
         String diet = host.getSpecialDiet();
         String cuisine = String.join(",", host.getFavoriteCuisineSet());
@@ -66,6 +68,10 @@ public class APIService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized");
         }
     }
+
+
+
+
 
 
     public List<RecipeInfo> getRecipe(Group group) {
@@ -114,11 +120,11 @@ public class APIService {
             RecipeSearchResult searchResult = searchResponse.getBody();
 
             if (searchResult == null || searchResult.getResults().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No recipes found for the given ingredients. " +
+                throw new ResponseStatusException(HttpStatus.NO_CONTENT, "No recipes found for the given ingredients. " +
                         "This is due to too high restrictions, e.g. your allergies matching all the given ingredients. " +
                         "We provide you now with a random recipe based only on your allergies, so you still have a cool meal to cook together!");
-                // TODO: send random recipe based only on allergies
-                // TODO: now test with postman normal track
+                // TODO: Call getRandomRecipeGroup (groupid, intolerancesString)
+                // NO CONTENT 204 to make frontend display another recipe?
 
             }
             return searchResult.getResults();

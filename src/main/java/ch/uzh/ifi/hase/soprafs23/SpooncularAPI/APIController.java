@@ -68,6 +68,11 @@ public class APIController {
                 recipe.setExternalRecipeId(recipeInfo.getId());
             }
 
+            recipe.setTitle(recipeInfo.getTitle());
+            recipe.setUsedIngredients(recipeInfo.getUsedIngredients().stream().map(IngredientInfo::getName).collect(Collectors.toList()));
+            recipe.setMissedIngredients(recipeInfo.getMissedIngredients().stream().map(IngredientInfo::getName).collect(Collectors.toList()));
+            recipe.setGroup(group);
+
             // Fetch additional details --> makes call to Spoonacular API and map response to RecipeDetailInfo object
             RecipeDetailInfo detailInfo = apiService.getRecipeDetails(recipe.getExternalRecipeId());
             if (detailInfo != null) {
@@ -75,9 +80,6 @@ public class APIController {
                 recipe.setReadyInMinutes(detailInfo.getReadyInMinutes());
                 recipe.setImage(detailInfo.getImage() != null ? detailInfo.getImage() : "Default image URL");
                 recipe.setInstructions(detailInfo.getInstructions() != null ? detailInfo.getInstructions() : "No instructions provided");
-
-                // Extract ingredient names from the detailed info
-                recipe.setUsedIngredients(detailInfo.getIngredients().stream().map(IngredientInfo::getName).collect(Collectors.toList()));
 
             }
             recipe.setGroup(group);

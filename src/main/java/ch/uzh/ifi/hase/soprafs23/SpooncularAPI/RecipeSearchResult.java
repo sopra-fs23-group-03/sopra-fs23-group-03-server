@@ -2,7 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
 import java.util.List;
 
-// API response contains now a results array inside a results field --> need to create a RecipeSearchResult class here to map response
+// API response contains now a results array inside a results field --> need this class to map response
 public class RecipeSearchResult {
     private List<RecipeInfo> results;
 

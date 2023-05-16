@@ -15,6 +15,9 @@ public class RecipeInfo {
     private String sourceUrl;
     private int spoonacularScore;
     private String instructions;
+    private List<IngredientInfo> missedIngredients;
+    private List<IngredientInfo> usedIngredients;
+    private List<IngredientInfo> unusedIngredients;
 
 
     public RecipeInfo() {
@@ -84,5 +87,29 @@ public class RecipeInfo {
 
     public void setInstructions(String instructions) {
         this.instructions = instructions;
+    }
+
+    public List<IngredientInfo> getMissedIngredients() {
+        return missedIngredients;
+    }
+
+    public void setMissedIngredients(List<IngredientInfo> missedIngredients) {
+        this.missedIngredients = missedIngredients;
+    }
+
+    public List<IngredientInfo> getUsedIngredients() {
+        return usedIngredients;
+    }
+
+    public void setUsedIngredients(List<IngredientInfo> usedIngredients) {
+        this.usedIngredients = usedIngredients;
+    }
+
+    public List<IngredientInfo> getUnusedIngredients() {
+        return unusedIngredients;
+    }
+
+    public void setUnusedIngredients(List<IngredientInfo> unusedIngredients) {
+        this.unusedIngredients = unusedIngredients;
     }
 }

@@ -2,7 +2,10 @@ package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
 import java.util.List;
 
-public class IngredientInfo { // maps exactly response from spoonacular API
+public class IngredientInfo {
+
+    // maps exactly response from spoonacular API
+
     private int id;
     private String name;
 
