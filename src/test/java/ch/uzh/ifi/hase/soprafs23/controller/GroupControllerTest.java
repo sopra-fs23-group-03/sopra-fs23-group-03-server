@@ -591,6 +591,8 @@ public class GroupControllerTest {
         Long firstInviteeId = 3L;
         Long secondInviteeId = 4L;
         List<Long> guestIds = Arrays.asList(firstInviteeId, secondInviteeId);
+        
+        group.setGroupState(GroupState.GROUPFORMING);
 
         // when and then
         MockHttpServletRequestBuilder postRequest = post("/groups/" + group.getId() + "/invitations")
@@ -605,6 +607,24 @@ public class GroupControllerTest {
         // verify
         verify(invitationService, times(1)).createInvitation(group.getId(), firstInviteeId);
         verify(invitationService, times(1)).createInvitation(group.getId(), secondInviteeId);
+    }
+
+    @Test
+    public void sendInvitation_returns409_whenWrongGroupState() throws Exception {
+        // given
+        List<Long> guestIds = new ArrayList<>();
+        
+        group.setGroupState(GroupState.INGREDIENTENTERING);
+
+        // when and then
+        MockHttpServletRequestBuilder postRequest = post("/groups/" + group.getId() + "/invitations")
+                                                    .header("X-Token", user.getToken())
+                                                    .content(new ObjectMapper().writeValueAsString(guestIds))
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .accept(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(postRequest)
+                .andExpect(status().isConflict());
     }
     
     @Test
@@ -997,6 +1017,7 @@ public class GroupControllerTest {
 
         String requestBody = asJsonString(ingredientRatings);
 
+        group.setGroupState(GroupState.INGREDIENTVOTING);
         group.setVotingType(VotingType.MAJORITYVOTE);
         List<Long> memberIds = new ArrayList<>();
         memberIds.add(group.getHostId());
@@ -1018,6 +1039,32 @@ public class GroupControllerTest {
         verify(groupService, times(1)).calculateRatingPerGroup(group.getId());
     }
 
+    @Test
+    public void testUpdateRatings_wrongGroupState() throws Exception {
+        // given
+        Map<Long, String> ingredientRatings = new HashMap<>();
+        ingredientRatings.put(1L, "1");
+        ingredientRatings.put(2L, "-1");
+
+        String requestBody = asJsonString(ingredientRatings);
+
+        group.setVotingType(VotingType.MAJORITYVOTE);
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(group.getHostId());
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/groups/{groupId}/ratings/{userId}", group.getId(), user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", user.getToken())
+                .content(requestBody);
+
+        mockMvc.perform(putRequest)
+                .andExpect(status().isConflict());
+    }
+    
     @Test
     public void testUpdateRatings_groupNotFound() throws Exception {
         // given
@@ -1076,6 +1123,7 @@ public class GroupControllerTest {
 
         String requestBody = asJsonString(ingredientRatings);
 
+        group.setGroupState(GroupState.INGREDIENTVOTING);
         group.setVotingType(VotingType.MAJORITYVOTE);
         List<Long> memberIds = new ArrayList<>();
         memberIds.add(group.getHostId());
@@ -1092,8 +1140,6 @@ public class GroupControllerTest {
         mockMvc.perform(putRequest)
                 .andExpect(status().isBadRequest());
     }
-
-
 
     @Test
     public void testGetGroupGuestsById_valid() throws Exception {
@@ -1203,6 +1249,8 @@ public class GroupControllerTest {
 
     @Test
     public void testDeleteGroup204() throws Exception {
+        group.setGroupState(GroupState.GROUPFORMING);
+
         mockMvc.perform(delete("/groups/{groupId}", group.getId())
                         .header("X-Token", user.getToken()))
                 .andExpect(status().isNoContent());
@@ -1211,12 +1259,12 @@ public class GroupControllerTest {
     }
 
     @Test
-    public void testDeleteGroup400() throws Exception {
+    public void testDeleteGroup409() throws Exception {
         group.setGroupState(GroupState.INGREDIENTENTERING);
 
         mockMvc.perform(delete("/groups/{groupId}", group.getId())
                         .header("X-Token", user.getToken()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isConflict());
     }
 
     @Test
@@ -1254,6 +1302,7 @@ public class GroupControllerTest {
         Group group = new Group();
         group.setId(groupId);
         group.setHostId(hostId);
+        group.setGroupState(GroupState.GROUPFORMING);
 
         User guest = new User();
         guest.setId(guestId);
@@ -1278,7 +1327,7 @@ public class GroupControllerTest {
 
         mockMvc.perform(put("/groups/{groupId}/leave", group.getId())
                         .header("X-Token", user.getToken()))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isConflict());
     }
 
     @Test
@@ -1359,16 +1408,17 @@ public class GroupControllerTest {
     @Test
     void testSendRequestToJoinGroupReturns201() throws Exception {
         // Arrange
-        Long groupId = 1L;
+        group.setGroupState(GroupState.GROUPFORMING);
+
         Long guestId = 2L;
         JoinRequestPostDTO joinRequestPostDTO = new JoinRequestPostDTO();
         joinRequestPostDTO.setGuestId(guestId);
         String token = "valid-token";
-        String url = "/groups/" + groupId + "/requests";
-        given(groupService.getGroupById(groupId)).willReturn(new Group());
+        String url = "/groups/" + group.getId() + "/requests";
+
         given(userService.getUserById(guestId)).willReturn(new User());
         given(userService.getUseridByToken(token)).willReturn(guestId);
-        given(joinRequestService.createJoinRequest(joinRequestPostDTO, groupId)).willReturn(new JoinRequest());
+        given(joinRequestService.createJoinRequest(joinRequestPostDTO, group.getId())).willReturn(new JoinRequest());
 
         // Act
         MvcResult mvcResult = mockMvc.perform(post(url)
@@ -1382,6 +1432,34 @@ public class GroupControllerTest {
         // Assert
         assertEquals(HttpStatus.CREATED.value(), mvcResult.getResponse().getStatus());
     }
+
+    @Test
+    void sendRequestToJoinGroup_wrong_state_409() throws Exception {
+        // Arrange
+        group.setGroupState(GroupState.INGREDIENTENTERING);
+
+        Long guestId = 2L;
+        JoinRequestPostDTO joinRequestPostDTO = new JoinRequestPostDTO();
+        joinRequestPostDTO.setGuestId(guestId);
+        String token = "valid-token";
+        String url = "/groups/" + group.getId() + "/requests";
+
+        given(userService.getUserById(guestId)).willReturn(new User());
+        given(userService.getUseridByToken(token)).willReturn(guestId);
+
+        // Act
+        MvcResult mvcResult = mockMvc.perform(post(url)
+                        .header("X-Token", token)
+                        .content(new ObjectMapper().writeValueAsString(joinRequestPostDTO))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andReturn();
+
+        // Assert
+        assertEquals(HttpStatus.CONFLICT.value(), mvcResult.getResponse().getStatus());
+    }
+
 
     @Test
     public void sendRequestToJoinGroup_forbidden_403() throws Exception {

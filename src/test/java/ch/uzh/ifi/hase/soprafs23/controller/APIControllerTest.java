@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.*;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.IngredientInfo;
+import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
@@ -116,11 +117,24 @@ public class APIControllerTest {
 
     @Test
     public void getGroupRecipe_success_200() throws Exception {
+        testGroup.setGroupState(GroupState.FINAL);
+
         MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/result", 1L)
                 .header("X-Token", "valid-token")
                 .contentType(MediaType.APPLICATION_JSON);
 
         mockMvc.perform(getRequest).andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void getGroupRecipe_wrongGroupState_409() throws Exception {
+        testGroup.setGroupState(GroupState.INGREDIENTENTERING);
+
+        MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/result", 1L)
+                .header("X-Token", "valid-token")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(getRequest).andExpect(status().isConflict());
     }
 
 
@@ -136,6 +150,8 @@ public class APIControllerTest {
 
     @Test
     public void getGroupRecipe_noRecipesFound_404() throws Exception {
+        testGroup.setGroupState(GroupState.FINAL);
+
         List<RecipeInfo> emptyRecipeList = new ArrayList<>();
         doReturn(emptyRecipeList).when(apiService).getRecipe(Mockito.any());
 
@@ -148,6 +164,8 @@ public class APIControllerTest {
 
     @Test
     public void getGroupRecipe_withDetailsFetched() throws Exception {
+        testGroup.setGroupState(GroupState.FINAL);
+
         testRecipeDetails.setInstructions("Test instructions");
         testRecipeDetails.setImage("test-image.jpg");
         doReturn(testRecipeDetails).when(apiService).getRecipeDetails(Mockito.any());

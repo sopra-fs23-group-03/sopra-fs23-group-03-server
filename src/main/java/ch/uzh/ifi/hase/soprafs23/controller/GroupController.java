@@ -115,6 +115,12 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized.")); // 401 - not authorized
         }
 
+        // 409 - groupState is not GROUPFORMING
+        GroupState groupState = currentGroup.getGroupState();
+        if(!groupState.equals(GroupState.GROUPFORMING)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not GROUPFORMING"); // 409
+        }
+
         // Loop through each guest id and create an invitation for them:
         // idea--> create InvitationPostDTO object for each guest id, set guest id in it, then use DTOMapper to convert it to an Invit entity
         for (Long guestId : ListGuestIds) {
@@ -302,10 +308,10 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
         }
 
-        // Check that groupState is INGREDIENTVOTING
+        // 409 - groupState is not INGREDIENTVOTING
         GroupState groupState = group.getGroupState();
         if(!groupState.equals(GroupState.INGREDIENTVOTING)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Not all members of the group have entered ingredients yet"); // 202        }
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not INGREDIENTVOTING"); // 409
         }
         
         // retrieve all ingredients available from the members of the group
@@ -334,10 +340,10 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
         }
 
-        // Check that group state is FINAL
+        // 409 - groupState is not FINAL
         GroupState groupState = group.getGroupState();
         if(!groupState.equals(GroupState.FINAL)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Not all members of the group have voted yet"); // 200
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not FINAL"); // 409
         }
 
         // retrieve all ingredients available from the members of the group
@@ -358,10 +364,10 @@ public class GroupController {
         // Check if the group exists
         Group group = groupService.getGroupById(groupId); // 404 - group not found
 
-        // Check that group state is either GROUPFORMING or FINAL
+        // 409 - groupState is not GROUPFORMING
         GroupState groupState = group.getGroupState();
-        if(!groupState.equals(GroupState.GROUPFORMING) && !groupState.equals(GroupState.FINAL)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You currenty can't delete the group");
+        if(!groupState.equals(GroupState.GROUPFORMING)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not GROUPFORMING"); // 409
         }
 
         // Check the validity of the token
@@ -380,10 +386,10 @@ public class GroupController {
         // Check if the group exists
         Group group = groupService.getGroupById(groupId); // 404 - group not found
 
-        // Check that group state is either GROUPFORMING or FINAL
+        // 409 - groupState is not GROUPFORMING
         GroupState groupState = group.getGroupState();
-        if(!groupState.equals(GroupState.GROUPFORMING) && !groupState.equals(GroupState.FINAL)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You currenty can't leave the group");
+        if(!groupState.equals(GroupState.GROUPFORMING)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not GROUPFORMING"); // 409
         }
 
         // Check the validity of the token
@@ -420,12 +426,18 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are already in a group");
         }
 
-        groupService.getGroupById(groupId);
+        Group group = groupService.getGroupById(groupId);
         userService.getUserById(joinRequestPostDTO.getGuestId());
 
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
         if (!tokenId.equals(joinRequestPostDTO.getGuestId())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized");
+        }
+
+        // 409 - groupState is not GROUPFORMING
+        GroupState groupState = group.getGroupState();
+        if(!groupState.equals(GroupState.GROUPFORMING)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not GROUPFORMING"); // 409
         }
 
         joinRequestService.createJoinRequest(joinRequestPostDTO, groupId);
@@ -510,6 +522,12 @@ public class GroupController {
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token")); // 401 - not authorized
         if(!memberIds.contains(tokenId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
+        }
+
+        // 409 - groupState is not INGREDIENTVOTING
+        GroupState groupState = group.getGroupState();
+        if(!groupState.equals(GroupState.INGREDIENTVOTING)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not INGREDIENTVOTING"); // 409
         }
 
         // Validate ingredientRatings - 400 bad request
