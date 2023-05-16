@@ -14,6 +14,7 @@ import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 import ch.uzh.ifi.hase.soprafs23.service.JoinRequestService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +44,7 @@ public class UserController {
 
     private final JoinRequestService joinRequestService;
 
-    public UserController(UserService userService, GroupService groupService, InvitationService invitationService, JoinRequestService joinRequestService) {
+    public UserController(UserService userService, GroupService groupService, InvitationService invitationService,@Lazy JoinRequestService joinRequestService) {
         this.userService = userService;
         this.groupService = groupService;
         this.invitationService = invitationService;
@@ -94,7 +95,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).headers(headers).body(userGetDTO);
     }
 
-    @PostMapping("users/{username}/login")
+    @PostMapping("/users/{username}/login")
     @ResponseStatus(HttpStatus.OK) //OK is 200
     @ResponseBody
     public ResponseEntity<UserGetDTO> loginUser(@RequestBody UserPostDTO userPostDTO, @PathVariable String username){
@@ -121,7 +122,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).headers(headers).body(userGetDTO);
     }
 
-    @PostMapping("users/{userId}/logout")
+    @PostMapping("/users/{userId}/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT) // NO CONTENT IS 204
     public void logoutUser(HttpServletRequest request, @PathVariable Long userId) {
         // 404
@@ -258,17 +259,26 @@ public class UserController {
     public void updateUserIngredients(@PathVariable Long userId,
                                       @RequestBody List<IngredientPutDTO> ingredientsPutDTO, // I get list of objects (arrays)
                                       @RequestHeader(name = "X-Token") String xToken) {
+        // 404 - group not found
         User user = userService.getUserById(userId);
 
+        // 401 - not authorized
         Long tokenId = userService.getUseridByToken(xToken);
         if (!tokenId.equals(userId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to update ingredients associated with this user.")); //401 - unauthorized
         }
 
+        // 409 - groupState is not INGREDIENTENTERING
+        Group group = groupService.getGroupById(user.getGroupId());
+        GroupState groupState = group.getGroupState();
+        if(!groupState.equals(GroupState.INGREDIENTENTERING)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not INGREDIENTENTERING"); // 409
+        }
+
         userService.addUserIngredients(userId, ingredientsPutDTO);
 
         // Check if all members of group have entered ingredients, change state if so
-        Group group = groupService.getGroupById(user.getGroupId());
+        // Group group = groupService.getGroupById(user.getGroupId());
         List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
         boolean changeState = true;
         for (Long memberId : memberIds) {
@@ -281,7 +291,5 @@ public class UserController {
             groupService.changeGroupState(group.getId(), GroupState.INGREDIENTVOTING); // if all members have entered ingredients change state and continue
         }
     }
-
-
 
 }

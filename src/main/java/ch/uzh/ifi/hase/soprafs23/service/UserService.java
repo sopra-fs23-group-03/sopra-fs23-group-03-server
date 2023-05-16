@@ -2,11 +2,14 @@ package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 
-import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.*;
 
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.constant.UserVotingStatus;
+import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
+import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
@@ -31,12 +34,15 @@ public class UserService {
     private final GroupService groupService;
     @Autowired
     private final IngredientRepository ingredientRepository;
+    @Autowired
+    private FullIngredientRepository fullIngredientRepository;
 
     @Autowired
-    public UserService(@Qualifier("userRepository") UserRepository userRepository, IngredientRepository ingredientRepository, @Lazy GroupService groupService) {
+    public UserService(@Qualifier("userRepository") UserRepository userRepository, IngredientRepository ingredientRepository, @Lazy GroupService groupService, FullIngredientRepository fullIngredientRepository) {
         this.userRepository = userRepository;
         this.ingredientRepository = ingredientRepository;
         this.groupService =  groupService;
+        this.fullIngredientRepository = fullIngredientRepository;
     }
 
     public List<User> getUsers() {
@@ -201,6 +207,7 @@ public class UserService {
         }
     }
 
+
     public void addUserIngredients(Long userId, List<IngredientPutDTO> ingredientsPutDTO) {
         User user = getUserById(userId);
 
@@ -213,6 +220,12 @@ public class UserService {
         Group group = groupService.getGroupById(user.getGroupId());
 
         for (IngredientPutDTO ingredientPutDTO : ingredientsPutDTO) {
+            Optional<FullIngredient> fullIngredientOptional = fullIngredientRepository.findByName(ingredientPutDTO.getName());
+
+            if (!fullIngredientOptional.isPresent()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ingredient not found in the full ingredient list.");
+            }
+
             Optional<Ingredient> ingredientOptional = ingredientRepository.findByName(ingredientPutDTO.getName());
             Ingredient ingredient;
             if(ingredientOptional.isPresent()) {
@@ -224,8 +237,18 @@ public class UserService {
             if(ingredient.getGroup() != null && !ingredient.getGroup().getId().equals(group.getId())) {
                 ingredient = new Ingredient(ingredientPutDTO.getName());
             }
-            ingredient.setGroup(group);
-            newIngredients.add(ingredient);
+
+            // Declare a separate variable for the ingredient name
+            String ingredientName = ingredient.getName();
+
+            // Check if the user already has an ingredient with the same name
+            boolean userAlreadyHasIngredient = user.getIngredients().stream()
+                    .anyMatch(existingIngredient -> existingIngredient.getName().equals(ingredientName));
+
+            if (!userAlreadyHasIngredient) {
+                ingredient.setGroup(group);
+                newIngredients.add(ingredient);
+            }
         }
 
         user.addIngredient(newIngredients);
@@ -308,5 +331,5 @@ public class UserService {
         int ingredientSetSize = user.getIngredients().size();
         return ingredientSetSize > 0;
     }
-    
+
 }

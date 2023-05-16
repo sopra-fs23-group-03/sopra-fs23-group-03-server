@@ -1,5 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
+import ch.uzh.ifi.hase.soprafs23.entity.FullIngredient;
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
@@ -7,6 +9,10 @@ import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -15,6 +21,8 @@ import org.springframework.web.client.RestTemplate;
 import ch.uzh.ifi.hase.soprafs23.repository.RecipeRepository;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.annotation.PostConstruct;
+import javax.persistence.criteria.CriteriaBuilder;
 import java.nio.charset.StandardCharsets;
 
 import java.util.*;
@@ -33,6 +41,10 @@ public class APIService {
     private RecipeRepository recipeRepository;
     private final RestTemplate restTemplate = new RestTemplate();
     private final String apiKey = "56638b96d69d409cab5a0cdf9a8a1f5d";
+    @Autowired
+    private FullIngredientRepository fullIngredientRepository;
+    @Autowired
+    private IngredientRepository ingredientRepository;
 
     // TODO: give basic basic default recipe
 
@@ -68,10 +80,6 @@ public class APIService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized");
         }
     }
-
-
-
-
 
 
     public List<RecipeInfo> getRecipe(Group group) {
@@ -140,7 +148,6 @@ public class APIService {
         }
     }
 
-
     public RecipeDetailInfo getRecipeDetails(Long externalRecipeId) {
         String informationApiUrl = "https://api.spoonacular.com/recipes/" + externalRecipeId + "/information?apiKey=" + apiKey;
         try {
@@ -159,29 +166,24 @@ public class APIService {
     }
 
 
-    public List<String> getListOfIngredients(String initialString) { //for frontend to be displayed in order for the users to choose from
-        String query = URLEncoder.encode(initialString, StandardCharsets.UTF_8);
-        String ingredientsApiUrl = "https://api.spoonacular.com/food/ingredients/search?apiKey=" + apiKey + "&query=" + query + "&number=100";
+    public void fetchAndStoreIngredients(String apiUrl, String query) {
+        // Fetch only if there's no record of that character in the database.
+        if (!fullIngredientRepository.existsByQuery(query)) {
+            String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
+            String fullUrl = apiUrl + "&query=" + encodedQuery;
 
-        try {
-            ResponseEntity<IngredientSearchResponse> searchResponse = restTemplate.getForEntity(ingredientsApiUrl, IngredientSearchResponse.class);
+            ResponseEntity<IngredientSearchResponse> searchResponse = restTemplate.getForEntity(fullUrl, IngredientSearchResponse.class);
             List<IngredientAPI> ingredientsAPI = Objects.requireNonNull(searchResponse.getBody()).getResults();
-
-            List<String> ingredientNames = new ArrayList<>();
 
             for (IngredientAPI ingredientAPI : ingredientsAPI) {
                 String name = ingredientAPI.getName();
-                ingredientNames.add(name);
+                // Save the ingredient in the FullIngredient table if not already present
+                Optional<FullIngredient> existingIngredient = fullIngredientRepository.findByName(name);
+                if (!existingIngredient.isPresent()) {
+                    FullIngredient newIngredient = new FullIngredient(name, query);
+                    fullIngredientRepository.save(newIngredient);
+                }
             }
-
-            if (ingredientNames.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no ingredient starting with those letters"); // 404 - error
-            }
-
-            return ingredientNames;
-        }
-        catch (ResponseStatusException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
         }
     }
 

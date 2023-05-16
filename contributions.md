@@ -179,7 +179,7 @@
 |             |        |                                                                                  |      |
 | Kalliopi    |        |                                                                                  |      |
 |             |        |                                                                                  |      |
-| Ann-Kathrin |        |                                                                                  |      |
+| Ann-Kathrin |  #248  |  implement check that frontend send really just 1,-1,0 for ingredient ratings    |    X |
 |             |        |                                                                                  |      |
 | Chiara      |        |                                                                                  |      |
 |             |        |                                                                                  |      |

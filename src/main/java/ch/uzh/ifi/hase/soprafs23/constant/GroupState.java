@@ -4,5 +4,6 @@ public enum GroupState {
     GROUPFORMING,
     INGREDIENTENTERING,
     INGREDIENTVOTING,
-    FINAL
+    FINAL,
+    RECIPE
 }

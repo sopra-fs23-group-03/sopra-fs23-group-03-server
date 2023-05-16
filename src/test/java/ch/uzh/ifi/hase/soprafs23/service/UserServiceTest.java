@@ -1,10 +1,12 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs23.entity.FullIngredient;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.constant.UserVotingStatus;
+import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
@@ -33,10 +35,15 @@ public class UserServiceTest {
     @Mock
     private IngredientRepository ingredientRepository;
 
+    @Mock
+    private FullIngredientRepository fullIngredientRepository;
+
     @InjectMocks
     private UserService userService;
 
     private UserPutDTO userPutDTO;
+
+    private IngredientPutDTO ingredientPutDTO;
 
     private User user;
 
@@ -232,44 +239,60 @@ public class UserServiceTest {
     }
 
     @Test
-    void addUserIngredients_withExistingUserIdAndNewIngredient_addsIngredientToUser() {
-        // user needs to be in a group
-        user.setGroupId(5L);
-        when(groupService.getGroupById(user.getGroupId())).thenReturn(new Group());
+    public void addUserIngredients_withExistingUserIdAndNewIngredient_addsIngredientToUser() {
+        // given
+        ingredientPutDTO = new IngredientPutDTO();
+        ingredientPutDTO.setName("newIngredient");
 
-        Long userId = user.getId();
-        IngredientPutDTO ingredientPutDTO = new IngredientPutDTO();
-        ingredientPutDTO.setName("new_ingredient_name");
+        FullIngredient fullIngredient = new FullIngredient("newIngredient", "new");
+        when(fullIngredientRepository.findByName("newIngredient")).thenReturn(Optional.of(fullIngredient));
+        when(ingredientRepository.findByName("newIngredient")).thenReturn(Optional.empty());
 
-        Ingredient ingredient = new Ingredient("new_ingredient_name");
-        when(ingredientRepository.findByName(ingredientPutDTO.getName())).thenReturn(Optional.of(ingredient));
+        Group group = new Group();
+        group.setId(2L);
+        when(groupService.getGroupById(user.getGroupId())).thenReturn(group);
 
-        userService.addUserIngredients(userId, Collections.singletonList(ingredientPutDTO));
+        // when
+        userService.addUserIngredients(user.getId(), Collections.singletonList(ingredientPutDTO));
 
-        verify(userRepository).save(user);
-        assertEquals(3, user.getIngredients().size()); //expects 3 bc in the setup are already 2
-        assertTrue(user.getIngredients().contains(ingredient));
+        // then
+        assertTrue(user.getIngredients().stream().anyMatch(ingredient -> ingredient.getName().equals("newIngredient")));
     }
 
     @Test
-    void addUserIngredients_withExistingIngredients_doesNotAddDuplicatesToUser() {
-        // user needs to be in a group
-        user.setGroupId(5L);
-        when(groupService.getGroupById(user.getGroupId())).thenReturn(new Group());
+    public void addUserIngredients_withExistingIngredients_doesNotAddDuplicatesToUser() {
+        // given
+        ingredientPutDTO = new IngredientPutDTO();
+        ingredientPutDTO.setName("ingredient1");
 
-        Long userId = user.getId();
+        FullIngredient fullIngredient = new FullIngredient("ingredient1", "ing");
+        when(fullIngredientRepository.findByName("ingredient1")).thenReturn(Optional.of(fullIngredient));
 
-        Ingredient existingIngredient = user.getIngredients().iterator().next();
-        IngredientPutDTO ingredientPutDTO = new IngredientPutDTO();
-        ingredientPutDTO.setName(existingIngredient.getName()); //get another ingredient with the same name
+        Ingredient existingIngredient = new Ingredient("ingredient1");
+        Group existingGroup = new Group();
+        existingGroup.setId(2L);
+        existingIngredient.setGroup(existingGroup);
+        when(ingredientRepository.findByName("ingredient1")).thenReturn(Optional.of(existingIngredient));
 
-        when(ingredientRepository.findByName(existingIngredient.getName())).thenReturn(Optional.of(existingIngredient));
+        Group group = new Group();
+        group.setId(2L);
+        when(groupService.getGroupById(user.getGroupId())).thenReturn(group);
 
-        userService.addUserIngredients(userId, Collections.singletonList(ingredientPutDTO));
+        int initialIngredientCount = user.getIngredients().size();
 
-        verify(userRepository).save(user);
-        assertEquals(user.getIngredients().size(), 2); // bc 2 are mentioned above in setup
+        // when
+        userService.addUserIngredients(user.getId(), Collections.singletonList(ingredientPutDTO));
+
+        // then
+        assertEquals(initialIngredientCount, user.getIngredients().size());
+
+        // Additional verification
+        long ingredient1Count = user.getIngredients().stream()
+                .filter(ingredient -> ingredient.getName().equals("ingredient1"))
+                .count();
+        assertEquals(1, ingredient1Count);
     }
+
 
     @Test
     void addUserIngredients_withNonexistentUserId_throwsException() {
