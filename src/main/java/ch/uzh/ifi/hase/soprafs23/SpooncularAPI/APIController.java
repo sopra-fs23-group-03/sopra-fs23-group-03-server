@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
+import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
@@ -48,6 +49,12 @@ public class APIController {
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
         if (tokenId.equals(0L)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
+        }
+
+        // 409 - groupState is not FINAL
+        GroupState groupState = group.getGroupState();
+        if(!groupState.equals(GroupState.FINAL)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not FINAL"); // 409
         }
 
         List<RecipeInfo> recipeInfos = apiService.getRecipe(group);
