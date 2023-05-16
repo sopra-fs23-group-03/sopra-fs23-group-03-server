@@ -302,10 +302,10 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
         }
 
-        // Check that groupState is INGREDIENTVOTING
+        // 409 - groupState is not INGREDIENTVOTING
         GroupState groupState = group.getGroupState();
         if(!groupState.equals(GroupState.INGREDIENTVOTING)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Not all members of the group have entered ingredients yet"); // 202        }
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not INGREDIENTVOTING yet"); // 409
         }
         
         // retrieve all ingredients available from the members of the group
@@ -334,10 +334,10 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
         }
 
-        // Check that group state is FINAL
+        // 409 - groupState is not FINAL
         GroupState groupState = group.getGroupState();
         if(!groupState.equals(GroupState.FINAL)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Not all members of the group have voted yet"); // 200
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not FINAL yet"); // 409
         }
 
         // retrieve all ingredients available from the members of the group

@@ -571,11 +571,14 @@ public class UserControllerTest {
         List<IngredientPutDTO> ingredientsPutDTO = new ArrayList<>();
         IngredientPutDTO ingredientPutDTO1 = new IngredientPutDTO();
         ingredientPutDTO1.setName("fish");
+        ingredientsPutDTO.add(ingredientPutDTO1);
 
         IngredientPutDTO ingredientPutDTO2 = new IngredientPutDTO();
         ingredientPutDTO2.setName("beer");
+        ingredientsPutDTO.add(ingredientPutDTO2);
 
         Group group = new Group();
+        group.setGroupState(GroupState.INGREDIENTENTERING);
 
         // mocks
         given(groupService.getGroupById(any())).willReturn(group);
@@ -588,6 +591,24 @@ public class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(ingredientsPutDTO)))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void updateUserIngredients_validRequest_stateNotIngrediententering() throws Exception {
+        List<IngredientPutDTO> ingredientsPutDTO = new ArrayList<>();
+
+        Group group = new Group();
+
+        // mocks
+        given(groupService.getGroupById(any())).willReturn(group);
+
+        // when/then -> do the request
+        String xToken = user.getToken();
+        mockMvc.perform(put("/user/{userId}/ingredients", user.getId())
+                        .header("X-Token", xToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(ingredientsPutDTO)))
+                .andExpect(status().isConflict());
     }
 
     @Test
