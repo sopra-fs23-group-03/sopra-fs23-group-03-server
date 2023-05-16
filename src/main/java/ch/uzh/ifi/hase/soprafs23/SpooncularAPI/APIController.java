@@ -1,7 +1,12 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
+import ch.uzh.ifi.hase.soprafs23.entity.FullIngredient;
 import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
+import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
+import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.service.RecipeService;
@@ -33,6 +38,11 @@ public class APIController {
 
     @Autowired
     private UserService userService;
+
+    private final String apiKey = "56638b96d69d409cab5a0cdf9a8a1f5d";
+
+    @Autowired
+    private FullIngredientRepository fullIngredientRepository;
 
     @Autowired
     private RecipeService recipeService;
@@ -111,28 +121,27 @@ public class APIController {
     @GetMapping("/ingredients")
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
-    public List<String> getAllIngredients(HttpServletRequest request, @RequestParam String initialString){
+    public List<String> getAllIngredients(HttpServletRequest request, @RequestParam String initialString) {
         // check validity of token
         String token = request.getHeader("X-Token"); // 401 - not authorized
-        if(userService.getUseridByToken(token).equals(0L)) {
+        if (userService.getUseridByToken(token).equals(0L)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
         }
 
-        if (initialString.length() == 3) {
-
-            List<String> ingredientNames = apiService.getListOfIngredients(initialString);
-
-            // when no ingredients were found - 404
-            if (ingredientNames.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No ingredients found for initial string '%s'.", initialString));
-            }
-            return ingredientNames;
-
-            }
-        else{
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, String.format("The provided string has to be exactly length 3, you provided '%s'.", initialString)); // 422 - unprocessable entity
+        // Fetch ingredients from the API if not already in the database
+        for (char ch : initialString.toCharArray()) {
+            String apiUrl = "https://api.spoonacular.com/food/ingredients/search?apiKey=" + apiKey + "&number=1000";
+            apiService.fetchAndStoreIngredients(apiUrl, String.valueOf(ch));
         }
 
+        List<FullIngredient> fullIngredients = fullIngredientRepository.findByNameContainingIgnoreCase(initialString);
+        List<String> ingredientNames = fullIngredients.stream().map(FullIngredient::getName).collect(Collectors.toList());
 
+        if (ingredientNames.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No ingredients found with the name: '%s'.", initialString));
+        }
+        return ingredientNames;
     }
+
+
 }

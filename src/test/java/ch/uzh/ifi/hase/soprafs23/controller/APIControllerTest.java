@@ -6,6 +6,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.IngredientInfo;
 import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.RecipeService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
@@ -57,6 +58,9 @@ public class APIControllerTest {
 
     @MockBean
     private IngredientInfo ingredientInfo;
+
+    @MockBean
+    private FullIngredientRepository fullIngredientRepository;
 
 
     private Group testGroup;

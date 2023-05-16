@@ -9,6 +9,8 @@ import java.util.Optional;
 public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
 
     Optional<Ingredient> findByName(String name);
+    List<Ingredient> findByNameContainingIgnoreCase(String name);
+
     List<Ingredient> findAllByIdIn(List<Long> ingredientIds);
 
     Optional<Ingredient> findById(Long id);

@@ -14,6 +14,7 @@ import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import ch.uzh.ifi.hase.soprafs23.service.InvitationService;
 import ch.uzh.ifi.hase.soprafs23.service.JoinRequestService;
 import ch.uzh.ifi.hase.soprafs23.service.UserService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +44,7 @@ public class UserController {
 
     private final JoinRequestService joinRequestService;
 
-    public UserController(UserService userService, GroupService groupService, InvitationService invitationService, JoinRequestService joinRequestService) {
+    public UserController(UserService userService, GroupService groupService, InvitationService invitationService,@Lazy JoinRequestService joinRequestService) {
         this.userService = userService;
         this.groupService = groupService;
         this.invitationService = invitationService;
