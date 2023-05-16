@@ -62,7 +62,7 @@ public class APIService {
         catch (ResponseStatusException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
         }
-        catch(HttpServerErrorException e) {
+        catch (HttpServerErrorException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized");
         }
     }
@@ -70,47 +70,84 @@ public class APIService {
 
     public List<RecipeInfo> getRecipe(Group group) {
         Set<Ingredient> finalSetIngredients = groupService.getFinalIngredients(group);// good Ingredients
-
-
+        Set<Ingredient> badSetIngredients = groupService.getBadIngredients(group);// bad Ingredients
+        Set<String> allergiesGroupMembers = groupService.getGroupMemberAllergies(group); // get all intolerances
 
         List<String> listOfIngredients = finalSetIngredients.stream()
                 .map(Ingredient::getName)
                 .collect(Collectors.toList());
 
-        String ingredients = listOfIngredients.stream()
+        String goodIngredients = listOfIngredients.stream() // we need a string to feed in API
                 .map(ingredient -> URLEncoder.encode(ingredient, StandardCharsets.UTF_8))
                 .collect(Collectors.joining(","));
 
-        String searchApiUrl = "https://api.spoonacular.com/recipes/findByIngredients?apiKey=" + apiKey +
-                "&ingredients=" + ingredients + "&number=1&ignorePantry=true&ranking=1"; //1 means maximizes used ingredients first
-        try {
-            ResponseEntity<List<RecipeInfo>> searchResponse = restTemplate.exchange(searchApiUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<RecipeInfo>>() {});
-            List<RecipeInfo> recipeInfos = searchResponse.getBody();
+        List<String> listOfBadIngredients = badSetIngredients.stream()
+                .map(Ingredient::getName)
+                .collect(Collectors.toList());
 
-            if (recipeInfos.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No recipes found for the given ingredients");
+        String badIngredients = listOfBadIngredients.stream() // we need a string to feed in API
+                .map(ingredient -> URLEncoder.encode(ingredient, StandardCharsets.UTF_8))
+                .collect(Collectors.joining(","));
+
+        String intolerancesString = allergiesGroupMembers.stream()
+                .map(intolerance -> URLEncoder.encode(intolerance, StandardCharsets.UTF_8))
+                .collect(Collectors.joining(","));
+
+
+        String searchApiUrl = "https://api.spoonacular.com/recipes/complexSearch?apiKey=" + apiKey +
+                "&includeIngredients=" + goodIngredients +
+                "&excludeIngredients=" + badIngredients +
+                "&intolerances=" + intolerancesString +
+                "&number=1" +
+                "&ignorePantry=true" +
+                "&type=main course" +
+                "&sort=max-used-ingredients" +
+                "&fillIngredients=true";
+
+        try {
+            ResponseEntity<RecipeSearchResult> searchResponse = restTemplate.exchange(
+                    searchApiUrl,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<RecipeSearchResult>() {}
+            );
+            RecipeSearchResult searchResult = searchResponse.getBody();
+
+            if (searchResult == null || searchResult.getResults().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No recipes found for the given ingredients. " +
+                        "This is due to too high restrictions, e.g. your allergies matching all the given ingredients. " +
+                        "We provide you now with a random recipe based only on your allergies, so you still have a cool meal to cook together!");
+                // TODO: send random recipe based only on allergies
+                // TODO: now test with postman normal track
+
             }
-            return recipeInfos;
-        } catch (ResponseStatusException e) {
-        logger.error("Error occurred while fetching recipe: " + e.getMessage(), e);
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Error occurred while fetching recipe: " + e.getMessage());
-    } catch (Exception e) {
-        logger.error("Unexpected error occurred while fetching recipe: " + e.getMessage(), e);
-        throw new RuntimeException("Unexpected error occurred while fetching recipe: " + e.getMessage());
+            return searchResult.getResults();
+
+        }
+        catch (ResponseStatusException e) {
+            logger.error("Error occurred while fetching recipe: " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Error occurred while fetching recipe: " + e.getMessage());
+        }
+        catch (Exception e) {
+            logger.error("Unexpected error occurred while fetching recipe: " + e.getMessage(), e);
+            throw new RuntimeException("Unexpected error occurred while fetching recipe: " + e.getMessage());
+        }
     }
-    }
+
 
     public RecipeDetailInfo getRecipeDetails(Long externalRecipeId) {
         String informationApiUrl = "https://api.spoonacular.com/recipes/" + externalRecipeId + "/information?apiKey=" + apiKey;
         try {
-            ResponseEntity<RecipeDetailInfo> infoResponse = restTemplate.exchange(informationApiUrl, HttpMethod.GET, null, new ParameterizedTypeReference<RecipeDetailInfo>() {});
+            ResponseEntity<RecipeDetailInfo> infoResponse = restTemplate.exchange(informationApiUrl, HttpMethod.GET, null, new ParameterizedTypeReference<RecipeDetailInfo>() {
+            });
             RecipeDetailInfo detailInfo = infoResponse.getBody();
 
             if (detailInfo == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No details found for the given recipe ID");
             }
             return detailInfo;
-        } catch (ResponseStatusException e) {
+        }
+        catch (ResponseStatusException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Error occurred while fetching recipe details: " + e.getMessage());
         }
     }
@@ -136,10 +173,12 @@ public class APIService {
             }
 
             return ingredientNames;
-        } catch (ResponseStatusException e) {
+        }
+        catch (ResponseStatusException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
         }
     }
+
     public String getApiKey() {
         return apiKey;
     }

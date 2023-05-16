@@ -62,5 +62,6 @@ public interface DTOMapper {
     RecipeInfoDTO convertEntityToRecipeInfoDTO(RecipeInfo recipeInfo);
     IngredientInfoDTO convertEntityToIngredientInfoDTO(IngredientInfo ingredientInfo);
 
+    IngredientGetDTO convertIngredientInfoToIngredientGetDTO(IngredientInfo ingredientInfo);
 
 }
