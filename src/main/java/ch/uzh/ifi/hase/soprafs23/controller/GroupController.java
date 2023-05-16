@@ -426,12 +426,18 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are already in a group");
         }
 
-        groupService.getGroupById(groupId);
+        Group group = groupService.getGroupById(groupId);
         userService.getUserById(joinRequestPostDTO.getGuestId());
 
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
         if (!tokenId.equals(joinRequestPostDTO.getGuestId())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized");
+        }
+
+        // 409 - groupState is not GROUPFORMING
+        GroupState groupState = group.getGroupState();
+        if(!groupState.equals(GroupState.GROUPFORMING)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not GROUPFORMING"); // 409
         }
 
         joinRequestService.createJoinRequest(joinRequestPostDTO, groupId);

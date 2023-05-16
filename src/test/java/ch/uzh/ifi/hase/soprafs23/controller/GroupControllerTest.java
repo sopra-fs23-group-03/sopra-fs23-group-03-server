@@ -1113,8 +1113,6 @@ public class GroupControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-
-
     @Test
     public void testGetGroupGuestsById_valid() throws Exception {
         User guest = new User();
@@ -1379,16 +1377,17 @@ public class GroupControllerTest {
     @Test
     void testSendRequestToJoinGroupReturns201() throws Exception {
         // Arrange
-        Long groupId = 1L;
+        group.setGroupState(GroupState.GROUPFORMING);
+
         Long guestId = 2L;
         JoinRequestPostDTO joinRequestPostDTO = new JoinRequestPostDTO();
         joinRequestPostDTO.setGuestId(guestId);
         String token = "valid-token";
-        String url = "/groups/" + groupId + "/requests";
-        given(groupService.getGroupById(groupId)).willReturn(new Group());
+        String url = "/groups/" + group.getId() + "/requests";
+
         given(userService.getUserById(guestId)).willReturn(new User());
         given(userService.getUseridByToken(token)).willReturn(guestId);
-        given(joinRequestService.createJoinRequest(joinRequestPostDTO, groupId)).willReturn(new JoinRequest());
+        given(joinRequestService.createJoinRequest(joinRequestPostDTO, group.getId())).willReturn(new JoinRequest());
 
         // Act
         MvcResult mvcResult = mockMvc.perform(post(url)
@@ -1402,6 +1401,34 @@ public class GroupControllerTest {
         // Assert
         assertEquals(HttpStatus.CREATED.value(), mvcResult.getResponse().getStatus());
     }
+
+    @Test
+    void sendRequestToJoinGroup_wrong_state_409() throws Exception {
+        // Arrange
+        group.setGroupState(GroupState.INGREDIENTENTERING);
+
+        Long guestId = 2L;
+        JoinRequestPostDTO joinRequestPostDTO = new JoinRequestPostDTO();
+        joinRequestPostDTO.setGuestId(guestId);
+        String token = "valid-token";
+        String url = "/groups/" + group.getId() + "/requests";
+
+        given(userService.getUserById(guestId)).willReturn(new User());
+        given(userService.getUseridByToken(token)).willReturn(guestId);
+
+        // Act
+        MvcResult mvcResult = mockMvc.perform(post(url)
+                        .header("X-Token", token)
+                        .content(new ObjectMapper().writeValueAsString(joinRequestPostDTO))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andReturn();
+
+        // Assert
+        assertEquals(HttpStatus.CONFLICT.value(), mvcResult.getResponse().getStatus());
+    }
+
 
     @Test
     public void sendRequestToJoinGroup_forbidden_403() throws Exception {
