@@ -271,7 +271,7 @@ public class UserController {
         Group group = groupService.getGroupById(user.getGroupId());
         GroupState groupState = group.getGroupState();
         if(!groupState.equals(GroupState.INGREDIENTENTERING)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not INGREDIENTENTERING yet"); // 409
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not INGREDIENTENTERING"); // 409
         }
 
         userService.addUserIngredients(userId, ingredientsPutDTO);
@@ -290,7 +290,5 @@ public class UserController {
             groupService.changeGroupState(group.getId(), GroupState.INGREDIENTVOTING); // if all members have entered ingredients change state and continue
         }
     }
-
-
 
 }

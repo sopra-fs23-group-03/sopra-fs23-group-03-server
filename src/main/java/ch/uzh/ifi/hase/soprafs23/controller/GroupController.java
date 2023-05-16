@@ -311,7 +311,7 @@ public class GroupController {
         // 409 - groupState is not INGREDIENTVOTING
         GroupState groupState = group.getGroupState();
         if(!groupState.equals(GroupState.INGREDIENTVOTING)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not INGREDIENTVOTING yet"); // 409
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not INGREDIENTVOTING"); // 409
         }
         
         // retrieve all ingredients available from the members of the group
@@ -343,7 +343,7 @@ public class GroupController {
         // 409 - groupState is not FINAL
         GroupState groupState = group.getGroupState();
         if(!groupState.equals(GroupState.FINAL)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not FINAL yet"); // 409
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not FINAL"); // 409
         }
 
         // retrieve all ingredients available from the members of the group
@@ -522,6 +522,12 @@ public class GroupController {
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token")); // 401 - not authorized
         if(!memberIds.contains(tokenId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
+        }
+
+        // 409 - groupState is not INGREDIENTVOTING
+        GroupState groupState = group.getGroupState();
+        if(!groupState.equals(GroupState.INGREDIENTVOTING)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not INGREDIENTVOTING"); // 409
         }
 
         // Validate ingredientRatings - 400 bad request

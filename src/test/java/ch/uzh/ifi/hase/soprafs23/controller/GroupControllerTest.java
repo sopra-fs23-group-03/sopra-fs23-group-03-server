@@ -1017,6 +1017,7 @@ public class GroupControllerTest {
 
         String requestBody = asJsonString(ingredientRatings);
 
+        group.setGroupState(GroupState.INGREDIENTVOTING);
         group.setVotingType(VotingType.MAJORITYVOTE);
         List<Long> memberIds = new ArrayList<>();
         memberIds.add(group.getHostId());
@@ -1038,6 +1039,32 @@ public class GroupControllerTest {
         verify(groupService, times(1)).calculateRatingPerGroup(group.getId());
     }
 
+    @Test
+    public void testUpdateRatings_wrongGroupState() throws Exception {
+        // given
+        Map<Long, String> ingredientRatings = new HashMap<>();
+        ingredientRatings.put(1L, "1");
+        ingredientRatings.put(2L, "-1");
+
+        String requestBody = asJsonString(ingredientRatings);
+
+        group.setVotingType(VotingType.MAJORITYVOTE);
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(group.getHostId());
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/groups/{groupId}/ratings/{userId}", group.getId(), user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", user.getToken())
+                .content(requestBody);
+
+        mockMvc.perform(putRequest)
+                .andExpect(status().isConflict());
+    }
+    
     @Test
     public void testUpdateRatings_groupNotFound() throws Exception {
         // given
@@ -1096,6 +1123,7 @@ public class GroupControllerTest {
 
         String requestBody = asJsonString(ingredientRatings);
 
+        group.setGroupState(GroupState.INGREDIENTVOTING);
         group.setVotingType(VotingType.MAJORITYVOTE);
         List<Long> memberIds = new ArrayList<>();
         memberIds.add(group.getHostId());
