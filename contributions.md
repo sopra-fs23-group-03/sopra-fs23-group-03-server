@@ -76,7 +76,7 @@
 |-------------|--------|----------------------------------------------------------------------------------|------|
 | Lany        | #84    | Create GET /groups/{id} request                                                  |  X   |
 |             | #187   | Create GET /groups/{id}/members request                                          |  X   |
-| Orestis     |   #57  | Function to randomly select one recipe suggestion from the API                   |      |
+| Orestis     |   #57  | Function to randomly select one recipe suggestion from the API                   |  X   |
 |             |   #88  | Reopened and fixed the updating attributes and the tests                         |  X   |
 | Kalliopi    |   #42  | Create host view of group forming page                                           |  X   |
 |             |   #43  | Create guest view of group forming page                                          |  X   |
@@ -145,8 +145,8 @@
 |             | #62    | Implement a function to check if the group is left with only the host, and disband the group if necessary. | X    |
 | Orestis     | #171   | Create Method to include new guest to group                                      | X    |
 |             | #218   | add GET groups/{groupid}/requests call                                           | X    |
-|             | #77    | Create PUT /groups/{id}/state request                                            |      |
-|             | #170   | Create Method to check if user is allowed to request (group not entered certain stange in planning process). |      |
+|             | #77    | Create PUT /groups/{id}/state request                                            | X    |
+|             | #170   | Create Method to check if user is allowed to request (group not entered certain stange in planning process). |  X   |
 | Kalliopi    | #58    | Ingredient input-field + button for adding ingredients to the meal(Improvements) |   X  |
 |             | #59    | Create a button to remove an ingredient from the meal (Improvements)             |   X  |
 |             | #60    | Display all ingredients added to the meal in a separate section                  |   X  |
@@ -175,8 +175,9 @@
 |             | #235   | independent: create GET /groups/{groupId}/members/allergies                      | X    |
 |             | #69 & #114 | Edited for added functionality                                               | X    |
 |             | #67 & #173 | Implemented previously, connected to corresponding commits.                  | X    |
-| Orestis     |        |                                                                                  |      |
-|             |        |                                                                                  |      |
+| Orestis     | #210   | Updated the logic of retrieval of all ingredients from external API to avoid spelling mistakes. | X    |
+|             | #47    | Re-opened Create Logout Method which sets User to offline to add some extra functionality to it. | X    |
+|             |        | Implement a new Ready/Not Ready logic to transition from some states to other states. |      |    
 | Kalliopi    |        |                                                                                  |      |
 |             |        |                                                                                  |      |
 | Ann-Kathrin |  #248  |  implement check that frontend send really just 1,-1,0 for ingredient ratings    |    X |
