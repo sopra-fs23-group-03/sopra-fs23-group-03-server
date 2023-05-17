@@ -132,7 +132,6 @@ public class UserService {
         userRepository.flush();
     }
 
-
     public void updateUser(Long id, UserPutDTO userPutDTO) {
         User user = getUserById(id);
 
@@ -207,7 +206,6 @@ public class UserService {
         }
     }
 
-
     public void addUserIngredients(Long userId, List<IngredientPutDTO> ingredientsPutDTO) {
         User user = getUserById(userId);
 
@@ -257,8 +255,9 @@ public class UserService {
             String missingIngredientsString = String.join(", ", missingIngredients);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No ingredient with the name " + missingIngredientsString + " found in the full ingredient list.");
         }
+        user.getIngredients().addAll(newIngredients);
+        userRepository.save(user);
     }
-
 
     @Transactional //for Spring; makes all changes to db persisted in one single transaction --> helps rolling back in case of an error (data consistency)
     public void updateIngredientRatings(Long groupId, Long userId, Map <Long, String> ingredientRatings) {
@@ -335,5 +334,4 @@ public class UserService {
         int ingredientSetSize = user.getIngredients().size();
         return ingredientSetSize > 0;
     }
-
 }
