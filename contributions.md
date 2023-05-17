@@ -181,6 +181,9 @@
 | Kalliopi    |        |                                                                                  |      |
 |             |        |                                                                                  |      |
 | Ann-Kathrin |  #248  |  implement check that frontend send really just 1,-1,0 for ingredient ratings    |    X |
+|             |   #257 |   take allergies of all group members into account                               |      |
+|             |   #253 | make sure "No" ingredients are not used in the final recipe                      |      |
+|             |   #255 |    in case of an empty final ingredients list: provide RandomRecipe              |      |
 |             |        |                                                                                  |      |
 | Chiara      |        |                                                                                  |      |
 |             |        |                                                                                  |      |
