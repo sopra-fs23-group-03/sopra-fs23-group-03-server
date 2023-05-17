@@ -212,6 +212,7 @@ public class UserService {
         User user = getUserById(userId);
 
         List<Ingredient> newIngredients = new ArrayList<>();
+        List<String> missingIngredients = new ArrayList<>();
 
         if(user.getGroupId() == null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "You must be part of a group to add ingredients.");
@@ -223,7 +224,8 @@ public class UserService {
             Optional<FullIngredient> fullIngredientOptional = fullIngredientRepository.findByName(ingredientPutDTO.getName());
 
             if (!fullIngredientOptional.isPresent()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ingredient not found in the full ingredient list.");
+                missingIngredients.add(ingredientPutDTO.getName());
+                continue;
             }
 
             Optional<Ingredient> ingredientOptional = ingredientRepository.findByName(ingredientPutDTO.getName());
@@ -251,10 +253,12 @@ public class UserService {
             }
         }
 
-        user.addIngredient(newIngredients);
-        userRepository.save(user);
-        userRepository.flush();
+        if (!missingIngredients.isEmpty()) {
+            String missingIngredientsString = String.join(", ", missingIngredients);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No ingredient with the name " + missingIngredientsString + " found in the full ingredient list.");
+        }
     }
+
 
     @Transactional //for Spring; makes all changes to db persisted in one single transaction --> helps rolling back in case of an error (data consistency)
     public void updateIngredientRatings(Long groupId, Long userId, Map <Long, String> ingredientRatings) {
