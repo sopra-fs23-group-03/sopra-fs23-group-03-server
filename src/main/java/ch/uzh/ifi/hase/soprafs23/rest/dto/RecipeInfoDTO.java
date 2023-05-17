@@ -14,6 +14,8 @@ public class RecipeInfoDTO {
         private List<IngredientInfoDTO> usedIngredients;
         private List<IngredientInfoDTO> unusedIngredients;
         private int likes;
+        private String instructions;
+        private int readyInMinutes;
 
     public Long getId() {
         return id;
@@ -93,5 +95,21 @@ public class RecipeInfoDTO {
 
     public void setLikes(int likes) {
         this.likes = likes;
+    }
+
+    public String getInstructions() {
+        return instructions;
+    }
+
+    public void setInstructions(String instructions) {
+        this.instructions = instructions;
+    }
+
+    public int getReadyInMinutes() {
+        return readyInMinutes;
+    }
+
+    public void setReadyInMinutes(int readyInMinutes) {
+        this.readyInMinutes = readyInMinutes;
     }
 }

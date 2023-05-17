@@ -157,7 +157,7 @@ public class GroupService {
         }
     }
 
-    public Set<Ingredient> getFinalIngredients(Group group) {
+    public Set<Ingredient> getFinalIngredients(Group group) { // good ingredients to keep
         Set<Ingredient> ingredients = group.getIngredients();
         Set<Ingredient> finalIngredients = new HashSet<>();
 
@@ -169,6 +169,20 @@ public class GroupService {
 
         return finalIngredients;
     }
+
+    public Set<Ingredient> getBadIngredients(Group group) { // bad ingredients to NOT include
+        Set<Ingredient> ingredients = group.getIngredients();
+        Set<Ingredient> badIngredients = new HashSet<>();
+
+        for (Ingredient ingredient : ingredients) {
+            if (ingredient.getCalculatedRating() <= -1) {
+                badIngredients.add(ingredient);
+            }
+        }
+
+        return badIngredients;
+    }
+
 
     public Group removeGuestFromGroup(Group group, Long guestId) {
         group.removeGuestId(guestId);

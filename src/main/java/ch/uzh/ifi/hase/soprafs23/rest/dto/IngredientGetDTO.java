@@ -5,6 +5,8 @@ public class IngredientGetDTO {
     private Long id;
     private String name;
 
+    private int SpoonacularId;
+
     public Long getId() {
         return id;
     }
@@ -21,4 +23,11 @@ public class IngredientGetDTO {
         this.name = name;
     }
 
+    public int getSpoonacularId() {
+        return SpoonacularId;
+    }
+
+    public void setSpoonacularId(int spoonacularId) {
+        SpoonacularId = spoonacularId;
+    }
 }

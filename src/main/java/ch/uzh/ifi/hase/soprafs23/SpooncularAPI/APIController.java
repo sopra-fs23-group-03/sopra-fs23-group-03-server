@@ -52,6 +52,9 @@ public class APIController {
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
     public ResponseEntity<List<APIGetDTO>> getGroupRecipe(@PathVariable Long groupId, HttpServletRequest request) {
+        // change state
+        groupService.changeGroupState(groupId, GroupState.RECIPE);
+
         // 404 - group not found
         Group group = groupService.getGroupById(groupId);
 
@@ -90,13 +93,16 @@ public class APIController {
             recipe.setMissedIngredients(recipeInfo.getMissedIngredients().stream().map(IngredientInfo::getName).collect(Collectors.toList()));
             recipe.setGroup(group);
 
-            // Fetch additional details
+            // Fetch additional details --> makes call to Spoonacular API and map response to RecipeDetailInfo object
             RecipeDetailInfo detailInfo = apiService.getRecipeDetails(recipe.getExternalRecipeId());
             if (detailInfo != null) {
-                recipe.setReadyInMinutes(detailInfo.getReadyInMinutes() != 0 ? detailInfo.getReadyInMinutes() : 0);
+                recipe.setTitle(detailInfo.getTitle());
+                recipe.setReadyInMinutes(detailInfo.getReadyInMinutes());
                 recipe.setImage(detailInfo.getImage() != null ? detailInfo.getImage() : "Default image URL");
                 recipe.setInstructions(detailInfo.getInstructions() != null ? detailInfo.getInstructions() : "No instructions provided");
+
             }
+            recipe.setGroup(group);
 
             // Save/update the recipe in db
             recipeService.save(recipe);
