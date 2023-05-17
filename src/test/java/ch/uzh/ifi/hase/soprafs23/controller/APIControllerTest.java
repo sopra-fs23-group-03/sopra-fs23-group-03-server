@@ -63,8 +63,6 @@ public class APIControllerTest {
     @MockBean
     private FullIngredientRepository fullIngredientRepository;
 
-
-
     private Group testGroup;
     private User testUser;
     private Recipe testRecipe;
@@ -119,7 +117,7 @@ public class APIControllerTest {
 
     @Test
     public void getGroupRecipe_success_200() throws Exception {
-        testGroup.setGroupState(GroupState.FINAL);
+        testGroup.setGroupState(GroupState.RECIPE);
 
         when(groupService.getGroupById(1L)).thenReturn(testGroup);
 
@@ -145,7 +143,7 @@ public class APIControllerTest {
 
     @Test
     public void getGroupRecipe_noRecipesFound_404() throws Exception {
-        testGroup.setGroupState(GroupState.FINAL);
+        testGroup.setGroupState(GroupState.RECIPE);
         List<RecipeInfo> emptyRecipeList = new ArrayList<>();
         doReturn(emptyRecipeList).when(apiService).getRecipe(Mockito.any());
 
@@ -158,7 +156,7 @@ public class APIControllerTest {
 
     @Test
     public void getGroupRecipe_withDetailsFetched() throws Exception {
-        testGroup.setGroupState(GroupState.FINAL);
+        testGroup.setGroupState(GroupState.RECIPE);
         testRecipeDetails.setInstructions("Test instructions");
         testRecipeDetails.setImage("test-image.jpg");
         doReturn(testRecipeDetails).when(apiService).getRecipeDetails(Mockito.any());

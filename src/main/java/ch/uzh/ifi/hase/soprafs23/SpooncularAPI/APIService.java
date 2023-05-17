@@ -8,6 +8,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,18 +124,21 @@ public class APIService {
                     searchApiUrl,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<RecipeSearchResult>() {}
+                    new ParameterizedTypeReference<RecipeSearchResult>() {
+                    }
             );
             RecipeSearchResult searchResult = searchResponse.getBody();
 
-            if (searchResult == null || searchResult.getResults().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NO_CONTENT, "No recipes found for the given ingredients. " +
+            if (searchResult == null || searchResult.getResults().isEmpty()) { //TODO check with frontend if the can dispaly it like taht
+                logger.info("No recipes found for the given ingredients. " +
                         "This is due to too high restrictions, e.g. your allergies matching all the given ingredients. " +
                         "We provide you now with a random recipe based only on your allergies, so you still have a cool meal to cook together!");
-                // TODO: Call getRandomRecipeGroup (groupid, intolerancesString)
-                // NO CONTENT 204 to make frontend display another recipe?
 
+                RecipeInfo randomRecipe = getRandomRecipeGroup(intolerancesString);
+                randomRecipe.setIsRandomBasedOnIntolerances(true); // Setting the new field to true --> can be used by frontend
+                return Arrays.asList(randomRecipe);
             }
+
             return searchResult.getResults();
 
         }
@@ -147,6 +151,46 @@ public class APIService {
             throw new RuntimeException("Unexpected error occurred while fetching recipe: " + e.getMessage());
         }
     }
+
+    public RecipeInfo getRandomRecipeGroup(String intolerancesString) {
+        String searchApiUrl = "https://api.spoonacular.com/recipes/complexSearch?apiKey=" + apiKey +
+                "&intolerances=" + intolerancesString +
+                "&number=1" +
+                "&ignorePantry=true" +
+                "&type=main course" +
+                "&sort=random" +
+                "&fillIngredients=true";
+
+        try {
+            ResponseEntity<RecipeSearchResult> searchResponse = restTemplate.exchange(
+                    searchApiUrl,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<RecipeSearchResult>() {
+                    }
+            );
+            RecipeSearchResult searchResult = searchResponse.getBody();
+
+            if (searchResult == null || searchResult.getResults().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NO_CONTENT, "Now we only send the allergies from all the guests in your group, but there is still no recipe found for it.");
+            }
+            RecipeInfo resultRecipe = searchResult.getResults().get(0);
+            resultRecipe.setIsRandomBasedOnIntolerances(false); // Setting new field to false
+            return resultRecipe;
+
+        }
+        catch (ResponseStatusException e) {
+            logger.error("Error occurred while fetching random recipe: " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Error occurred while fetching random recipe: " + e.getMessage());
+        }
+        catch (Exception e) {
+            logger.error("Unexpected error occurred while fetching random recipe: " + e.getMessage(), e);
+            throw new RuntimeException("Unexpected error occurred while fetching random recipe: " + e.getMessage());
+        }
+
+
+    }
+
 
     public RecipeDetailInfo getRecipeDetails(Long externalRecipeId) {
         String informationApiUrl = "https://api.spoonacular.com/recipes/" + externalRecipeId + "/information?apiKey=" + apiKey;

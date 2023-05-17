@@ -12,6 +12,7 @@ public class APIGetDTO {
     private String instructions;
     private String image;
     private int readyInMinutes;
+    private boolean isRandomBasedOnIntolerances;
 
     // Getters and Setters
 
@@ -78,4 +79,13 @@ public class APIGetDTO {
     public void setReadyInMinutes(int readyInMinutes) {
         this.readyInMinutes = readyInMinutes;
     }
+
+    public boolean getIsRandomBasedOnIntolerances() {
+        return isRandomBasedOnIntolerances;
+    }
+
+    public void setIsRandomBasedOnIntolerances(boolean isRandomBasedOnIntolerances) {
+        this.isRandomBasedOnIntolerances = isRandomBasedOnIntolerances;
+    }
+
 }
