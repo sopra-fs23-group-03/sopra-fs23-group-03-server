@@ -18,6 +18,7 @@ public class RecipeInfo {
     private List<IngredientInfo> missedIngredients;
     private List<IngredientInfo> usedIngredients;
     private List<IngredientInfo> unusedIngredients;
+    private boolean isRandomBasedOnIntolerances;
 
 
     public RecipeInfo() {
@@ -111,5 +112,13 @@ public class RecipeInfo {
 
     public void setUnusedIngredients(List<IngredientInfo> unusedIngredients) {
         this.unusedIngredients = unusedIngredients;
+    }
+
+    public boolean getIsRandomBasedOnIntolerances() {
+        return isRandomBasedOnIntolerances;
+    }
+
+    public void setIsRandomBasedOnIntolerances(boolean isRandomBasedOnIntolerances) {
+        this.isRandomBasedOnIntolerances = isRandomBasedOnIntolerances;
     }
 }

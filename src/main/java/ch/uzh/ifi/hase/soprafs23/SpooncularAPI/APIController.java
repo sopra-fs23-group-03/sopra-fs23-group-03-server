@@ -52,9 +52,6 @@ public class APIController {
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
     public ResponseEntity<List<APIGetDTO>> getGroupRecipe(@PathVariable Long groupId, HttpServletRequest request) {
-        // change state
-        groupService.changeGroupState(groupId, GroupState.RECIPE);
-
         // 404 - group not found
         Group group = groupService.getGroupById(groupId);
 
@@ -64,10 +61,10 @@ public class APIController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
         }
 
-        // 409 - groupState is not FINAL
+        // 409 - groupState is not RECIPE
         GroupState groupState = group.getGroupState();
-        if(!groupState.equals(GroupState.FINAL)) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not FINAL"); // 409
+        if(!groupState.equals(GroupState.RECIPE)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not RECIPE"); // 409
         }
 
         List<RecipeInfo> recipeInfos = apiService.getRecipe(group);
@@ -116,10 +113,11 @@ public class APIController {
             apiGetDTO.setImage(recipe.getImage());
             apiGetDTO.setReadyInMinutes(recipe.getReadyInMinutes());
             apiGetDTO.setGroupId(groupId);
+            apiGetDTO.setIsRandomBasedOnIntolerances(recipeInfo.getIsRandomBasedOnIntolerances());
 
             apiGetDTOS.add(apiGetDTO);
         }
-
+        groupService.changeGroupState(groupId, GroupState.FINAL); //TODO: need to implement more tests for this
         return new ResponseEntity<>(apiGetDTOS, HttpStatus.OK);
     }
 
