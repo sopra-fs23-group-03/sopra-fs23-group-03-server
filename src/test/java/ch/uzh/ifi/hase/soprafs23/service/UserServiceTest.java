@@ -251,6 +251,7 @@ public class UserServiceTest {
         Group group = new Group();
         group.setId(2L);
         when(groupService.getGroupById(user.getGroupId())).thenReturn(group);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
         // when
         userService.addUserIngredients(user.getId(), Collections.singletonList(ingredientPutDTO));
