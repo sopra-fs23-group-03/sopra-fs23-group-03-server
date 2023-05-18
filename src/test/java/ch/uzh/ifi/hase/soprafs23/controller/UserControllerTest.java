@@ -737,20 +737,6 @@ public class UserControllerTest {
     }
 
     @Test
-    public void setReady_userNotFound_shouldReturnNotFound() throws Exception {
-        given(userService.getUserById(any())).willReturn(null);
-        mockMvc.perform(put("/users/1/1/ready").header("X-Token", "token"))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void setReady_groupNotFound_shouldReturnNotFound() throws Exception {
-        given(groupService.getGroupById(any())).willReturn(null);
-        mockMvc.perform(put("/users/1/1/ready").header("X-Token", "token"))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
     public void setReady_userNotAuthorized_shouldReturnUnauthorized() throws Exception {
         Group group = new Group();
         group.setGroupState(GroupState.GROUPFORMING);

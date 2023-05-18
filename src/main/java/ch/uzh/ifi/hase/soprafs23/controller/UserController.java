@@ -45,14 +45,11 @@ public class UserController {
 
     private final JoinRequestService joinRequestService;
 
-    private final UserRepository userRepository;
-
-    public UserController(UserService userService, GroupService groupService, InvitationService invitationService,@Lazy JoinRequestService joinRequestService, UserRepository userRepository) {
+    public UserController(UserService userService, GroupService groupService, InvitationService invitationService,@Lazy JoinRequestService joinRequestService) {
         this.userService = userService;
         this.groupService = groupService;
         this.invitationService = invitationService;
         this.joinRequestService = joinRequestService;
-        this.userRepository = userRepository;
     }
 
     @GetMapping("/users")
@@ -299,16 +296,12 @@ public class UserController {
     @PutMapping("/users/{userId}/{groupId}/ready")
     @ResponseStatus(HttpStatus.NO_CONTENT) // 204
     public ResponseEntity<Void> setReady(@PathVariable Long userId, @PathVariable Long groupId, HttpServletRequest request) {
-        User user = userService.getUserById(userId);
-        Group group = groupService.getGroupById(groupId);
 
-        // 404 - user or group not found
-        if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User with id %s does not exist", userId));
-        }
-        if (group == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Group with id %s does not exist", groupId));
-        }
+        //404 - user not found
+        User user = userService.getUserById(userId);
+
+        //404 - group not found
+        Group group = groupService.getGroupById(groupId);
 
         // 401 - not authorized if not the same user
         Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
@@ -329,13 +322,10 @@ public class UserController {
         }
 
         // Set user's isReady to true and save
-        user.setReady(true);
-        userRepository.save(user);
+        userService.setUserReady(userId);
 
         // Check if all users in the group are ready
-        boolean allReady = memberIds.stream()
-                .map(id -> userService.getUserById(id))
-                .allMatch(User::isReady);
+        boolean allReady = userService.areAllUsersReady(memberIds);
 
         if (allReady) {
             // If all users are ready, change the state and set isReady to false for all
@@ -344,21 +334,11 @@ public class UserController {
             } else if (groupState == GroupState.FINAL) {
                 group.setGroupState(GroupState.RECIPE);
             } else if (groupState == GroupState.RECIPE) {
-                groupService.deleteGroup(groupId);
-                // Set isReady of all members to false after deleting the group
-                memberIds.forEach(id -> {
-                    User member = userService.getUserById(id);
-                    member.setReady(false);
-                    userRepository.save(member);
-                });
+                userService.deleteGroupAndSetAllUsersNotReady(groupId, memberIds);
                 return new ResponseEntity<>(HttpStatus.OK);
             }
 
-            memberIds.forEach(id -> {
-                User member = userService.getUserById(id);
-                member.setReady(false);
-                userRepository.save(member);
-            });
+            userService.setAllUsersNotReady(memberIds);
         }
 
         return new ResponseEntity<>(HttpStatus.OK);
