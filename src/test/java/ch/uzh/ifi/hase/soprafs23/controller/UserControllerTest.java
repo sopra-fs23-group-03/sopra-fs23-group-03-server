@@ -578,10 +578,12 @@ public class UserControllerTest {
         ingredientsPutDTO.add(ingredientPutDTO2);
 
         Group group = new Group();
+        group.setId(4L);
         group.setGroupState(GroupState.INGREDIENTENTERING);
+        user.setGroupId(group.getId());
 
         // mocks
-        given(groupService.getGroupById(any())).willReturn(group);
+        given(groupService.getGroupById(group.getId())).willReturn(group);
         given(groupService.getAllMemberIdsOfGroup(group)).willReturn(Collections.singletonList(user.getId()));
 
         // when/then -> do the request

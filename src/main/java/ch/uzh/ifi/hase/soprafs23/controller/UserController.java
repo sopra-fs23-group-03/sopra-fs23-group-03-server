@@ -269,6 +269,10 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized to update ingredients associated with this user.")); //401 - unauthorized
         }
 
+        if (user.getGroupId() == null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "You must be in a group to enter ingredients.");
+        }
+
         // 409 - groupState is not INGREDIENTENTERING
         Group group = groupService.getGroupById(user.getGroupId());
         GroupState groupState = group.getGroupState();
