@@ -254,7 +254,7 @@ public class UserController {
         return groupGetDTOs;
     }
 
-    @PutMapping("/user/{userId}/ingredients")
+    @PutMapping("/users/{userId}/ingredients")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateUserIngredients(@PathVariable Long userId,
                                       @RequestBody List<IngredientPutDTO> ingredientsPutDTO, // I get list of objects (arrays)
