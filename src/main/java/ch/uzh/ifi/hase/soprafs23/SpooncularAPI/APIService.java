@@ -47,7 +47,6 @@ public class APIService {
     @Autowired
     private IngredientRepository ingredientRepository;
 
-    // TODO: give basic basic default recipe
 
     public Recipe getRandomRecipe(User host) { //TODO: use for Solo trip and for trouble shooting in case answer from Group is zero due to restrictions
         String intolerances = String.join(",", host.getAllergiesSet());
@@ -172,7 +171,7 @@ public class APIService {
             RecipeSearchResult searchResult = searchResponse.getBody();
 
             if (searchResult == null || searchResult.getResults().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NO_CONTENT, "Now we only send the allergies from all the guests in your group, but there is still no recipe found for it.");
+                throw new ResponseStatusException(HttpStatus.NO_CONTENT, "Now we only send only the allergies from all the guests in your group, but there is still no recipe found for it.");
             }
             RecipeInfo resultRecipe = searchResult.getResults().get(0);
             resultRecipe.setIsRandomBasedOnIntolerances(false); // Setting new field to false
@@ -187,8 +186,6 @@ public class APIService {
             logger.error("Unexpected error occurred while fetching random recipe: " + e.getMessage(), e);
             throw new RuntimeException("Unexpected error occurred while fetching random recipe: " + e.getMessage());
         }
-
-
     }
 
 

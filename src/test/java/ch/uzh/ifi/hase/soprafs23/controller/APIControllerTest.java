@@ -117,9 +117,8 @@ public class APIControllerTest {
 
     @Test
     public void getGroupRecipe_success_200() throws Exception {
-        testGroup.setGroupState(GroupState.RECIPE);
-
         when(groupService.getGroupById(1L)).thenReturn(testGroup);
+        testGroup.setGroupState(GroupState.RECIPE);
 
         MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/result", 1L)
                 .header("X-Token", "valid-token")
@@ -127,7 +126,7 @@ public class APIControllerTest {
 
         mockMvc.perform(getRequest).andExpect(status().is2xxSuccessful());
 
-        verify(groupService, times(1)).changeGroupState(1L, GroupState.RECIPE);
+        verify(groupService, times(1)).changeGroupState(1L, GroupState.FINAL);
     }
 
 
