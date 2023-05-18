@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
+import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.Recipe;
 import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import ch.uzh.ifi.hase.soprafs23.repository.RecipeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
@@ -32,16 +34,19 @@ public class GroupService {
     private final JoinRequestService joinRequestService;
     private final InvitationService invitationService;
     private final UserService userService;
+    private final RecipeRepository recipeRepository;
+
 
     @Autowired
     public GroupService(@Qualifier("groupRepository") GroupRepository groupRepository, IngredientRepository ingredientRepository,
                         @Lazy @Qualifier("userService") UserService userService,
-                        @Lazy JoinRequestService joinRequestService, @Lazy InvitationService invitationService) {
+                        @Lazy JoinRequestService joinRequestService, @Lazy InvitationService invitationService, RecipeRepository recipeRepository) {
         this.groupRepository = groupRepository;
         this.userService = userService;
         this.ingredientRepository = ingredientRepository;
         this.joinRequestService = joinRequestService;
         this.invitationService = invitationService;
+        this.recipeRepository = recipeRepository;
     }
 
     public List<Group> getGroups() {
@@ -129,9 +134,17 @@ public class GroupService {
         invitationService.deleteInvitationsByGroupId(groupId);
         joinRequestService.deleteJoinRequestsByGroupId(groupId);
 
+        // Delete the recipes associated with this group
+        List<Recipe> recipes = recipeRepository.findAllByGroup(group);
+        for (Recipe recipe : recipes) {
+            recipeRepository.delete(recipe);
+        }
+
         // Delete the group
         groupRepository.delete(group);
     }
+
+
 
     @Transactional
     public void calculateRatingPerGroup(Long groupId) {

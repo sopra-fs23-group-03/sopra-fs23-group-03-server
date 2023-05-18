@@ -376,9 +376,20 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Only the Host can delete the Group"); // 401 - not authorized
         }
 
+        // Check if any member of the group is ready
+        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
+        boolean anyMemberReady = memberIds.stream()
+                .map(id -> userService.getUserById(id))
+                .anyMatch(User::isReady);
+
+        if (anyMemberReady) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot delete the group while a member is ready"); // 409
+        }
+
         // Delete the group
         groupService.deleteGroup(groupId);
     }
+
 
     @PutMapping("/groups/{groupId}/leave")
     @ResponseStatus(HttpStatus.NO_CONTENT) // 204
