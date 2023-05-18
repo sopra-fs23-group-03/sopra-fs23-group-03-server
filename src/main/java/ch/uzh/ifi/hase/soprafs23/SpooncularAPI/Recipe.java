@@ -24,7 +24,7 @@ public class Recipe implements Serializable {
     @Column(nullable = true)
     private String image;
 
-    @Column(nullable = true, length = 1500)
+    @Column(nullable = true, length = 2500)
     private String instructions;
 
     @Column(name = "external_recipe_id")
@@ -112,8 +112,8 @@ public class Recipe implements Serializable {
     }
 
     public void setInstructions(String instructions) {
-        if (instructions.length() > 1500) {
-            this.instructions ="Seems like a complicated recipe! The instructions are too long, the maximum allowed length is 1500 characters. Just google the recipe and get the instructions from there :) ";
+        if (instructions.length() > 2500) {
+            this.instructions ="Seems like a complicated recipe! The instructions are too long, the maximum allowed length is 2500 characters. Just google the recipe and get the instructions from there :) ";
         } else {
             this.instructions = instructions;
         }
