@@ -586,7 +586,7 @@ public class UserControllerTest {
 
         // when/then -> do the request
         String xToken = user.getToken();
-        mockMvc.perform(put("/user/{userId}/ingredients", user.getId())
+        mockMvc.perform(put("/users/{userId}/ingredients", user.getId())
                         .header("X-Token", xToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(ingredientsPutDTO)))
@@ -604,7 +604,7 @@ public class UserControllerTest {
 
         // when/then -> do the request
         String xToken = user.getToken();
-        mockMvc.perform(put("/user/{userId}/ingredients", user.getId())
+        mockMvc.perform(put("/users/{userId}/ingredients", user.getId())
                         .header("X-Token", xToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(ingredientsPutDTO)))
@@ -623,7 +623,7 @@ public class UserControllerTest {
 
         // when/then -> do the request
         String invalidToken = "invalidToken";
-        mockMvc.perform(put("/user/{userId}/ingredients", user.getId())
+        mockMvc.perform(put("/users/{userId}/ingredients", user.getId())
                         .header("X-Token", invalidToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(ingredientsPutDTO)))
@@ -650,7 +650,7 @@ public class UserControllerTest {
 
         // when/then -> do the request
         String xToken = user.getToken();
-        mockMvc.perform(put("/user/{userId}/ingredients", user.getId())
+        mockMvc.perform(put("/users/{userId}/ingredients", user.getId())
                         .header("X-Token", xToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(ingredientsPutDTO)))
