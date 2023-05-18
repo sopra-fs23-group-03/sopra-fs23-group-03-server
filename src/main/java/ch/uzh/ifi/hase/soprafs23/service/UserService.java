@@ -343,4 +343,29 @@ public class UserService {
         int ingredientSetSize = user.getIngredients().size();
         return ingredientSetSize > 0;
     }
+
+    public void setUserReady(Long userId) {
+        User user = this.getUserById(userId);
+        user.setReady(true);
+        userRepository.save(user);
+    }
+
+    public boolean areAllUsersReady(List<Long> userIds) {
+        return userIds.stream()
+                .map(this::getUserById)
+                .allMatch(User::isReady);
+    }
+
+    public void setAllUsersNotReady(List<Long> userIds) {
+        userIds.forEach(id -> {
+            User member = getUserById(id);
+            member.setReady(false);
+            userRepository.save(member);
+        });
+    }
+
+    public void deleteGroupAndSetAllUsersNotReady(Long groupId, List<Long> userIds) {
+        groupService.deleteGroup(groupId);
+        setAllUsersNotReady(userIds);
+    }
 }

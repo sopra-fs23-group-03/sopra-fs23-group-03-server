@@ -48,6 +48,10 @@ public class User implements Serializable {
     @Column(nullable = false)
     private UserVotingStatus votingStatus;
 
+    // Add a new field isReady
+    @Column(nullable = false)
+    private boolean isReady;
+
     @ManyToMany(cascade = CascadeType.ALL) // so all changes are applied to ingredients class which is associated
     @JoinTable(
             name = "USER_INGREDIENT",
@@ -177,5 +181,15 @@ public class User implements Serializable {
 
     public void setVotingStatus(UserVotingStatus votingStatus) {
         this.votingStatus = votingStatus;
+    }
+
+    // Add a getter for isReady
+    public boolean isReady() {
+        return isReady;
+    }
+
+    // Add a setter for isReady
+    public void setReady(boolean ready) {
+        this.isReady = ready;
     }
 }

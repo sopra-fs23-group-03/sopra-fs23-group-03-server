@@ -1294,6 +1294,27 @@ public class GroupControllerTest {
     }
 
     @Test
+    public void testDeleteGroup_memberReady_shouldReturnConflict() throws Exception {
+        // Set up a group with a member who is ready
+        User readyUser = new User();
+        readyUser.setId(3L);
+        readyUser.setReady(true); // set this user to be ready
+
+        // add this ready user to the group's members
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(readyUser.getId());
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+        given(userService.getUserById(readyUser.getId())).willReturn(readyUser);
+
+        // The request
+        mockMvc.perform(delete("/groups/{groupId}", group.getId())
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isConflict())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResponseStatusException))
+                .andExpect(result -> assertTrue(Objects.requireNonNull(result.getResolvedException()).getMessage().contains("Cannot delete the group while a member is ready")));
+    }
+
+    @Test
     public void leaveGroup_guestSuccessfullyLeaves_204() throws Exception {
         Long groupId = 1L;
         Long hostId = 2L;
