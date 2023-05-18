@@ -524,6 +524,10 @@ public class GroupController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
         }
 
+        if(!tokenId.equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized");
+        }
+
         // 409 - groupState is not INGREDIENTVOTING
         GroupState groupState = group.getGroupState();
         if(!groupState.equals(GroupState.INGREDIENTVOTING)) {
