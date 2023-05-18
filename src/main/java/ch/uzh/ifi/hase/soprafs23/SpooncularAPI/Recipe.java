@@ -112,8 +112,8 @@ public class Recipe implements Serializable {
     }
 
     public void setInstructions(String instructions) {
-        if (instructions.length() > 1000) {
-            this.instructions ="Seems like a complicated recipe! The instructions are too long, the maximum allowed length is 1000 characters. Just google the recipe and get the instructions from there :) ";
+        if (instructions.length() > 1500) {
+            this.instructions ="Seems like a complicated recipe! The instructions are too long, the maximum allowed length is 1500 characters. Just google the recipe and get the instructions from there :) ";
         } else {
             this.instructions = instructions;
         }

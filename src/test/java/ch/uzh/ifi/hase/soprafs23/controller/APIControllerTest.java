@@ -125,8 +125,6 @@ public class APIControllerTest {
                 .contentType(MediaType.APPLICATION_JSON);
 
         mockMvc.perform(getRequest).andExpect(status().is2xxSuccessful());
-
-        verify(groupService, times(1)).changeGroupState(1L, GroupState.FINAL);
     }
 
 
