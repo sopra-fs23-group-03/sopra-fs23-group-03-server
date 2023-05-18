@@ -160,6 +160,14 @@ public class UserService {
 
         if(newUsername != null && !newUsername.equals(user.getUsername())) {
             checkIfUsernameExists(newUsername);
+            // check if username is only latin letters
+            if (newUsername.matches("^[a-zA-Z]+$")) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "The username should only contain Latin letters (a-z, A-Z)!");
+            }
+            // check that username and password are not the same
+            if(newUsername.equals(user.getPassword())) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "The username and password cannot be the same!");
+            }
             user.setUsername(newUsername);
         }
 
