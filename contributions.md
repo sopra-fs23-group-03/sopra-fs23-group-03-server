@@ -153,6 +153,7 @@
 |             | #61    | Ensure that at least one ingredient is added before allowing the user to submit  |   X  |
 |             | #62    | Implement API call to submit the ingredient contributions                        |   X  |
 |             | #63    | Button to submit final contributions and transition to next page  (Improvements) |  X   |
+|             |   #78  | Redirect host toGroup Forming Page - Host when clicking on continue              |   X  |
 | Ann-Kathrin |#172/#55|    Implement default majority logic                                              |    X |
 |             |    #59 |    Develop endpoint to store and retrieve guest and ingredient contributions     |   X  |
 |             |   #57  | select one recipe suggestion from the API based on the given ingredients         |    X |
@@ -161,6 +162,7 @@
 |             |   #13  | Make yes/no/indifferent buttons available                                        |   X  |
 |             |   #126 | Create a voting page that displays all typed in ingredients to be voted          |   X  |
 |             |   #125 | Display an overview of all typed-in ingredients so that they can rate them       |   X  |
+|             |   #78  | Redirect host toGroup Forming Page - Host when clicking on continue              |   X  |
 |             |   #127 | Create a final ingredients page with the ingredients that have been selected after the voting  |   X  |
 
 </p>
