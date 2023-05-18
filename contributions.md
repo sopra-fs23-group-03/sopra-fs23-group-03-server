@@ -179,16 +179,15 @@
 |             | #67 & #173 | Implemented previously, connected to corresponding commits.                  | X    |
 | Orestis     | #210   | Updated the logic of retrieval of all ingredients from external API to avoid spelling mistakes. | X    |
 |             | #47    | Re-opened Create Logout Method which sets User to offline to add some extra functionality to it. | X    |
-|             | #77    | Implement a new Ready/Not Ready logic to transition from some states to other states. |      |    
+|             | #77    | Implement a new Ready/Not Ready logic to transition from some states to other states. |          
 | Kalliopi    |        |                                                                                  |      |
-|             | #42   |  Create path to be redirected back to the landing page                            | X    |
+|             |  #42   |  Create path to be redirected back to the landing page                           | X    |
 |             |        |  Create path to be redirected back to the landing page                           | X    |
-|             | #41 |  Map cancel button to make all members leave the group                           | X    | 
-|             |  #144  | When dropping out, the user is directed to the LANDING PAGE again                         | X    | 
-|             | #39   |  Map continue button to perform the PUT /groups/{id}/state request to have the group move on to the next step | X    |
+|             | #41    |  Map cancel button to make all members leave the group                              | X    | 
+|             |  #144  | When dropping out, the user is directed to the LANDING PAGE again                | X    | 
+|             | #39    |  Map continue button to perform the PUT /groups/{id}/state request to have the group move on to the next step | X    |
 |             |        |  independent: Guards                                                             | X    |    
-|             | #40  |  Create path to be directed to the lobby screen (to wait for host to continue)   | X    |     
-    
+|             | #40    |  Create path to be directed to the lobby screen (to wait for host to continue)   | X    |         
 | Ann-Kathrin |  #248  |  implement check that frontend send really just 1,-1,0 for ingredient ratings    |    X |
 |             |   #257 |   take allergies of all group members into account                               |      |
 |             |   #253 | make sure "No" ingredients are not used in the final recipe                      |      |
