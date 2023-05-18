@@ -47,7 +47,6 @@ public class APIController {
     @Autowired
     private RecipeService recipeService;
 
-
     @GetMapping("/groups/{groupId}/result")
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
@@ -121,7 +120,6 @@ public class APIController {
         return new ResponseEntity<>(apiGetDTOS, HttpStatus.OK);
     }
 
-
     @GetMapping("/ingredients")
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
@@ -146,6 +144,4 @@ public class APIController {
         }
         return ingredientNames;
     }
-
-
 }

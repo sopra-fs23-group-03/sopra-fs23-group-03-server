@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.*;
+import ch.uzh.ifi.hase.soprafs23.entity.FullIngredient;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
@@ -31,7 +32,10 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.ArrayList;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -68,9 +72,8 @@ public class APIControllerTest {
     private Recipe testRecipe;
     private RecipeInfo testRecipeInfo;
     private RecipeDetailInfo testRecipeDetails;
-
     private IngredientInfo testIngredientInfo;
-
+    private FullIngredient testFullIngredient;
 
     @BeforeEach
     public void setUp() {
@@ -104,6 +107,17 @@ public class APIControllerTest {
 
         testRecipeDetails = new RecipeDetailInfo();
         testRecipeDetails.setReadyInMinutes(30);
+
+        testFullIngredient = new FullIngredient();
+        testFullIngredient.setId(1L);
+        testFullIngredient.setName("apple");
+
+        List<FullIngredient> ingredientsList = new ArrayList<>();
+        ingredientsList.add(testFullIngredient);
+
+        doReturn(1L).when(userService).getUseridByToken(Mockito.any());
+        doReturn(ingredientsList).when(fullIngredientRepository).findByNameContainingIgnoreCase(Mockito.any());
+        doReturn(false).when(fullIngredientRepository).existsByQuery(Mockito.any());
 
         doReturn(testGroup).when(groupService).getGroupById(Mockito.any());
         doReturn(testUser).when(userService).getUserById(Mockito.any());
@@ -198,81 +212,53 @@ public class APIControllerTest {
 //                        .contentType(MediaType.APPLICATION_JSON))
 //                .andExpect(status().isUnauthorized()); // 401
 //    }
-//
-//    @Test
-//    void getAllIngredients_validRequest_returnsListOfIngredients() throws Exception {
-//        String initialString = "app";
-//
-//        List<String> ingredientNames = new ArrayList<>();
-//        ingredientNames.add("apple");
-//        ingredientNames.add("apple juice");
-//
-//        // given
-//        given(userService.getUseridByToken(anyString())).willReturn(1L);
-//        given(apiService.getListOfIngredients(initialString)).willReturn(ingredientNames);
-//
-//        // when/then -> perform the request and validate the response
-//        mockMvc.perform(get("/ingredients")
-//                        .header("X-Token", "valid-token")
-//                        .param("initialString", initialString)
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$", hasSize(2)))
-//                .andExpect(jsonPath("$[0]", equalTo("apple")))
-//                .andExpect(jsonPath("$[1]", equalTo("apple juice")));
-//    }
-//
-//    @Test
-//    public void getAllIngredients_returnsUnauthorizedStatusCode401() throws Exception {
-//        // Set up mocks for the unauthorized case
-//        doReturn(0L).when(userService).getUseridByToken("unauthorized-token");
-//
-//        // Perform the test
-//        mockMvc.perform(get("/ingredients")
-//                        .header("X-Token", "unauthorized-token")
-//                        .param("initialString", "a"))
-//                .andExpect(status().isUnauthorized()); // 401
-//    }
-//
-//    @Test
-//    void getIngredients_returnsNotFound_whenIngredientNotFound() throws Exception {
-//        String nonExistentIngredient = "xyz";
-//
-//        // Set up mocks for the case when the API returns 404 status code
-//        when(apiService.getListOfIngredients(nonExistentIngredient))
-//                .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND, "Ingredients not found"));
-//
-//        // Perform the test
-//        try {
-//            mockMvc.perform(get("/ingredients")
-//                            .header("X-Token", "valid-token")
-//                            .param("initialString", nonExistentIngredient)
-//                            .contentType(MediaType.APPLICATION_JSON))
-//                    .andExpect(status().isNotFound()); // 404
-//        } catch (NestedServletException e) {
-//            HttpClientErrorException cause = (HttpClientErrorException) e.getCause();
-//            assertEquals(HttpStatus.NOT_FOUND, cause.getStatusCode());
-//            assertEquals("404 Ingredients not found", cause.getMessage()); // this comes from external API directly then
-//        }
-//    }
-//
-//    @Test
-//    void getAllIngredients_returnsUnprocessableEntity_whenInvalidLengthProvided() throws Exception {
-//        String invalidInitialString = "abcd";
-//
-//        // Perform the test
-//        try {
-//            mockMvc.perform(get("/ingredients")
-//                            .header("X-Token", "valid-token")
-//                            .param("initialString", invalidInitialString)
-//                            .contentType(MediaType.APPLICATION_JSON))
-//                    .andExpect(status().isUnprocessableEntity()); // 422
-//
-//        } catch (NestedServletException e) {
-//            HttpClientErrorException cause = (HttpClientErrorException) e.getCause();
-//            assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, cause.getStatusCode());
-//            assertEquals("422 UnprocessableEntity", cause.getMessage());
-//        }
-//    }
 
+    @Test
+    void getAllIngredients_validRequest_returnsListOfIngredients() throws Exception {
+        String initialString = "app";
+
+        List<FullIngredient> fullIngredients = new ArrayList<>();
+        fullIngredients.add(testFullIngredient);
+
+        // given
+        given(userService.getUseridByToken(anyString())).willReturn(1L);
+        given(fullIngredientRepository.findByNameContainingIgnoreCase(initialString)).willReturn(fullIngredients);
+
+        // when/then -> perform the request and validate the response
+        mockMvc.perform(get("/ingredients")
+                        .header("X-Token", "valid-token")
+                        .param("initialString", initialString)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0]", equalTo("apple")));
+    }
+
+    @Test
+    public void getAllIngredients_returnsUnauthorizedStatusCode401() throws Exception {
+        // Set up mocks for the unauthorized case
+        doReturn(0L).when(userService).getUseridByToken("unauthorized-token");
+
+        // Perform the test
+        mockMvc.perform(get("/ingredients")
+                        .header("X-Token", "unauthorized-token")
+                        .param("initialString", "a"))
+                .andExpect(status().isUnauthorized()); // 401
+    }
+
+    @Test
+    void getIngredients_returnsNotFound_whenIngredientNotFound() throws Exception {
+        String nonExistentIngredient = "xyz";
+
+        // Set up mocks for the case when the ingredient is not found
+        List<FullIngredient> emptyList = new ArrayList<>();
+        doReturn(emptyList).when(fullIngredientRepository).findByNameContainingIgnoreCase(nonExistentIngredient);
+
+        // Perform the test
+        mockMvc.perform(get("/ingredients")
+                        .header("X-Token", "valid-token")
+                        .param("initialString", nonExistentIngredient)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound()); // 404
+    }
 }
