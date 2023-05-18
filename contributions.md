@@ -179,7 +179,7 @@
 |             | #67 & #173 | Implemented previously, connected to corresponding commits.                  | X    |
 | Orestis     | #210   | Updated the logic of retrieval of all ingredients from external API to avoid spelling mistakes. | X    |
 |             | #47    | Re-opened Create Logout Method which sets User to offline to add some extra functionality to it. | X    |
-|             |        | Implement a new Ready/Not Ready logic to transition from some states to other states. |      |    
+|             | #77    | Implement a new Ready/Not Ready logic to transition from some states to other states. |      |    
 | Kalliopi    |        |                                                                                  |      |
 |             |        |                                                                                  |      |
 | Ann-Kathrin |  #248  |  implement check that frontend send really just 1,-1,0 for ingredient ratings    |    X |
