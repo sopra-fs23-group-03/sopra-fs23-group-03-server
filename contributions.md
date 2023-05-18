@@ -76,7 +76,7 @@
 |-------------|--------|----------------------------------------------------------------------------------|------|
 | Lany        | #84    | Create GET /groups/{id} request                                                  |  X   |
 |             | #187   | Create GET /groups/{id}/members request                                          |  X   |
-| Orestis     |   #57  | Function to randomly select one recipe suggestion from the API                   |      |
+| Orestis     |   #57  | Function to randomly select one recipe suggestion from the API                   |  X   |
 |             |   #88  | Reopened and fixed the updating attributes and the tests                         |  X   |
 | Kalliopi    |   #42  | Create host view of group forming page                                           |  X   |
 |             |   #43  | Create guest view of group forming page                                          |  X   |
@@ -145,22 +145,24 @@
 |             | #62    | Implement a function to check if the group is left with only the host, and disband the group if necessary. | X    |
 | Orestis     | #171   | Create Method to include new guest to group                                      | X    |
 |             | #218   | add GET groups/{groupid}/requests call                                           | X    |
-|             | #77    | Create PUT /groups/{id}/state request                                            |      |
-|             | #170   | Create Method to check if user is allowed to request (group not entered certain stange in planning process). |      |
+|             | #77    | Create PUT /groups/{id}/state request                                            | X    |
+|             | #170   | Create Method to check if user is allowed to request (group not entered certain stange in planning process). |  X   |
 | Kalliopi    | #58    | Ingredient input-field + button for adding ingredients to the meal(Improvements) |   X  |
 |             | #59    | Create a button to remove an ingredient from the meal (Improvements)             |   X  |
 |             | #60    | Display all ingredients added to the meal in a separate section                  |   X  |
 |             | #61    | Ensure that at least one ingredient is added before allowing the user to submit  |   X  |
 |             | #62    | Implement API call to submit the ingredient contributions                        |   X  |
 |             | #63    | Button to submit final contributions and transition to next page  (Improvements) |  X   |
+|             |   #78  | Redirect host toGroup Forming Page - Host when clicking on continue              |   X  |
 | Ann-Kathrin |#172/#55|    Implement default majority logic                                              |    X |
-|             |    #59 |    Develop endpoint to store and retrieve guest and ingredient contributions     |      |
-|             |   #57  | select one recipe suggestion from the API based on the given ingredients         |      |
+|             |    #59 |    Develop endpoint to store and retrieve guest and ingredient contributions     |   X  |
+|             |   #57  | select one recipe suggestion from the API based on the given ingredients         |    X |
 | Chiara      |   #99  | Add description text in group creation for describing the default logic          |   X  |
 |             |   #101 | Send the voting type to backend when creating the group                          |   X  |
 |             |   #13  | Make yes/no/indifferent buttons available                                        |   X  |
 |             |   #126 | Create a voting page that displays all typed in ingredients to be voted          |   X  |
 |             |   #125 | Display an overview of all typed-in ingredients so that they can rate them       |   X  |
+|             |   #78  | Redirect host toGroup Forming Page - Host when clicking on continue              |   X  |
 |             |   #127 | Create a final ingredients page with the ingredients that have been selected after the voting  |   X  |
 
 </p>
@@ -175,14 +177,25 @@
 |             | #235   | independent: create GET /groups/{groupId}/members/allergies                      | X    |
 |             | #69 & #114 | Edited for added functionality                                               | X    |
 |             | #67 & #173 | Implemented previously, connected to corresponding commits.                  | X    |
-| Orestis     |        |                                                                                  |      |
-|             |        |                                                                                  |      |
+| Orestis     | #210   | Updated the logic of retrieval of all ingredients from external API to avoid spelling mistakes. | X    |
+|             | #47    | Re-opened Create Logout Method which sets User to offline to add some extra functionality to it. | X    |
+|             | #77    | Implement a new Ready/Not Ready logic to transition from some states to other states. |      |    
 | Kalliopi    |        |                                                                                  |      |
 |             |        |                                                                                  |      |
-| Ann-Kathrin |        |                                                                                  |      |
+| Ann-Kathrin |  #248  |  implement check that frontend send really just 1,-1,0 for ingredient ratings    |    X |
+|             |   #257 |   take allergies of all group members into account                               |      |
+|             |   #253 | make sure "No" ingredients are not used in the final recipe                      |      |
+|             |   #255 |    in case of an empty final ingredients list: provide RandomRecipe              |      |
 |             |        |                                                                                  |      |
-| Chiara      |        |                                                                                  |      |
-|             |        |                                                                                  |      |
+| Chiara      |  #15   |  Send list of all ratings of all ingredients to backend through REST API         |  X   |
+|             |  #25   |  Implement a function to enable guests and host to vote all ingredients          |  X   |
+|             |  #28   |  Implement a submit button to save the ratings                                   |  X   |
+|             |  #26   |  Implement a decision logic for the rating system (default: majority)            |  X   |
+|             |  #14   |  Make submit button clickable only if all ingredients have been rated            |  X   |
+|             |  #27   |  Display a message indicating that all ingredients must be rated before submit   |  X   |
+|             |  #19   |  Display the list of final ingredients in IngredientsFinal view (after voting)   |  X   |
+|             |  #133  |  Display the allregies of the group to help guests in the selection of ingredients to add |  X   |
+
 
 </p>
 

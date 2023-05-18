@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs23.controller;
 
 import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.*;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.IngredientInfo;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
@@ -30,6 +31,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.ArrayList;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -60,7 +62,6 @@ public class APIControllerTest {
 
     @MockBean
     private FullIngredientRepository fullIngredientRepository;
-
 
     private Group testGroup;
     private User testUser;
@@ -116,11 +117,16 @@ public class APIControllerTest {
 
     @Test
     public void getGroupRecipe_success_200() throws Exception {
+        when(groupService.getGroupById(1L)).thenReturn(testGroup);
+        testGroup.setGroupState(GroupState.RECIPE);
+
         MockHttpServletRequestBuilder getRequest = get("/groups/{groupId}/result", 1L)
                 .header("X-Token", "valid-token")
                 .contentType(MediaType.APPLICATION_JSON);
 
         mockMvc.perform(getRequest).andExpect(status().is2xxSuccessful());
+
+        verify(groupService, times(1)).changeGroupState(1L, GroupState.FINAL);
     }
 
 
@@ -136,6 +142,7 @@ public class APIControllerTest {
 
     @Test
     public void getGroupRecipe_noRecipesFound_404() throws Exception {
+        testGroup.setGroupState(GroupState.RECIPE);
         List<RecipeInfo> emptyRecipeList = new ArrayList<>();
         doReturn(emptyRecipeList).when(apiService).getRecipe(Mockito.any());
 
@@ -148,6 +155,7 @@ public class APIControllerTest {
 
     @Test
     public void getGroupRecipe_withDetailsFetched() throws Exception {
+        testGroup.setGroupState(GroupState.RECIPE);
         testRecipeDetails.setInstructions("Test instructions");
         testRecipeDetails.setImage("test-image.jpg");
         doReturn(testRecipeDetails).when(apiService).getRecipeDetails(Mockito.any());

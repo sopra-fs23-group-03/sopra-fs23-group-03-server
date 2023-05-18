@@ -1,12 +1,19 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RecipeDetailInfo {
 
-    // This class in to store all the additional Information regarding the recipe, retrieved by the second call to the external spoonacular API
+    // This class is to store all the additional Information regarding the recipe, retrieved by the second call to the external spoonacular API
 
-    private int readyInMinutes;
+    private Long id;
+    private String title;
     private String image;
+    private int readyInMinutes;
     private String instructions;
+    private List<IngredientInfo> ingredients = new ArrayList<>();
+
 
 
     public int getReadyInMinutes() {
@@ -31,5 +38,29 @@ public class RecipeDetailInfo {
 
     public void setInstructions(String instructions) {
         this.instructions = instructions;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public List<IngredientInfo> getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(List<IngredientInfo> ingredients) {
+        this.ingredients = ingredients;
     }
 }

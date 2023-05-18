@@ -8,6 +8,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ import java.util.*;
 import java.net.URLEncoder;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger; //needed for more information in the log --> for testing
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
@@ -46,7 +47,8 @@ public class APIService {
     @Autowired
     private IngredientRepository ingredientRepository;
 
-    public Recipe getHostRecipe(User host) { //TODO: use for Solo trip?
+
+    public Recipe getRandomRecipe(User host) { //TODO: use for Solo trip and for trouble shooting in case answer from Group is zero due to restrictions
         String intolerances = String.join(",", host.getAllergiesSet());
         String diet = host.getSpecialDiet();
         String cuisine = String.join(",", host.getFavoriteCuisineSet());
@@ -74,52 +76,132 @@ public class APIService {
         catch (ResponseStatusException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
         }
-        catch(HttpServerErrorException e) {
+        catch (HttpServerErrorException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized");
         }
     }
 
 
     public List<RecipeInfo> getRecipe(Group group) {
-        Set<Ingredient> finalSetIngredients = groupService.getFinalIngredients(group);
+        Set<Ingredient> finalSetIngredients = groupService.getFinalIngredients(group);// good Ingredients
+        Set<Ingredient> badSetIngredients = groupService.getBadIngredients(group);// bad Ingredients
+        Set<String> allergiesGroupMembers = groupService.getGroupMemberAllergies(group); // get all intolerances
+
         List<String> listOfIngredients = finalSetIngredients.stream()
                 .map(Ingredient::getName)
                 .collect(Collectors.toList());
 
-        String ingredients = listOfIngredients.stream()
+        String goodIngredients = listOfIngredients.stream() // we need a string to feed in API
                 .map(ingredient -> URLEncoder.encode(ingredient, StandardCharsets.UTF_8))
                 .collect(Collectors.joining(","));
 
-        String searchApiUrl = "https://api.spoonacular.com/recipes/findByIngredients?apiKey=" + apiKey +
-                "&ingredients=" + ingredients + "&number=1&ignorePantry=true&ranking=1"; //1 means maximizes used ingredients first
-        try {
-            ResponseEntity<List<RecipeInfo>> searchResponse = restTemplate.exchange(searchApiUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<RecipeInfo>>() {});
-            List<RecipeInfo> recipeInfos = searchResponse.getBody();
+        List<String> listOfBadIngredients = badSetIngredients.stream()
+                .map(Ingredient::getName)
+                .collect(Collectors.toList());
 
-            if (recipeInfos.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No recipes found for the given ingredients");
+        String badIngredients = listOfBadIngredients.stream() // we need a string to feed in API
+                .map(ingredient -> URLEncoder.encode(ingredient, StandardCharsets.UTF_8))
+                .collect(Collectors.joining(","));
+
+        String intolerancesString = allergiesGroupMembers.stream()
+                .map(intolerance -> URLEncoder.encode(intolerance, StandardCharsets.UTF_8))
+                .collect(Collectors.joining(","));
+
+
+        String searchApiUrl = "https://api.spoonacular.com/recipes/complexSearch?apiKey=" + apiKey +
+                "&includeIngredients=" + goodIngredients +
+                "&excludeIngredients=" + badIngredients +
+                "&intolerances=" + intolerancesString +
+                "&number=1" +
+                "&ignorePantry=true" +
+                "&type=main course" +
+                "&sort=max-used-ingredients" +
+                "&fillIngredients=true";
+
+        try {
+            ResponseEntity<RecipeSearchResult> searchResponse = restTemplate.exchange(
+                    searchApiUrl,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<RecipeSearchResult>() {
+                    }
+            );
+            RecipeSearchResult searchResult = searchResponse.getBody();
+
+            if (searchResult == null || searchResult.getResults().isEmpty()) { //TODO check with frontend if the can dispaly it like taht
+                logger.info("No recipes found for the given ingredients. " +
+                        "This is due to too high restrictions, e.g. your allergies matching all the given ingredients. " +
+                        "We provide you now with a random recipe based only on your allergies, so you still have a cool meal to cook together!");
+
+                RecipeInfo randomRecipe = getRandomRecipeGroup(intolerancesString);
+                randomRecipe.setIsRandomBasedOnIntolerances(true); // Setting the new field to true --> can be used by frontend
+                return Arrays.asList(randomRecipe);
             }
-            return recipeInfos;
-        } catch (ResponseStatusException e) {
-        logger.error("Error occurred while fetching recipe: " + e.getMessage(), e);
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Error occurred while fetching recipe: " + e.getMessage());
-    } catch (Exception e) {
-        logger.error("Unexpected error occurred while fetching recipe: " + e.getMessage(), e);
-        throw new RuntimeException("Unexpected error occurred while fetching recipe: " + e.getMessage());
+
+            return searchResult.getResults();
+
+        }
+        catch (ResponseStatusException e) {
+            logger.error("Error occurred while fetching recipe: " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Error occurred while fetching recipe: " + e.getMessage());
+        }
+        catch (Exception e) {
+            logger.error("Unexpected error occurred while fetching recipe: " + e.getMessage(), e);
+            throw new RuntimeException("Unexpected error occurred while fetching recipe: " + e.getMessage());
+        }
     }
+
+    public RecipeInfo getRandomRecipeGroup(String intolerancesString) {
+        String searchApiUrl = "https://api.spoonacular.com/recipes/complexSearch?apiKey=" + apiKey +
+                "&intolerances=" + intolerancesString +
+                "&number=1" +
+                "&ignorePantry=true" +
+                "&type=main course" +
+                "&sort=random" +
+                "&fillIngredients=true";
+
+        try {
+            ResponseEntity<RecipeSearchResult> searchResponse = restTemplate.exchange(
+                    searchApiUrl,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<RecipeSearchResult>() {
+                    }
+            );
+            RecipeSearchResult searchResult = searchResponse.getBody();
+
+            if (searchResult == null || searchResult.getResults().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NO_CONTENT, "Now we only send only the allergies from all the guests in your group, but there is still no recipe found for it.");
+            }
+            RecipeInfo resultRecipe = searchResult.getResults().get(0);
+            resultRecipe.setIsRandomBasedOnIntolerances(false); // Setting new field to false
+            return resultRecipe;
+
+        }
+        catch (ResponseStatusException e) {
+            logger.error("Error occurred while fetching random recipe: " + e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Error occurred while fetching random recipe: " + e.getMessage());
+        }
+        catch (Exception e) {
+            logger.error("Unexpected error occurred while fetching random recipe: " + e.getMessage(), e);
+            throw new RuntimeException("Unexpected error occurred while fetching random recipe: " + e.getMessage());
+        }
     }
+
 
     public RecipeDetailInfo getRecipeDetails(Long externalRecipeId) {
         String informationApiUrl = "https://api.spoonacular.com/recipes/" + externalRecipeId + "/information?apiKey=" + apiKey;
         try {
-            ResponseEntity<RecipeDetailInfo> infoResponse = restTemplate.exchange(informationApiUrl, HttpMethod.GET, null, new ParameterizedTypeReference<RecipeDetailInfo>() {});
+            ResponseEntity<RecipeDetailInfo> infoResponse = restTemplate.exchange(informationApiUrl, HttpMethod.GET, null, new ParameterizedTypeReference<RecipeDetailInfo>() {
+            });
             RecipeDetailInfo detailInfo = infoResponse.getBody();
 
             if (detailInfo == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No details found for the given recipe ID");
             }
             return detailInfo;
-        } catch (ResponseStatusException e) {
+        }
+        catch (ResponseStatusException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Error occurred while fetching recipe details: " + e.getMessage());
         }
     }

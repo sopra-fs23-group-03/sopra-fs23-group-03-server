@@ -196,12 +196,36 @@ public class GroupServiceTest {
         ingredients.add(potato);
         group.addIngredient(ingredients);
 
-        Set<Ingredient> expectedIngredients = new HashSet<>();
-        expectedIngredients.add(carrot);
-        expectedIngredients.add(potato);
+        Set<Ingredient> expectedGoodIngredients = new HashSet<>();
+        expectedGoodIngredients.add(carrot);
+        expectedGoodIngredients.add(potato);
 
-        assertEquals(expectedIngredients, groupService.getFinalIngredients(group));
+
+        assertEquals(expectedGoodIngredients, groupService.getFinalIngredients(group));
     }
+
+    @Test
+    public void getBadIngredients_test() {
+        Ingredient onion = new Ingredient("onion");
+        onion.setCalculatedRating(-1);
+        Ingredient meat = new Ingredient("meat");
+        meat.setCalculatedRating(-1);
+        Ingredient carrot = new Ingredient("carrot");
+        carrot.setCalculatedRating(0);
+
+        List<Ingredient> ingredients = new ArrayList<>();
+        ingredients.add(onion);
+        ingredients.add(carrot);
+        ingredients.add(meat);
+        group.addIngredient(ingredients);
+
+        Set<Ingredient> expectedBadIngredients = new HashSet<>();
+        expectedBadIngredients.add(onion);
+        expectedBadIngredients.add(meat);
+
+        assertEquals(expectedBadIngredients, groupService.getBadIngredients(group));
+    }
+
 
     @Test
     public void removeGuestFromGroup_test() {

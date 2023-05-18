@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
 import ch.uzh.ifi.hase.soprafs23.entity.FullIngredient;
+import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
@@ -60,6 +61,12 @@ public class APIController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
         }
 
+        // 409 - groupState is not RECIPE
+        GroupState groupState = group.getGroupState();
+        if(!groupState.equals(GroupState.RECIPE)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not RECIPE"); // 409
+        }
+
         List<RecipeInfo> recipeInfos = apiService.getRecipe(group);
 
         if (recipeInfos.isEmpty()) {
@@ -83,13 +90,16 @@ public class APIController {
             recipe.setMissedIngredients(recipeInfo.getMissedIngredients().stream().map(IngredientInfo::getName).collect(Collectors.toList()));
             recipe.setGroup(group);
 
-            // Fetch additional details
+            // Fetch additional details --> makes call to Spoonacular API and map response to RecipeDetailInfo object
             RecipeDetailInfo detailInfo = apiService.getRecipeDetails(recipe.getExternalRecipeId());
             if (detailInfo != null) {
-                recipe.setReadyInMinutes(detailInfo.getReadyInMinutes() != 0 ? detailInfo.getReadyInMinutes() : 0);
+                recipe.setTitle(detailInfo.getTitle());
+                recipe.setReadyInMinutes(detailInfo.getReadyInMinutes());
                 recipe.setImage(detailInfo.getImage() != null ? detailInfo.getImage() : "Default image URL");
                 recipe.setInstructions(detailInfo.getInstructions() != null ? detailInfo.getInstructions() : "No instructions provided");
+
             }
+            recipe.setGroup(group);
 
             // Save/update the recipe in db
             recipeService.save(recipe);
@@ -103,10 +113,11 @@ public class APIController {
             apiGetDTO.setImage(recipe.getImage());
             apiGetDTO.setReadyInMinutes(recipe.getReadyInMinutes());
             apiGetDTO.setGroupId(groupId);
+            apiGetDTO.setIsRandomBasedOnIntolerances(recipeInfo.getIsRandomBasedOnIntolerances());
 
             apiGetDTOS.add(apiGetDTO);
         }
-
+        groupService.changeGroupState(groupId, GroupState.FINAL); //TODO: need to implement more tests for this
         return new ResponseEntity<>(apiGetDTOS, HttpStatus.OK);
     }
 
