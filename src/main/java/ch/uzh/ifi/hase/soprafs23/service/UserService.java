@@ -70,6 +70,7 @@ public class UserService {
         newUser.setToken(UUID.randomUUID().toString());
         newUser.setStatus(UserStatus.ONLINE);
         newUser.setVotingStatus(UserVotingStatus.NOT_VOTED);
+        newUser.setSpecialDiet("omnivore");
       
         // check that the username is still free
         checkIfUsernameExists(newUser.getUsername());
@@ -162,15 +163,15 @@ public class UserService {
             user.setUsername(newUsername);
         }
 
+        user.removeAllergies();
         if(newAllergies != null) {
-            user.removeAllergies();
             for(String allergy : newAllergies) {
                 user.addAllergy(allergy);
             }
         }
 
+        user.removeFavouriteCuisines();
         if(newFavoriteCuisine != null){
-            user.removeFavouriteCuisines();
             for(String cuisine : newFavoriteCuisine) {
                 user.addFavouriteCuisine(cuisine);
             }
