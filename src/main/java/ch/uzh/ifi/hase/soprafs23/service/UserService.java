@@ -161,7 +161,7 @@ public class UserService {
         if(newUsername != null && !newUsername.equals(user.getUsername())) {
             checkIfUsernameExists(newUsername);
             // check if username is only latin letters
-            if (newUsername.matches("^[a-zA-Z]+$")) {
+            if (!newUsername.matches("^[a-zA-Z]+$")) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "The username should only contain Latin letters (a-z, A-Z)!");
             }
             // check that username and password are not the same
