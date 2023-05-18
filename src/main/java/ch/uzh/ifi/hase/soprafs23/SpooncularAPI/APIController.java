@@ -117,7 +117,6 @@ public class APIController {
 
             apiGetDTOS.add(apiGetDTO);
         }
-        groupService.changeGroupState(groupId, GroupState.FINAL); //TODO: need to implement more tests for this
         return new ResponseEntity<>(apiGetDTOS, HttpStatus.OK);
     }
 
