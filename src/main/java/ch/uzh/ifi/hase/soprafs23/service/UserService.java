@@ -368,4 +368,22 @@ public class UserService {
         groupService.deleteGroup(groupId);
         setAllUsersNotReady(userIds);
     }
+
+    public Map<Long, Boolean> getGroupUserReadyStatus(Long groupId) {
+        Group group = groupService.getGroupById(groupId);
+        if (group == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
+        }
+
+        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
+
+        Map<Long, Boolean> userReadyStatus = new HashMap<>();
+        for (Long memberId : memberIds) {
+            User user = this.getUserById(memberId);
+            if (user != null) {
+                userReadyStatus.put(memberId, user.isReady());
+            }
+        }
+        return userReadyStatus;
+    }
 }
