@@ -68,7 +68,7 @@ public class UserControllerTest {
     @MockBean
     private JoinRequestService joinRequestService;
 
-    @Mock
+    @MockBean
     private UserRepository userRepository;
 
     private User user;
@@ -736,4 +736,59 @@ public class UserControllerTest {
         }
     }
 
+    @Test
+    public void setReady_userNotFound_shouldReturnNotFound() throws Exception {
+        given(userService.getUserById(any())).willReturn(null);
+        mockMvc.perform(put("/users/1/1/ready").header("X-Token", "token"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void setReady_groupNotFound_shouldReturnNotFound() throws Exception {
+        given(groupService.getGroupById(any())).willReturn(null);
+        mockMvc.perform(put("/users/1/1/ready").header("X-Token", "token"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void setReady_userNotAuthorized_shouldReturnUnauthorized() throws Exception {
+        Group group = new Group();
+        group.setGroupState(GroupState.GROUPFORMING);
+        given(groupService.getGroupById(any())).willReturn(group);
+        given(userService.getUserById(any())).willReturn(user); // add this line
+        given(userService.getUseridByToken(any())).willReturn(2L); // token corresponds to a different user
+        mockMvc.perform(put("/users/1/1/ready").header("X-Token", "token"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void setReady_userNotMember_shouldReturnUnauthorized() throws Exception {
+        Group group = new Group();
+        group.setGroupState(GroupState.GROUPFORMING);
+        given(groupService.getGroupById(any())).willReturn(group);
+        given(userService.getUserById(any())).willReturn(user); // add this line
+        given(groupService.getAllMemberIdsOfGroup(any())).willReturn(Collections.emptyList()); // user is not a member of the group
+        mockMvc.perform(put("/users/1/1/ready").header("X-Token", "token"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void setReady_wrongGroupState_shouldReturnConflict() throws Exception {
+        Group group = new Group();
+        group.setGroupState(GroupState.INGREDIENTENTERING); // not one of the allowed states
+        given(groupService.getGroupById(any())).willReturn(group);
+        given(groupService.getAllMemberIdsOfGroup(any())).willReturn(Collections.singletonList(1L)); // user is a member
+        mockMvc.perform(put("/users/1/1/ready").header("X-Token", user.getToken())) // use the user's actual token
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void setReady_allFine_shouldReturnOK() throws Exception {
+        Group group = new Group();
+        group.setGroupState(GroupState.GROUPFORMING); // an allowed state
+        given(groupService.getGroupById(any())).willReturn(group);
+        given(groupService.getAllMemberIdsOfGroup(any())).willReturn(Collections.singletonList(1L));
+        mockMvc.perform(put("/users/1/1/ready").header("X-Token", user.getToken())) // use the user's actual token
+                .andExpect(status().isOk());
+    }
 }

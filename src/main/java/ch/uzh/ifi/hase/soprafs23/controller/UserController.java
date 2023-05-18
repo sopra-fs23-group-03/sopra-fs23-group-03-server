@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
@@ -44,11 +45,14 @@ public class UserController {
 
     private final JoinRequestService joinRequestService;
 
-    public UserController(UserService userService, GroupService groupService, InvitationService invitationService,@Lazy JoinRequestService joinRequestService) {
+    private final UserRepository userRepository;
+
+    public UserController(UserService userService, GroupService groupService, InvitationService invitationService,@Lazy JoinRequestService joinRequestService, UserRepository userRepository) {
         this.userService = userService;
         this.groupService = groupService;
         this.invitationService = invitationService;
         this.joinRequestService = joinRequestService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/users")
@@ -255,7 +259,7 @@ public class UserController {
     }
 
     @PutMapping("/users/{userId}/ingredients")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.NO_CONTENT) // 204
     public void updateUserIngredients(@PathVariable Long userId,
                                       @RequestBody List<IngredientPutDTO> ingredientsPutDTO, // I get list of objects (arrays)
                                       @RequestHeader(name = "X-Token") String xToken) {
@@ -292,4 +296,71 @@ public class UserController {
         }
     }
 
+    @PutMapping("/users/{userId}/{groupId}/ready")
+    @ResponseStatus(HttpStatus.NO_CONTENT) // 204
+    public ResponseEntity<Void> setReady(@PathVariable Long userId, @PathVariable Long groupId, HttpServletRequest request) {
+        User user = userService.getUserById(userId);
+        Group group = groupService.getGroupById(groupId);
+
+        // 404 - user or group not found
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("User with id %s does not exist", userId));
+        }
+        if (group == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Group with id %s does not exist", groupId));
+        }
+
+        // 401 - not authorized if not the same user
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if(!tokenId.equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized to update this user's status.");
+        }
+
+        // 401 - not authorized if not a member of the group
+        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
+        if(!memberIds.contains(tokenId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
+        }
+
+        // Checking the group state before setting ready state
+        GroupState groupState = group.getGroupState();
+        if(!(groupState.equals(GroupState.GROUPFORMING) || groupState.equals(GroupState.FINAL) || groupState.equals(GroupState.RECIPE))) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState must be either GROUPFORMING, FINAL or RECIPE to set ready state"); // 409
+        }
+
+        // Set user's isReady to true and save
+        user.setReady(true);
+        userRepository.save(user);
+
+        // Check if all users in the group are ready
+        boolean allReady = memberIds.stream()
+                .map(id -> userService.getUserById(id))
+                .allMatch(User::isReady);
+
+        if (allReady) {
+            // If all users are ready, change the state and set isReady to false for all
+            if (groupState == GroupState.GROUPFORMING) {
+                group.setGroupState(GroupState.INGREDIENTENTERING);
+            } else if (groupState == GroupState.FINAL) {
+                group.setGroupState(GroupState.RECIPE);
+            } else if (groupState == GroupState.RECIPE) {
+                groupService.deleteGroup(groupId);
+                // Set isReady of all members to false after deleting the group
+                memberIds.forEach(id -> {
+                    User member = userService.getUserById(id);
+                    member.setReady(false);
+                    userRepository.save(member);
+                });
+                return new ResponseEntity<>(HttpStatus.OK);
+            }
+
+            memberIds.forEach(id -> {
+                User member = userService.getUserById(id);
+                member.setReady(false);
+                userRepository.save(member);
+            });
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

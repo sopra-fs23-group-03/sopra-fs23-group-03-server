@@ -331,5 +331,4 @@ public class UserService {
         int ingredientSetSize = user.getIngredients().size();
         return ingredientSetSize > 0;
     }
-
 }
