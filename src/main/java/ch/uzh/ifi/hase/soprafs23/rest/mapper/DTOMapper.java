@@ -44,7 +44,6 @@ public interface DTOMapper {
     @Mapping(source = "groupState", target = "groupState")
     GroupGetDTO convertEntityToGroupGetDTO(Group group);
 
-
     @Mapping(source = "invitationId", target = "id")
     Invitation convertInvitationPostDTOtoEntity(InvitationPostDTO invitationPostDTO);
 
@@ -58,8 +57,8 @@ public interface DTOMapper {
     @Mapping(source = "name", target = "name")
     IngredientGetDTO convertEntityToIngredientGetDTO(Ingredient ingredient);
 
-
     RecipeInfoDTO convertEntityToRecipeInfoDTO(RecipeInfo recipeInfo);
+
     IngredientInfoDTO convertEntityToIngredientInfoDTO(IngredientInfo ingredientInfo);
 
     IngredientGetDTO convertIngredientInfoToIngredientGetDTO(IngredientInfo ingredientInfo);

@@ -4,16 +4,12 @@ import ch.uzh.ifi.hase.soprafs23.entity.FullIngredient;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
-import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -22,8 +18,6 @@ import org.springframework.web.client.RestTemplate;
 import ch.uzh.ifi.hase.soprafs23.repository.RecipeRepository;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.criteria.CriteriaBuilder;
 import java.nio.charset.StandardCharsets;
 
 import java.util.*;

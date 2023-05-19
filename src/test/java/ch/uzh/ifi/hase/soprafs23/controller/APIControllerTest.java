@@ -4,7 +4,6 @@ import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.*;
 import ch.uzh.ifi.hase.soprafs23.entity.FullIngredient;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
-import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.IngredientInfo;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
@@ -34,7 +33,6 @@ import java.util.ArrayList;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
