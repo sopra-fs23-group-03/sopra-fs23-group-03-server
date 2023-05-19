@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 import ch.uzh.ifi.hase.soprafs23.entity.FullIngredient;
 import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
@@ -19,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -41,6 +43,7 @@ public class APIController {
 
     @Autowired
     private FullIngredientRepository fullIngredientRepository;
+
 
     @Autowired
     private RecipeService recipeService;
@@ -135,6 +138,40 @@ public class APIController {
         apiGetDTO.setIsRandomBasedOnIntolerances(recipe.getIsRandomBasedOnIntolerances());
         return apiGetDTO;
     }
+
+    @GetMapping("/users/{userId}/solo/result")
+    @ResponseStatus(HttpStatus.OK) // 200
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getSoloRecipe(@PathVariable Long userId, HttpServletRequest request) {
+
+        // 401 - not authorized
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if (tokenId.equals(0L)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
+        }
+
+        // we don't check if there is already a recipe in the db bc the profile might has changed
+
+        User user = userService.getUserById(userId);
+        Map<String, Object> recipeInfo = apiService.getRandomRecipeUser(user);
+
+
+        if (user.getRecipe() != null) {
+            Recipe recipe = user.getRecipe();
+            recipeInfo.put("id", recipe.getId());
+            recipeInfo.put("title", recipe.getTitle());
+            recipeInfo.put("readyInMinutes", recipe.getReadyInMinutes());
+            recipeInfo.put("image", recipe.getImage());
+            recipeInfo.put("instructions", recipe.getInstructions());
+            recipeInfo.put("missedIngredients", recipe.getMissedIngredients());
+        }
+
+        return ResponseEntity.ok(recipeInfo);
+    }
+
+
+
+
 
 
     @GetMapping("/ingredients")

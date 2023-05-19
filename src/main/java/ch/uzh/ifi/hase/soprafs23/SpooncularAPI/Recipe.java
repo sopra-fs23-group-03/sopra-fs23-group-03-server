@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
+import ch.uzh.ifi.hase.soprafs23.entity.User;
 
 
 import java.util.List;
@@ -39,13 +40,17 @@ public class Recipe implements Serializable {
     @Column(name = "INGREDIENT")
     private List<String> missedIngredients;
 
-    @ManyToOne
+    @ManyToOne (optional = true) //TODO: need to test then for this, also handle change in service and repository layers. e.g. retrieve or save Recipe instances
     @JoinColumn(name = "group_id")
     private Group group;
 
-
     @Column(nullable = false)
     private boolean isRandomBasedOnIntolerances;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = true)
+    private User user;
+
 
     public Recipe() {}
 
@@ -138,5 +143,13 @@ public class Recipe implements Serializable {
 
     public void setExternalRecipeId(Long externalRecipeId) {
         this.externalRecipeId = externalRecipeId;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

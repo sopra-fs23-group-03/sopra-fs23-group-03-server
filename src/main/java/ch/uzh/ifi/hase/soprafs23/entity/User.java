@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.entity;
 
+import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.Recipe;
 import ch.uzh.ifi.hase.soprafs23.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs23.constant.UserVotingStatus;
 
@@ -51,6 +52,9 @@ public class User implements Serializable {
     // Add a new field isReady
     @Column(nullable = false)
     private boolean isReady;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Recipe recipe;
 
     @ManyToMany(cascade = CascadeType.ALL) // so all changes are applied to ingredients class which is associated
     @JoinTable(
@@ -183,13 +187,20 @@ public class User implements Serializable {
         this.votingStatus = votingStatus;
     }
 
-    // Add a getter for isReady
     public boolean isReady() {
         return isReady;
     }
 
-    // Add a setter for isReady
     public void setReady(boolean ready) {
         this.isReady = ready;
+    }
+
+
+    public Recipe getRecipe() {
+        return recipe;
+    }
+
+    public void setRecipe(Recipe recipe) {
+        this.recipe = recipe;
     }
 }
