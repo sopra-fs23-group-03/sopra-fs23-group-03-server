@@ -339,39 +339,10 @@ public class UserController {
                 group.setGroupState(GroupState.RECIPE);
             } else if (groupState == GroupState.RECIPE) {
                 userService.deleteGroupAndSetAllUsersNotReady(groupId, memberIds);
-                return new ResponseEntity<>(HttpStatus.OK);
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-
             userService.setAllUsersNotReady(memberIds);
         }
-
-        return new ResponseEntity<>(HttpStatus.OK); //TODO returns 200 or 204?
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-    @GetMapping("/users/{userId}/{groupId}/ready")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public Map<Long, Boolean> getGroupUserReady(@PathVariable Long userId, @PathVariable Long groupId, HttpServletRequest request) {
-
-        // 404 - user not found
-        User user = userService.getUserById(userId);
-
-        // 404 - group not found
-        Group group = groupService.getGroupById(groupId);
-
-        // 401 - not authorized if not the host
-        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
-        if(!tokenId.equals(userId) || !userId.equals(group.getHostId())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized to view this information.");
-        }
-
-        // 401 - not authorized if not a member of the group
-        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
-        if(!memberIds.contains(tokenId)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not a member of the group with id %d.", groupId));
-        }
-
-        return userService.getGroupUserReadyStatus(groupId);
-    }
-
 }

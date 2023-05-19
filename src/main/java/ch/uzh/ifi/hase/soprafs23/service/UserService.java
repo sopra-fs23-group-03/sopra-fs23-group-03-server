@@ -370,10 +370,9 @@ public class UserService {
     }
 
     public Map<Long, Boolean> getGroupUserReadyStatus(Long groupId) {
+
+        //404 - group not found
         Group group = groupService.getGroupById(groupId);
-        if (group == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
-        }
 
         List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
 

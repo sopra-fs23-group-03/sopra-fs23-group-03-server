@@ -809,7 +809,7 @@ public class UserControllerTest {
         given(userService.areAllUsersReady(any())).willReturn(true);
 
         mockMvc.perform(put("/users/1/1/ready").header("X-Token", user.getToken())) // use the user's actual token
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(userService, times(1)).setAllUsersNotReady(Collections.singletonList(1L));
     }
@@ -823,7 +823,7 @@ public class UserControllerTest {
         given(userService.areAllUsersReady(any())).willReturn(true);
 
         mockMvc.perform(put("/users/1/1/ready").header("X-Token", user.getToken())) // use the user's actual token
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(userService, times(1)).setAllUsersNotReady(Collections.singletonList(1L));
     }
@@ -837,7 +837,7 @@ public class UserControllerTest {
         given(userService.areAllUsersReady(any())).willReturn(true);
 
         mockMvc.perform(put("/users/1/1/ready").header("X-Token", user.getToken())) // use the user's actual token
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
 
         verify(userService, times(1)).deleteGroupAndSetAllUsersNotReady(1L, Collections.singletonList(1L));
     }
