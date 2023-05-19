@@ -3,9 +3,11 @@ package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecipeDetailInfo {
+/** RecipeDetailInfo
+ * This class is to store all the additional Information regarding the recipe, retrieved by the second call to the external spoonacular API.
+ */
 
-    // This class is to store all the additional Information regarding the recipe, retrieved by the second call to the external spoonacular API
+public class RecipeDetailInfo {
 
     private Long id;
     private String title;

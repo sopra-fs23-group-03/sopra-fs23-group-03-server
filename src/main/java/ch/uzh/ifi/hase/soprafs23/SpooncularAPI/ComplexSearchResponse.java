@@ -4,6 +4,8 @@ import java.util.List;
 
 public class ComplexSearchResponse {
 
+    //TODO: can this class be deleted?
+
     private List<Recipe> results;
 
     public List<Recipe> getResults() {

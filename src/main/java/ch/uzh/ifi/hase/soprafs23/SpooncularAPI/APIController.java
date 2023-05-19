@@ -140,7 +140,6 @@ public class APIController {
         return apiGetDTO;
     }
 
-
     @GetMapping("/users/{userId}/solo/result")
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
@@ -174,10 +173,8 @@ public class APIController {
             recipeInfo.put("instructions", recipe.getInstructions());
             recipeInfo.put("missedIngredients", recipe.getMissedIngredients());
         }
-
         return ResponseEntity.ok(recipeInfo);
     }
-
 
 
     @GetMapping("/ingredients")

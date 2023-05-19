@@ -3,10 +3,15 @@ package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 
-
 import java.util.List;
 import javax.persistence.*;
 import java.io.Serializable;
+
+/** Recipe
+ * This class is to store the final recipes, derived by the external API.
+ * The groupId is optional as also the recipes derived on the go-solo are store here and naturally do not have a groupId.
+ * Therefore, also the userId is nullable, as it is only used in the go solo option.
+ */
 
 @Entity
 @Table(name = "RECIPES")
