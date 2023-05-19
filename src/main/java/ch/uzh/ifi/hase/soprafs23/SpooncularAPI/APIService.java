@@ -107,10 +107,10 @@ public class APIService {
         }
         catch (ResponseStatusException e) {
             if (e.getStatus() == HttpStatus.NOT_FOUND && e.getReason().equalsIgnoreCase("No recipes found")) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unfortunately, there were no recipes found based on the information you provided in your profile.");
             }
             else {
-                throw e; // re-throwing exception if it's not related to user not being found
+                throw e;
             }
         }
     }
