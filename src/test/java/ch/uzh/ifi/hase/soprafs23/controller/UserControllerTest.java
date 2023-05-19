@@ -19,8 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,19 +26,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
-import static org.assertj.core.api.BDDAssertions.then;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
@@ -306,6 +300,41 @@ public class UserControllerTest {
     }
 
     @Test
+    public void testLogoutUser_whenHostOfGroup_GroupFormingState_deletesGroup() throws Exception {
+        Group group = new Group();
+        group.setId(8L);
+        group.setGroupState(GroupState.GROUPFORMING);
+
+        given(groupService.getGroupByUserId(user.getId())).willReturn(group);
+        given(groupService.getGroupByHostId(user.getId())).willReturn(group);
+
+        mockMvc.perform(post("/users/{userId}/logout", user.getId())
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isNoContent());
+
+        verify(invitationService, times(1)).deleteInvitationsByGroupId(group.getId());
+        verify(joinRequestService, times(1)).deleteJoinRequestsByGroupId(group.getId());
+        verify(groupService, times(1)).deleteGroup(group.getId());
+    }
+
+    @Test
+    public void testLogoutUser_whenGuestOfGroup_GroupFormingState_leavesGroup() throws Exception {
+        Group group = new Group();
+        group.setId(8L);
+        group.setGroupState(GroupState.GROUPFORMING);
+
+        given(groupService.getGroupByUserId(user.getId())).willReturn(group);
+        given(groupService.getGroupByHostId(user.getId())).willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "errorMessage"));
+        given(userService.isUserInGroup(user.getId())).willReturn(true);
+
+        mockMvc.perform(post("/users/{userId}/logout", user.getId())
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isNoContent());
+
+        verify(userService, times(1)).leaveGroup(user.getId());
+    }
+
+    @Test
     public void testLogoutUserWhenInGroupNotInFormingState() throws Exception {
         Group group = new Group();
         group.setId(1L);
@@ -322,7 +351,6 @@ public class UserControllerTest {
                 .andExpect(result -> assertEquals("403 FORBIDDEN \"You cannot logout while your group is beyond the forming stage.\"",
                         Objects.requireNonNull(result.getResolvedException()).getMessage()));
     }
-
 
     @Test
     public void testGetUserByIdReturns200() throws Exception {
@@ -585,6 +613,7 @@ public class UserControllerTest {
         // mocks
         given(groupService.getGroupById(group.getId())).willReturn(group);
         given(groupService.getAllMemberIdsOfGroup(group)).willReturn(Collections.singletonList(user.getId()));
+        given(userService.userHasIngredients(user.getId())).willReturn(true);
 
         // when/then -> do the request
         String xToken = user.getToken();
@@ -593,6 +622,8 @@ public class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(ingredientsPutDTO)))
                 .andExpect(status().isNoContent());
+
+        verify(groupService, times(1)).changeGroupState(group.getId(), GroupState.INGREDIENTVOTING);
     }
 
     @Test
@@ -600,6 +631,7 @@ public class UserControllerTest {
         List<IngredientPutDTO> ingredientsPutDTO = new ArrayList<>();
 
         Group group = new Group();
+        group.setGroupState(GroupState.GROUPFORMING);
 
         // mocks
         given(groupService.getGroupById(any())).willReturn(group);
@@ -743,7 +775,6 @@ public class UserControllerTest {
         Group group = new Group();
         group.setGroupState(GroupState.GROUPFORMING);
         given(groupService.getGroupById(any())).willReturn(group);
-        given(userService.getUserById(any())).willReturn(user); // add this line
         given(userService.getUseridByToken(any())).willReturn(2L); // token corresponds to a different user
         mockMvc.perform(put("/users/1/1/ready").header("X-Token", "token"))
                 .andExpect(status().isUnauthorized());
@@ -754,7 +785,6 @@ public class UserControllerTest {
         Group group = new Group();
         group.setGroupState(GroupState.GROUPFORMING);
         given(groupService.getGroupById(any())).willReturn(group);
-        given(userService.getUserById(any())).willReturn(user); // add this line
         given(groupService.getAllMemberIdsOfGroup(any())).willReturn(Collections.emptyList()); // user is not a member of the group
         mockMvc.perform(put("/users/1/1/ready").header("X-Token", "token"))
                 .andExpect(status().isUnauthorized());
@@ -771,12 +801,45 @@ public class UserControllerTest {
     }
 
     @Test
-    public void setReady_allFine_shouldReturnOK() throws Exception {
+    public void setReady_allFine_shouldReturnOK_GROUPFORMING() throws Exception {
         Group group = new Group();
         group.setGroupState(GroupState.GROUPFORMING); // an allowed state
         given(groupService.getGroupById(any())).willReturn(group);
         given(groupService.getAllMemberIdsOfGroup(any())).willReturn(Collections.singletonList(1L));
+        given(userService.areAllUsersReady(any())).willReturn(true);
+
         mockMvc.perform(put("/users/1/1/ready").header("X-Token", user.getToken())) // use the user's actual token
                 .andExpect(status().isOk());
+
+        verify(userService, times(1)).setAllUsersNotReady(Collections.singletonList(1L));
     }
+
+    @Test
+    public void setReady_allFine_shouldReturnOK_FINAL() throws Exception {
+        Group group = new Group();
+        group.setGroupState(GroupState.FINAL); // an allowed state
+        given(groupService.getGroupById(any())).willReturn(group);
+        given(groupService.getAllMemberIdsOfGroup(any())).willReturn(Collections.singletonList(1L));
+        given(userService.areAllUsersReady(any())).willReturn(true);
+
+        mockMvc.perform(put("/users/1/1/ready").header("X-Token", user.getToken())) // use the user's actual token
+                .andExpect(status().isOk());
+
+        verify(userService, times(1)).setAllUsersNotReady(Collections.singletonList(1L));
+    }
+
+    @Test
+    public void setReady_allFine_shouldReturnOK_RECIPE() throws Exception {
+        Group group = new Group();
+        group.setGroupState(GroupState.RECIPE); // an allowed state
+        given(groupService.getGroupById(any())).willReturn(group);
+        given(groupService.getAllMemberIdsOfGroup(any())).willReturn(Collections.singletonList(1L));
+        given(userService.areAllUsersReady(any())).willReturn(true);
+
+        mockMvc.perform(put("/users/1/1/ready").header("X-Token", user.getToken())) // use the user's actual token
+                .andExpect(status().isOk());
+
+        verify(userService, times(1)).deleteGroupAndSetAllUsersNotReady(1L, Collections.singletonList(1L));
+    }
+
 }
