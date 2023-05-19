@@ -14,9 +14,12 @@ public class FullIngredient implements Serializable {
     @Column(nullable = false)
     private String name;
 
-
     @Column(nullable = false)
     private String query;
+
+    @Column(nullable = false)
+    private boolean isLocked;  // this replaces LockModeType lock
+
 
     public FullIngredient() {
     }
@@ -49,4 +52,13 @@ public class FullIngredient implements Serializable {
     public void setQuery(String query) {
         this.query = query;
     }
+
+    public boolean isLocked() {
+        return isLocked;
+    }
+
+    public void setLocked(boolean isLocked) {
+        this.isLocked = isLocked;
+    }
 }
+

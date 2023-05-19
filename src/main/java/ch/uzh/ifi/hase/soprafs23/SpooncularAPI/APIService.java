@@ -17,17 +17,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import ch.uzh.ifi.hase.soprafs23.repository.RecipeRepository;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.LockModeType;
 import javax.persistence.criteria.CriteriaBuilder;
 import java.nio.charset.StandardCharsets;
 
 import java.util.*;
 import java.net.URLEncoder;
+import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -206,7 +209,7 @@ public class APIService {
         }
     }
 
-
+    @Transactional
     public void fetchAndStoreIngredients(String apiUrl, String query) {
         // Fetch only if there's no record of that character in the database.
         if (!fullIngredientRepository.existsByQuery(query)) {
@@ -216,17 +219,35 @@ public class APIService {
             ResponseEntity<IngredientSearchResponse> searchResponse = restTemplate.getForEntity(fullUrl, IngredientSearchResponse.class);
             List<IngredientAPI> ingredientsAPI = Objects.requireNonNull(searchResponse.getBody()).getResults();
 
-            for (IngredientAPI ingredientAPI : ingredientsAPI) {
-                String name = ingredientAPI.getName();
-                // Save the ingredient in the FullIngredient table if not already present
-                Optional<FullIngredient> existingIngredient = fullIngredientRepository.findByName(name);
-                if (!existingIngredient.isPresent()) {
-                    FullIngredient newIngredient = new FullIngredient(name, query);
-                    fullIngredientRepository.save(newIngredient);
+            // synchronized block to prevent race conditions
+            synchronized (this) {
+                for (IngredientAPI ingredientAPI : ingredientsAPI) {
+                    String name = ingredientAPI.getName();
+
+                    // Save the ingredient in the FullIngredient table if not already present
+                    Optional<FullIngredient> existingIngredient;
+
+                    // Check if the ingredient exists
+                    existingIngredient = fullIngredientRepository.findByNameIgnoreCase(name);
+
+                    if (!existingIngredient.isPresent()) {
+                        FullIngredient newIngredient = new FullIngredient(name, query);
+                        newIngredient.setLocked(true);  // set locked to true
+                        fullIngredientRepository.saveAndFlush(newIngredient);
+                    } else {
+                        if (!existingIngredient.get().isLocked()) {
+                            existingIngredient.get().setLocked(true);
+                            fullIngredientRepository.saveAndFlush(existingIngredient.get());
+                        }
+                    }
                 }
             }
         }
     }
+
+
+
+
 
     public String getApiKey() {
         return apiKey;
