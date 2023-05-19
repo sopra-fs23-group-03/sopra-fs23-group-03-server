@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -139,6 +140,7 @@ public class APIController {
         return apiGetDTO;
     }
 
+
     @GetMapping("/users/{userId}/solo/result")
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
@@ -150,11 +152,18 @@ public class APIController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
         }
 
-        // we don't check if there is already a recipe in the db bc the profile might has changed
-
+        // we don't check if there is already a recipe in the db bc the profile might have changed
         User user = userService.getUserById(userId);
-        Map<String, Object> recipeInfo = apiService.getRandomRecipeUser(user);
+        Map<String, Object> recipeInfo;
+        try {
+            recipeInfo = apiService.getRandomRecipeUser(user);
+        } catch (RestClientException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error occurred while fetching recipe from Spoonacular API: " + e.getMessage());
+        }
 
+        if (recipeInfo.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No recipe found for this user.");
+        }
 
         if (user.getRecipe() != null) {
             Recipe recipe = user.getRecipe();
@@ -168,9 +177,6 @@ public class APIController {
 
         return ResponseEntity.ok(recipeInfo);
     }
-
-
-
 
 
 
