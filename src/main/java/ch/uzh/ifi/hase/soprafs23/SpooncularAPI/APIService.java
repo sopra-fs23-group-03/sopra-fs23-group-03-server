@@ -225,29 +225,25 @@ public class APIService {
                     String name = ingredientAPI.getName();
 
                     // Save the ingredient in the FullIngredient table if not already present
-                    Optional<FullIngredient> existingIngredient;
+                    List<FullIngredient> existingIngredients = fullIngredientRepository.findByNameIgnoreCase(name);
 
-                    // Check if the ingredient exists
-                    existingIngredient = fullIngredientRepository.findByNameIgnoreCase(name);
-
-                    if (!existingIngredient.isPresent()) {
+                    if (existingIngredients.isEmpty()) {
                         FullIngredient newIngredient = new FullIngredient(name, query);
                         newIngredient.setLocked(true);  // set locked to true
                         fullIngredientRepository.saveAndFlush(newIngredient);
-                    } else {
-                        if (!existingIngredient.get().isLocked()) {
-                            existingIngredient.get().setLocked(true);
-                            fullIngredientRepository.saveAndFlush(existingIngredient.get());
+                    }
+                    else {
+                        for (FullIngredient existingIngredient : existingIngredients) {
+                            if (!existingIngredient.isLocked()) {
+                                existingIngredient.setLocked(true);
+                                fullIngredientRepository.saveAndFlush(existingIngredient);
+                            }
                         }
                     }
                 }
             }
         }
     }
-
-
-
-
 
     public String getApiKey() {
         return apiKey;

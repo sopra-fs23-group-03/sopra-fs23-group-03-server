@@ -12,7 +12,7 @@ public interface FullIngredientRepository extends JpaRepository<FullIngredient, 
     Optional<FullIngredient> findByName(String name);
     List<FullIngredient> findByNameContainingIgnoreCase(String initialString);
     boolean existsByQuery(String query);
-    Optional<FullIngredient> findByNameIgnoreCase(String name);
+    List<FullIngredient> findByNameIgnoreCase(String name);
 }
 
 
