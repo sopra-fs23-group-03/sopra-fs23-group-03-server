@@ -35,7 +35,7 @@ public class Recipe implements Serializable {
     private List<String> usedIngredients;
 
     @ElementCollection
-    @CollectionTable(name = "MISSED_INGREDIENTS") //TODO: change this back?
+    @CollectionTable(name = "MISSED_INGREDIENTS")
     @Column(name = "INGREDIENT")
     private List<String> missedIngredients;
 
@@ -43,12 +43,17 @@ public class Recipe implements Serializable {
     @JoinColumn(name = "group_id")
     private Group group;
 
+
+    @Column(nullable = false)
+    private boolean isRandomBasedOnIntolerances;
+
     public Recipe() {}
 
     public Recipe(String title, List<String> usedIngredients, Group group) {
         this.title = title;
         this.usedIngredients = usedIngredients;
         this.group = group;
+        this.isRandomBasedOnIntolerances = false;
     }
 
     public long getId() {
@@ -118,6 +123,14 @@ public class Recipe implements Serializable {
             this.instructions = instructions;
         }
     }
+    public boolean getIsRandomBasedOnIntolerances() {
+        return this.isRandomBasedOnIntolerances;
+    }
+
+    public void setIsRandomBasedOnIntolerances(boolean isRandomBasedOnIntolerances) {
+        this.isRandomBasedOnIntolerances = isRandomBasedOnIntolerances;
+    }
+
 
     public Long getExternalRecipeId() {
         return externalRecipeId;

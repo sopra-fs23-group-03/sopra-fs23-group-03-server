@@ -11,9 +11,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -22,8 +20,6 @@ import org.springframework.web.client.RestTemplate;
 import ch.uzh.ifi.hase.soprafs23.repository.RecipeRepository;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.criteria.CriteriaBuilder;
 import java.nio.charset.StandardCharsets;
 
 import java.util.*;
@@ -48,7 +44,7 @@ public class APIService {
     private IngredientRepository ingredientRepository;
 
 
-    public Recipe getRandomRecipe(User host) { //TODO: use for Solo trip and for trouble shooting in case answer from Group is zero due to restrictions
+    public Recipe getRandomRecipe(User host) { //TODO: use for Solo trip
         String intolerances = String.join(",", host.getAllergiesSet());
         String diet = host.getSpecialDiet();
         String cuisine = String.join(",", host.getFavoriteCuisineSet());
@@ -128,7 +124,7 @@ public class APIService {
             );
             RecipeSearchResult searchResult = searchResponse.getBody();
 
-            if (searchResult == null || searchResult.getResults().isEmpty()) { //TODO check with frontend if the can dispaly it like taht
+            if (searchResult == null || searchResult.getResults().isEmpty()) {
                 logger.info("No recipes found for the given ingredients. " +
                         "This is due to too high restrictions, e.g. your allergies matching all the given ingredients. " +
                         "We provide you now with a random recipe based only on your allergies, so you still have a cool meal to cook together!");
@@ -227,6 +223,8 @@ public class APIService {
             }
         }
     }
+
+
 
     public String getApiKey() {
         return apiKey;
