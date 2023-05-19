@@ -420,7 +420,7 @@ public class GroupControllerTest {
         GroupPostDTO groupPostDTO = new GroupPostDTO();
         groupPostDTO.setGroupName(group.getGroupName());
         groupPostDTO.setHostId(group.getHostId());
-        groupPostDTO.setVotingType(group.getVotingType().toString());
+        // groupPostDTO.setVotingType(group.getVotingType().toString()); // at the moment no need to set the voting type, when additional votingtypes are implemented this needs adjustment
 
         // mocks
         given(groupService.createGroup(any(Group.class))).willReturn(group);
@@ -471,6 +471,30 @@ public class GroupControllerTest {
         verify(groupService, times(0)).createGroup(any());
     }
     
+    @Test
+    public void createGroup_hostAlreadyInGroup() throws Exception {
+        // given
+        GroupPostDTO groupPostDTO = new GroupPostDTO();
+        groupPostDTO.setGroupName(group.getGroupName());
+        groupPostDTO.setHostId(group.getHostId());
+        groupPostDTO.setVotingType(group.getVotingType().toString());
+
+        user.setGroupId(8L);
+
+        // mocks
+        given(groupService.createGroup(any(Group.class))).willReturn(group);
+
+        // when
+        MockHttpServletRequestBuilder postRequest = post("/groups")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", user.getToken())
+                .content(asJsonString(groupPostDTO));
+
+        // then
+        mockMvc.perform(postRequest)
+                .andExpect(status().isConflict());
+    }
+
     @Test
     public void testCreateGroupReturns409() throws Exception {
         // given
@@ -1022,6 +1046,8 @@ public class GroupControllerTest {
         List<Long> memberIds = new ArrayList<>();
         memberIds.add(group.getHostId());
 
+        user.setVotingStatus(UserVotingStatus.VOTED);
+
         // mocks
         given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
 
@@ -1037,6 +1063,7 @@ public class GroupControllerTest {
         // then
         verify(userService, times(1)).updateIngredientRatings(group.getId(), user.getId(), ingredientRatings);
         verify(groupService, times(1)).calculateRatingPerGroup(group.getId());
+        verify(groupService, times(1)).changeGroupState(group.getId(), GroupState.FINAL);
     }
 
     @Test
@@ -1089,11 +1116,38 @@ public class GroupControllerTest {
     }
 
     @Test
-    public void testUpdateRatings_notAuthorized() throws Exception {
+    public void testUpdateRatings_notAuthorized_notInGroup() throws Exception {
         // given
         Long anotherUserId = 7L;
         List<Long> memberIds = new ArrayList<>();
         memberIds.add(group.getHostId());
+        Map<Long, String> ingredientRatings = new HashMap<>();
+        ingredientRatings.put(1L, "-1");
+
+        String requestBody = asJsonString(ingredientRatings);
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+        given(userService.getUseridByToken("anotherToken")).willReturn(anotherUserId);
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/groups/{groupId}/ratings/{userId}", group.getId(), user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", "anotherToken")
+                .content(requestBody);
+
+        // then
+        mockMvc.perform(putRequest)
+                .andExpect(status().isUnauthorized());
+    }
+    
+    @Test
+    public void testUpdateRatings_notAuthorized_invalidToken() throws Exception {
+        // given
+        Long anotherUserId = 7L;
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(group.getHostId());
+        memberIds.add(anotherUserId);
         Map<Long, String> ingredientRatings = new HashMap<>();
         ingredientRatings.put(1L, "-1");
 

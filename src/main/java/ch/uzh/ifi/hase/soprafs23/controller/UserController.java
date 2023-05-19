@@ -284,7 +284,6 @@ public class UserController {
         userService.addUserIngredients(userId, ingredientsPutDTO);
 
         // Check if all members of group have entered ingredients, change state if so
-        // Group group = groupService.getGroupById(user.getGroupId());
         List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
         boolean changeState = true;
         for (Long memberId : memberIds) {
@@ -346,7 +345,7 @@ public class UserController {
             userService.setAllUsersNotReady(memberIds);
         }
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK); //TODO returns 200 or 204?
     }
 
     @GetMapping("/users/{userId}/{groupId}/ready")

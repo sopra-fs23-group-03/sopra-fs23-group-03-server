@@ -422,12 +422,6 @@ public class GroupController {
 
         // Remove the guest and their ingredients from the group
         userService.leaveGroup(guestId);
-
-        // Check if host is now alone & group state was FINAL -> delete group
-        memberIds = groupService.getAllMemberIdsOfGroup(group);
-        if(groupState.equals(GroupState.FINAL) && memberIds.size() == 1) {
-            groupService.deleteGroup(groupId);
-        }
     }
 
     @PostMapping("/groups/{groupId}/requests")
