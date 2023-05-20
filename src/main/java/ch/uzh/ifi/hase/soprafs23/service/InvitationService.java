@@ -1,6 +1,5 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
-
 import java.util.HashSet;
 import java.util.List;
 
@@ -75,6 +74,7 @@ public class InvitationService {
         invitationRepository.delete(invitation);
         invitationRepository.flush();
     }
+    
     @Transactional
     public void deleteInvitationsByGroupId(Long groupId) {
         invitationRepository.deleteAllByGroupId(groupId);

@@ -17,7 +17,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,9 +77,6 @@ public class JoinRequestServiceTest {
 
         // mock the findByGuestIdAndGroupId() method of JoinRequestRepository
         when(joinRequestRepository.findByGuestIdAndGroupId(anyLong(), anyLong())).thenReturn(Optional.empty());
-
-        // mocks the save() method of GroupRepository
-        when(groupRepository.save(any())).thenReturn(group);
     }
 
     @Test
@@ -112,7 +111,6 @@ public class JoinRequestServiceTest {
         assertEquals(HttpStatus.FORBIDDEN, ((ResponseStatusException) exception).getStatus());
         assertTrue(exception.getMessage().contains("You cannot make a join request to Group " + group.getId() + " because it is not in the GROUPFORMING state"));
     }
-
 
     @Test
     public void testCreateJoinRequest_withExistingJoinRequest_throwsConflictException() {
@@ -170,6 +168,7 @@ public class JoinRequestServiceTest {
         // verify that findByGuestIdAndGroupId() was called exactly once with the given arguments
         verify(joinRequestRepository, times(1)).findByGuestIdAndGroupId(guest.getId(), group.getId());
     }
+
     @Test
     public void testAcceptJoinRequest_validRequest_joinRequestIsDeletedAndUserAddedToGroup() {
         // Arrange
@@ -195,11 +194,9 @@ public class JoinRequestServiceTest {
 
         // Assert
         verify(joinRequestRepository).delete(joinRequest);
-        verify(groupService).addGuestToGroup(group, guestId);
+        verify(groupService).addGuestToGroupMembers(guestId, groupId);
         verify(userService).joinGroup(guestId, groupId);
     }
-
-
 
     @Test
     public void testRejectJoinRequest_validRequest_joinRequestIsDeleted() {
@@ -249,4 +246,36 @@ public class JoinRequestServiceTest {
         verify(joinRequestRepository, times(0)).delete(joinRequest2);
         verify(joinRequestRepository, times(1)).delete(joinRequest3);
     }
+
+    @Test
+    public void test_getOpenJoinRequestsByGroupId() {
+        JoinRequest secondJoinRequest = new JoinRequest();
+        secondJoinRequest.setGroupId(group.getId());
+        secondJoinRequest.setGuestId(9L);
+
+        List<JoinRequest> groupJoinRequests = new ArrayList<>();
+        groupJoinRequests.add(existingJoinRequest);
+        groupJoinRequests.add(secondJoinRequest);
+
+        when(joinRequestRepository.findAllByGroupId(group.getId())).thenReturn(groupJoinRequests);
+
+        assertEquals(groupJoinRequests, joinRequestService.getOpenJoinRequestsByGroupId(group.getId()));
+    }
+
+    @Test
+    public void test_deleteJoinRequestsByGroupId() {
+        joinRequestService.deleteJoinRequestsByGroupId(group.getId());
+
+        verify(joinRequestRepository, times(1)).deleteAllByGroupId(group.getId());
+    }
+
+    @Test
+    public void test_deleteAllJoinRequests() {
+        when(joinRequestRepository.findAllByGuestId(guest.getId())).thenReturn(Collections.singletonList(existingJoinRequest));
+
+        joinRequestService.deleteAllJoinRequests(guest.getId());
+
+        verify(joinRequestRepository, times(1)).delete(existingJoinRequest);
+    }
+    
 }

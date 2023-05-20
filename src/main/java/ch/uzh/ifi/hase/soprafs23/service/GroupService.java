@@ -194,7 +194,6 @@ public class GroupService {
         return badIngredients;
     }
 
-
     public Group removeGuestFromGroup(Group group, Long guestId) {
         group.removeGuestId(guestId);
 
@@ -235,16 +234,6 @@ public class GroupService {
                 ingredientRepository.delete(ingredient.get());
             }
         }
-    }
-
-
-    public Group addGuestToGroup(Group group, Long guestId) {
-        group.addGuestId(guestId);
-
-        group = groupRepository.save(group);
-        groupRepository.flush();
-
-        return group;
     }
 
     public boolean canUserJoinGroup(Long groupId) {
