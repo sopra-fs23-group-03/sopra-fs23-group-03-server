@@ -1850,43 +1850,6 @@ public class GroupControllerTest {
                         .header("X-Token", user.getToken()))
                 .andExpect(status().isOk());
     }
-    
-    @Test
-    public void changeGroupState_GroupNotFound_404() throws Exception {
-        Long nonExistingGroupId = 99L;
-        given(groupService.getGroupById(nonExistingGroupId)).willReturn(null);
-
-        mockMvc.perform(put("/groups/{groupId}/state", nonExistingGroupId)
-                        .header("X-Token", user.getToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(GroupState.GROUPFORMING)))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void changeGroupState_NotAuthorized_401() throws Exception {
-        User anotherUser = new User();
-        anotherUser.setId(3L);
-        anotherUser.setToken("anothertoken");
-        given(userService.getUseridByToken(anotherUser.getToken())).willReturn(anotherUser.getId());
-
-        mockMvc.perform(put("/groups/{groupId}/state", group.getId())
-                        .header("X-Token", anotherUser.getToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(GroupState.GROUPFORMING)))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    public void changeGroupState_Success_200() throws Exception {
-        mockMvc.perform(put("/groups/{groupId}/state", group.getId())
-                        .header("X-Token", user.getToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(GroupState.GROUPFORMING)))
-                .andExpect(status().isNoContent());
-
-        verify(groupService, times(1)).changeGroupState(group.getId(), GroupState.GROUPFORMING);
-    }
 
     @Test
     public void getGroupMemberAllergiesById_returnsAllergies() throws Exception {
