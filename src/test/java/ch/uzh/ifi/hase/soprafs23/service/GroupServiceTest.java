@@ -137,6 +137,34 @@ public class GroupServiceTest {
     }
 
     @Test
+    public void createGroup_disallowedName() {
+        Group newGroup = new Group();
+        newGroup.setGroupName("name123");
+
+        assertThrows(ResponseStatusException.class, () -> {
+            groupService.createGroup(newGroup);
+        });
+
+        verify(groupRepository, times(0)).save(any());
+        verify(groupRepository, times(0)).flush();
+    }
+
+    @Test
+    public void createGroup_nameTaken() {
+        Group newGroup = new Group();
+        newGroup.setGroupName("TestGroup");
+
+        when(groupRepository.findByGroupName(any())).thenReturn(new Group());
+
+        assertThrows(ResponseStatusException.class, () -> {
+            groupService.createGroup(newGroup);
+        });
+
+        verify(groupRepository, times(0)).save(any());
+        verify(groupRepository, times(0)).flush();
+    }
+
+    @Test
     public void testCalculateRatingPerGroup_success() {
         // given
         Ingredient ingredient1 = new Ingredient();
@@ -226,7 +254,6 @@ public class GroupServiceTest {
         assertEquals(expectedBadIngredients, groupService.getBadIngredients(group));
     }
 
-
     @Test
     public void removeGuestFromGroup_test() {
         Ingredient apple = new Ingredient("apple");
@@ -253,6 +280,36 @@ public class GroupServiceTest {
         assertTrue(group.getIngredients().isEmpty());
 
         verify(ingredientRepository, times(1)).delete(apple);
+    }
+
+    @Test
+    public void test_addGuestToMembers() {
+        // groupService.add
+    }
+
+    @Test
+    public void teastname() {
+
+    }
+
+    @Test
+    public void testnamae() {
+
+    }
+
+    @Test
+    public void taestname() {
+
+    }
+
+    @Test
+    public void testnamea() {
+
+    }
+
+    @Test
+    public void atestname() {
+
     }
 
 }

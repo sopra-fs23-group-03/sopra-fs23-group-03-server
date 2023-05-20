@@ -65,7 +65,7 @@ public class JoinRequestService {
         Group group = groupService.getGroupById(groupId);
         User guest = userService.getUserById(guestId);
 
-        groupService.addGuestToGroup(group, guest.getId());
+        groupService.addGuestToGroupMembers(guest.getId(), group.getId());
 
         userService.joinGroup(guestId, groupId);
     }
