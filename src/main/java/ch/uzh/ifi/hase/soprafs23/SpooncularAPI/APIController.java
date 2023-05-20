@@ -150,7 +150,6 @@ public class APIController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized.");
         }
 
-        // we don't check if there is already a recipe in the db bc the profile might have changed
         User user = userService.getUserById(userId);
         Map<String, Object> recipeInfo;
         try {
@@ -160,7 +159,7 @@ public class APIController {
         }
 
         if (recipeInfo.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No recipe found for this user.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No recipe found for this user."); // 404 - not found
         }
 
         if (user.getRecipe() != null) {

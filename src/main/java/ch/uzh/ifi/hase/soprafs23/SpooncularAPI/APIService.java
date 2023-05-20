@@ -9,26 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import ch.uzh.ifi.hase.soprafs23.repository.RecipeRepository;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.LockModeType;
-import javax.persistence.criteria.CriteriaBuilder;
 import java.nio.charset.StandardCharsets;
 
 import java.util.*;
 import java.net.URLEncoder;
-import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -99,7 +92,6 @@ public class APIService {
 
             } else {
                 // Recipe doesn't exist for user, so create a new one
-
                 recipe = new Recipe();
                 // map properties from RecipeInfo to Recipe
                 recipe.setUser(user);
@@ -132,7 +124,7 @@ public class APIService {
         }
         catch (ResponseStatusException e) {
             if (e.getStatus() == HttpStatus.NOT_FOUND && e.getReason().equalsIgnoreCase("No recipes found")) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unfortunately, there were no recipes found based on the information you provided in your profile.");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unfortunately, there were no recipes found based on the information you provided in your profile."); // 404 - not found
             }
             else {
                 throw e;

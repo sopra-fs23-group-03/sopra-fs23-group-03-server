@@ -26,10 +26,13 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -257,4 +260,64 @@ public class APIControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound()); // 404
     }
+
+    @Test
+    public void getSoloRecipe_success_200() throws Exception {
+        when(userService.getUserById(1L)).thenReturn(testUser);
+        testUser.setRecipe(testRecipe);
+
+        Map<String, Object> mockRecipeInfo = new HashMap<>();
+        mockRecipeInfo.put("title", "Test Recipe");
+        mockRecipeInfo.put("image", "Test Image");
+        mockRecipeInfo.put("readyInMinutes", 30);
+        mockRecipeInfo.put("instructions", "Test Instructions");
+        mockRecipeInfo.put("missedIngredients", List.of("Test Ingredient"));
+
+        when(apiService.getRandomRecipeUser(testUser)).thenReturn(mockRecipeInfo);
+
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/solo/result", 1L)
+                .header("X-Token", "valid-token")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(getRequest).andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void getSoloRecipe_unauthorized_401() throws Exception {
+        doReturn(0L).when(userService).getUseridByToken("invalid-token");
+
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/solo/result", 1L)
+                .header("X-Token", "invalid-token")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(getRequest).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void getSoloRecipe_noRecipeFound_404() throws Exception {
+        when(userService.getUserById(1L)).thenReturn(testUser);
+        testUser.setRecipe(null);
+
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/solo/result", 1L)
+                .header("X-Token", "valid-token")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(getRequest).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getSoloRecipe_internalError_500() throws Exception {
+        when(userService.getUserById(1L)).thenReturn(testUser);
+
+        when(apiService.getRandomRecipeUser(testUser)).thenThrow(new RestClientException("Test Exception"));
+
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/solo/result", 1L)
+                .header("X-Token", "valid-token")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(getRequest).andExpect(status().isInternalServerError());
+    }
+
+
+
 }
