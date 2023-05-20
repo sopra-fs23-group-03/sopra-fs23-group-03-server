@@ -82,6 +82,7 @@ public class JoinRequestService {
             }
         }
     }
+    
     public List<JoinRequest> getOpenJoinRequestsByGroupId(Long groupId) {
         return joinRequestRepository.findAllByGroupId(groupId);
     }
@@ -99,5 +100,3 @@ public class JoinRequestService {
     }
 
 }
-
-
