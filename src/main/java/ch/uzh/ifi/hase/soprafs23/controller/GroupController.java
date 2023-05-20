@@ -586,4 +586,24 @@ public class GroupController {
         return group.getGroupState();
     }
 
+    @GetMapping("/groups/{groupId}/members/ready")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public Map<Long, Boolean> getGroupUserReady(@PathVariable Long groupId, HttpServletRequest request) {
+
+        // Get userId from the token
+        Long userId = userService.getUseridByToken(request.getHeader("X-Token"));
+
+        // 404 - user not found
+        User user = userService.getUserById(userId);
+
+        // 404 - group not found
+        Group group = groupService.getGroupById(groupId);
+
+        // 401 - not authorized if not the host
+        if(!userId.equals(group.getHostId())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized to view this information.");
+        }
+        return userService.getGroupUserReadyStatus(groupId);
+    }
 }

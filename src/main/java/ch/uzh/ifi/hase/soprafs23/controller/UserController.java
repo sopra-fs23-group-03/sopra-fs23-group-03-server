@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * User Controller
@@ -337,12 +338,10 @@ public class UserController {
                 group.setGroupState(GroupState.RECIPE);
             } else if (groupState == GroupState.RECIPE) {
                 userService.deleteGroupAndSetAllUsersNotReady(groupId, memberIds);
-                return new ResponseEntity<>(HttpStatus.OK);
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-
             userService.setAllUsersNotReady(memberIds);
         }
-
-        return new ResponseEntity<>(HttpStatus.OK); //TODO returns 200 or 204?
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

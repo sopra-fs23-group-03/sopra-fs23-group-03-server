@@ -1959,4 +1959,37 @@ public class GroupControllerTest {
             .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void shouldReturnReadyMembersWhenUserIsHost() throws Exception {
+        Map<Long, Boolean> expectedMap = new HashMap<>();
+        expectedMap.put(3L, true); // You can put your own data here
+
+        given(userService.getGroupUserReadyStatus(group.getId())).willReturn(expectedMap);
+        String expectedJson = objectMapper.writeValueAsString(expectedMap);
+
+        mockMvc.perform(get("/groups/{groupId}/members/ready", group.getId())
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
+
+        verify(userService, times(1)).getGroupUserReadyStatus(group.getId());
+    }
+
+    @Test
+    void shouldReturnUnauthorizedWhenUserIsNotHost() throws Exception {
+        User anotherUser = new User();
+        anotherUser.setId(3L); // This ID is different from the hostId of the group
+        anotherUser.setToken("anotherToken");
+
+        given(userService.getUseridByToken(anotherUser.getToken())).willReturn(anotherUser.getId());
+        given(userService.getUserById(anotherUser.getId())).willReturn(anotherUser);
+
+        mockMvc.perform(get("/groups/{groupId}/members/ready", group.getId())
+                        .header("X-Token", anotherUser.getToken()))
+                .andExpect(status().isUnauthorized())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResponseStatusException))
+                .andExpect(result -> assertEquals("401 UNAUTHORIZED \"You are not authorized to view this information.\"", result.getResolvedException().getMessage()));
+
+        verify(userService, times(0)).getGroupUserReadyStatus(group.getId());
+    }
 }
