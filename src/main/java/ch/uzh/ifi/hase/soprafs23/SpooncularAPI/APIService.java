@@ -42,7 +42,7 @@ public class APIService {
     private IngredientRepository ingredientRepository;
 
 
-    public Recipe getRandomRecipe(User host) { //TODO: use for Solo trip and for trouble shooting in case answer from Group is zero due to restrictions
+    public Recipe getRandomRecipe(User host) { //TODO: use for Solo trip
         String intolerances = String.join(",", host.getAllergiesSet());
         String diet = host.getSpecialDiet();
         String cuisine = String.join(",", host.getFavoriteCuisineSet());
@@ -122,7 +122,7 @@ public class APIService {
             );
             RecipeSearchResult searchResult = searchResponse.getBody();
 
-            if (searchResult == null || searchResult.getResults().isEmpty()) { //TODO check with frontend if the can dispaly it like taht
+            if (searchResult == null || searchResult.getResults().isEmpty()) {
                 logger.info("No recipes found for the given ingredients. " +
                         "This is due to too high restrictions, e.g. your allergies matching all the given ingredients. " +
                         "We provide you now with a random recipe based only on your allergies, so you still have a cool meal to cook together!");
@@ -221,6 +221,8 @@ public class APIService {
             }
         }
     }
+
+
 
     public String getApiKey() {
         return apiKey;
