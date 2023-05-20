@@ -4,8 +4,6 @@ import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.JoinRequest;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
-import ch.uzh.ifi.hase.soprafs23.service.GroupService;
-import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.JoinRequestPostDTO;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.JoinRequestRepository;

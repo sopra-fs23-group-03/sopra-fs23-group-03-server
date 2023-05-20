@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 
-import javax.persistence.NamedQuery;
 import java.util.List;
 import java.util.Optional;
 

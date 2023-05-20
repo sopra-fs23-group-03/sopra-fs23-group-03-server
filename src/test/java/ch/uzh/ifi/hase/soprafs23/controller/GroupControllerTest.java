@@ -420,7 +420,7 @@ public class GroupControllerTest {
         GroupPostDTO groupPostDTO = new GroupPostDTO();
         groupPostDTO.setGroupName(group.getGroupName());
         groupPostDTO.setHostId(group.getHostId());
-        groupPostDTO.setVotingType(group.getVotingType().toString());
+        // groupPostDTO.setVotingType(group.getVotingType().toString()); // at the moment no need to set the voting type, when additional votingtypes are implemented this needs adjustment
 
         // mocks
         given(groupService.createGroup(any(Group.class))).willReturn(group);
@@ -471,6 +471,30 @@ public class GroupControllerTest {
         verify(groupService, times(0)).createGroup(any());
     }
     
+    @Test
+    public void createGroup_hostAlreadyInGroup() throws Exception {
+        // given
+        GroupPostDTO groupPostDTO = new GroupPostDTO();
+        groupPostDTO.setGroupName(group.getGroupName());
+        groupPostDTO.setHostId(group.getHostId());
+        groupPostDTO.setVotingType(group.getVotingType().toString());
+
+        user.setGroupId(8L);
+
+        // mocks
+        given(groupService.createGroup(any(Group.class))).willReturn(group);
+
+        // when
+        MockHttpServletRequestBuilder postRequest = post("/groups")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", user.getToken())
+                .content(asJsonString(groupPostDTO));
+
+        // then
+        mockMvc.perform(postRequest)
+                .andExpect(status().isConflict());
+    }
+
     @Test
     public void testCreateGroupReturns409() throws Exception {
         // given
@@ -1009,7 +1033,7 @@ public class GroupControllerTest {
     }
 
     @Test
-    public void testUpdateRatings_success() throws Exception {
+    public void testUpdateRatings_success_stateChange() throws Exception {
         // given
         Map<Long, String> ingredientRatings = new HashMap<>();
         ingredientRatings.put(1L, "1");
@@ -1021,6 +1045,8 @@ public class GroupControllerTest {
         group.setVotingType(VotingType.MAJORITYVOTE);
         List<Long> memberIds = new ArrayList<>();
         memberIds.add(group.getHostId());
+
+        user.setVotingStatus(UserVotingStatus.VOTED);
 
         // mocks
         given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
@@ -1037,6 +1063,41 @@ public class GroupControllerTest {
         // then
         verify(userService, times(1)).updateIngredientRatings(group.getId(), user.getId(), ingredientRatings);
         verify(groupService, times(1)).calculateRatingPerGroup(group.getId());
+        verify(groupService, times(1)).changeGroupState(group.getId(), GroupState.FINAL);
+    }
+
+    @Test
+    public void testUpdateRatings_success_noStateChange() throws Exception {
+        // given
+        Map<Long, String> ingredientRatings = new HashMap<>();
+        ingredientRatings.put(1L, "1");
+        ingredientRatings.put(2L, "-1");
+
+        String requestBody = asJsonString(ingredientRatings);
+
+        group.setGroupState(GroupState.INGREDIENTVOTING);
+        group.setVotingType(VotingType.MAJORITYVOTE);
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(group.getHostId());
+
+        user.setVotingStatus(UserVotingStatus.NOT_VOTED);
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/groups/{groupId}/ratings/{userId}", group.getId(), user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", user.getToken())
+                .content(requestBody);
+
+        mockMvc.perform(putRequest)
+                .andExpect(status().isNoContent());
+
+        // then
+        verify(userService, times(1)).updateIngredientRatings(group.getId(), user.getId(), ingredientRatings);
+        verify(groupService, times(1)).calculateRatingPerGroup(group.getId());
+        verify(groupService, times(0)).changeGroupState(any(), any());
     }
 
     @Test
@@ -1089,11 +1150,38 @@ public class GroupControllerTest {
     }
 
     @Test
-    public void testUpdateRatings_notAuthorized() throws Exception {
+    public void testUpdateRatings_notAuthorized_notInGroup() throws Exception {
         // given
         Long anotherUserId = 7L;
         List<Long> memberIds = new ArrayList<>();
         memberIds.add(group.getHostId());
+        Map<Long, String> ingredientRatings = new HashMap<>();
+        ingredientRatings.put(1L, "-1");
+
+        String requestBody = asJsonString(ingredientRatings);
+
+        // mocks
+        given(groupService.getAllMemberIdsOfGroup(group)).willReturn(memberIds);
+        given(userService.getUseridByToken("anotherToken")).willReturn(anotherUserId);
+
+        // when
+        MockHttpServletRequestBuilder putRequest = put("/groups/{groupId}/ratings/{userId}", group.getId(), user.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-Token", "anotherToken")
+                .content(requestBody);
+
+        // then
+        mockMvc.perform(putRequest)
+                .andExpect(status().isUnauthorized());
+    }
+    
+    @Test
+    public void testUpdateRatings_notAuthorized_invalidToken() throws Exception {
+        // given
+        Long anotherUserId = 7L;
+        List<Long> memberIds = new ArrayList<>();
+        memberIds.add(group.getHostId());
+        memberIds.add(anotherUserId);
         Map<Long, String> ingredientRatings = new HashMap<>();
         ingredientRatings.put(1L, "-1");
 
@@ -1796,43 +1884,6 @@ public class GroupControllerTest {
                         .header("X-Token", user.getToken()))
                 .andExpect(status().isOk());
     }
-    
-    @Test
-    public void changeGroupState_GroupNotFound_404() throws Exception {
-        Long nonExistingGroupId = 99L;
-        given(groupService.getGroupById(nonExistingGroupId)).willReturn(null);
-
-        mockMvc.perform(put("/groups/{groupId}/state", nonExistingGroupId)
-                        .header("X-Token", user.getToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(GroupState.GROUPFORMING)))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void changeGroupState_NotAuthorized_401() throws Exception {
-        User anotherUser = new User();
-        anotherUser.setId(3L);
-        anotherUser.setToken("anothertoken");
-        given(userService.getUseridByToken(anotherUser.getToken())).willReturn(anotherUser.getId());
-
-        mockMvc.perform(put("/groups/{groupId}/state", group.getId())
-                        .header("X-Token", anotherUser.getToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(GroupState.GROUPFORMING)))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    public void changeGroupState_Success_200() throws Exception {
-        mockMvc.perform(put("/groups/{groupId}/state", group.getId())
-                        .header("X-Token", user.getToken())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(GroupState.GROUPFORMING)))
-                .andExpect(status().isNoContent());
-
-        verify(groupService, times(1)).changeGroupState(group.getId(), GroupState.GROUPFORMING);
-    }
 
     @Test
     public void getGroupMemberAllergiesById_returnsAllergies() throws Exception {
@@ -1908,4 +1959,37 @@ public class GroupControllerTest {
             .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void shouldReturnReadyMembersWhenUserIsHost() throws Exception {
+        Map<Long, Boolean> expectedMap = new HashMap<>();
+        expectedMap.put(3L, true); // You can put your own data here
+
+        given(userService.getGroupUserReadyStatus(group.getId())).willReturn(expectedMap);
+        String expectedJson = objectMapper.writeValueAsString(expectedMap);
+
+        mockMvc.perform(get("/groups/{groupId}/members/ready", group.getId())
+                        .header("X-Token", user.getToken()))
+                .andExpect(status().isOk())
+                .andExpect(content().json(expectedJson));
+
+        verify(userService, times(1)).getGroupUserReadyStatus(group.getId());
+    }
+
+    @Test
+    void shouldReturnUnauthorizedWhenUserIsNotHost() throws Exception {
+        User anotherUser = new User();
+        anotherUser.setId(3L); // This ID is different from the hostId of the group
+        anotherUser.setToken("anotherToken");
+
+        given(userService.getUseridByToken(anotherUser.getToken())).willReturn(anotherUser.getId());
+        given(userService.getUserById(anotherUser.getId())).willReturn(anotherUser);
+
+        mockMvc.perform(get("/groups/{groupId}/members/ready", group.getId())
+                        .header("X-Token", anotherUser.getToken()))
+                .andExpect(status().isUnauthorized())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof ResponseStatusException))
+                .andExpect(result -> assertEquals("401 UNAUTHORIZED \"You are not authorized to view this information.\"", result.getResolvedException().getMessage()));
+
+        verify(userService, times(0)).getGroupUserReadyStatus(group.getId());
+    }
 }

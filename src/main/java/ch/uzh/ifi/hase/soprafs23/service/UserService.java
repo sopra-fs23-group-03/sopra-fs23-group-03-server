@@ -9,8 +9,6 @@ import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.constant.UserVotingStatus;
 import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
-import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
-import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
@@ -367,5 +365,22 @@ public class UserService {
     public void deleteGroupAndSetAllUsersNotReady(Long groupId, List<Long> userIds) {
         groupService.deleteGroup(groupId);
         setAllUsersNotReady(userIds);
+    }
+
+    public Map<Long, Boolean> getGroupUserReadyStatus(Long groupId) {
+
+        //404 - group not found
+        Group group = groupService.getGroupById(groupId);
+
+        List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);
+
+        Map<Long, Boolean> userReadyStatus = new HashMap<>();
+        for (Long memberId : memberIds) {
+            User user = this.getUserById(memberId);
+            if (user != null) {
+                userReadyStatus.put(memberId, user.isReady());
+            }
+        }
+        return userReadyStatus;
     }
 }

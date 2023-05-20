@@ -52,10 +52,10 @@
 |             | #10    | Make Logout Button accessible                                                    |  X   |
 |             | #79    | Implement method to sort the users based on their online/offline status          |  X   |
 |             | #68    | Create the Form Group button in the Landing Page                                 |  X   |
-|             | #56    | Νavigation to the respective user profile page when a username is clicked        |      |
-|             | #53    | API calls to retrieve registered users and active groups from the backend        |      |
-|             | #54    | Display all users with online users at the beginning of the list                 |      |
-|             | #55    | Display all active planning groups with their group name, host and guests        |      |
+|             | #56    | Νavigation to the respective user profile page when a username is clicked        |  X   |
+|             | #53    | API calls to retrieve registered users and active groups from the backend        |  X   |
+|             | #54    | Display all users with online users at the beginning of the list                 |  X   |
+|             | #55    | Display all active planning groups with their group name, host and guests        |  X   |
 | Ann-Kathrin | #101/102| Create method to retrieve active groups / active users                          |  X   |
 |             | #135   | Create function to check that one user is only in one group                      |  X   |
 |             | #159   | create GET calls to retrieve group information                                   |  X   |
@@ -119,7 +119,7 @@
 |             | #168   | implement PUT /groups/{groupId}/requests/reject call                             | X    |
 |             | #167   |implement POST /groups/{groupId}/requests call                                    | X    |
 |             | #169   | implement PUT /groups/{groupId}/requests/accept call                             | X    |
-| Kalliopi    | #18    | Implement a function to fetch the recipe suggestion the backend API              |      |
+| Kalliopi    | #18    | Implement a function to fetch the recipe suggestion the backend API              |  X   |
 |             | #17    | Display the randomly selected recipe suggestion on the screen                    |  X   |
 |             | #55    | Display all active planning groups with their group name, host and guests        |  X   |
 |             | #67    | Redirect user to landing page if invitation is rejected                          |  X   |
@@ -179,9 +179,15 @@
 |             | #67 & #173 | Implemented previously, connected to corresponding commits.                  | X    |
 | Orestis     | #210   | Updated the logic of retrieval of all ingredients from external API to avoid spelling mistakes. | X    |
 |             | #47    | Re-opened Create Logout Method which sets User to offline to add some extra functionality to it. | X    |
-|             | #77    | Implement a new Ready/Not Ready logic to transition from some states to other states. |      |    
+|             | #77    | Implement a new Ready/Not Ready logic to transition from some states to other states. |          
 | Kalliopi    |        |                                                                                  |      |
-|             |        |                                                                                  |      |
+|             |  #42   |  Create path to be redirected back to the landing page                           | X    |
+|             |  #37  |  Create path to be redirected back to the landing page                           | X    |
+|             | #41    |  Map cancel button to make all members leave the group                              | X    | 
+|             |  #144  | When dropping out, the user is directed to the LANDING PAGE again                | X    | 
+|             | #39    |  Map continue button to perform the PUT /groups/{id}/state request to have the group move on to the next step | X    |
+|             |        |  independent: Guards                                                             | X    |    
+|             | #40    |  Create path to be directed to the lobby screen (to wait for host to continue)   | X    |         
 | Ann-Kathrin |  #248  |  implement check that frontend send really just 1,-1,0 for ingredient ratings    |    X |
 |             |   #257 |   take allergies of all group members into account                               |      |
 |             |   #253 | make sure "No" ingredients are not used in the final recipe                      |      |

@@ -1,7 +1,5 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
-import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.IngredientInfo;
-
 import java.util.List;
 
 /** RecipeInfo

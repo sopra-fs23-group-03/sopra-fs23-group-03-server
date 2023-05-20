@@ -422,12 +422,6 @@ public class GroupController {
 
         // Remove the guest and their ingredients from the group
         userService.leaveGroup(guestId);
-
-        // Check if host is now alone & group state was FINAL -> delete group
-        memberIds = groupService.getAllMemberIdsOfGroup(group);
-        if(groupState.equals(GroupState.FINAL) && memberIds.size() == 1) {
-            groupService.deleteGroup(groupId);
-        }
     }
 
     @PostMapping("/groups/{groupId}/requests")
@@ -573,23 +567,6 @@ public class GroupController {
         }
     }
 
-    @PutMapping("/groups/{groupId}/state")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void changeGroupState(@PathVariable Long groupId, @RequestBody GroupState newState, HttpServletRequest request) {
-        Group group = groupService.getGroupById(groupId);
-
-        if (group == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
-        }
-
-        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
-        if (!tokenId.equals(group.getHostId())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized");
-        }
-
-        groupService.changeGroupState(groupId, newState);
-    }
-
     @GetMapping("/groups/{groupId}/state")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
@@ -609,4 +586,24 @@ public class GroupController {
         return group.getGroupState();
     }
 
+    @GetMapping("/groups/{groupId}/members/ready")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public Map<Long, Boolean> getGroupUserReady(@PathVariable Long groupId, HttpServletRequest request) {
+
+        // Get userId from the token
+        Long userId = userService.getUseridByToken(request.getHeader("X-Token"));
+
+        // 404 - user not found
+        User user = userService.getUserById(userId);
+
+        // 404 - group not found
+        Group group = groupService.getGroupById(groupId);
+
+        // 401 - not authorized if not the host
+        if(!userId.equals(group.getHostId())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not authorized to view this information.");
+        }
+        return userService.getGroupUserReadyStatus(groupId);
+    }
 }

@@ -144,8 +144,6 @@ public class GroupService {
         groupRepository.delete(group);
     }
 
-
-
     @Transactional
     public void calculateRatingPerGroup(Long groupId) {
         // Fetch all ingredients related to the given groupId
