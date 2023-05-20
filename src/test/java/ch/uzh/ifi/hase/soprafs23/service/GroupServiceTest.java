@@ -1,11 +1,14 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
+import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.Recipe;
+import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
+import ch.uzh.ifi.hase.soprafs23.repository.RecipeRepository;
 import javassist.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +41,15 @@ public class GroupServiceTest {
     private GroupService groupService;
 
     @Mock
+    private JoinRequestService joinRequestService;
+
+    @Mock
+    private InvitationService invitationService;
+
+    @Mock
+    private RecipeRepository recipeRepository;
+
+    @Mock
     private UserService userService;
 
     private Group group;
@@ -55,12 +67,19 @@ public class GroupServiceTest {
 
         // mocks the save() method of GroupRepository
         when(groupRepository.save(any())).thenReturn(group);
+        when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+    }
+
+    @Test
+    public void test_getGroups() {
+        when(groupRepository.findAll()).thenReturn(Collections.singletonList(group));
+
+        assertEquals(Collections.singletonList(group), groupService.getGroups());
     }
 
     @Test
     public void getGroupById_test() {
         // mocks the findById(Long id) method of GroupRepository
-        when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
         when(groupRepository.findById(2L)).thenReturn(Optional.empty());
 
         assertEquals(group, groupService.getGroupById(group.getId()));
@@ -284,32 +303,98 @@ public class GroupServiceTest {
 
     @Test
     public void test_addGuestToMembers() {
-        // groupService.add
+        User guest = new User();
+        guest.setId(5L);
+
+        when(groupRepository.findById(group.getId())).thenReturn(Optional.of(group));
+
+        groupService.addGuestToGroupMembers(guest.getId(), group.getId());
+
+        assertEquals(Collections.singleton(guest.getId()), group.getGuestIds());
     }
 
     @Test
-    public void teastname() {
+    public void test_deleteGroup() {
+        Recipe recipe = new Recipe();
 
+        when(recipeRepository.findAllByGroup(group)).thenReturn(Collections.singletonList(recipe));
+
+        groupService.deleteGroup(group.getId());
+
+        verify(userService, times(1)).leaveGroup(group.getHostId());
+        verify(invitationService, times(1)).deleteInvitationsByGroupId(group.getId());
+        verify(joinRequestService, times(1)).deleteJoinRequestsByGroupId(group.getId());
+        verify(recipeRepository, times(1)).delete(recipe);
+        verify(groupRepository, times(1)).delete(group);
     }
 
     @Test
-    public void testnamae() {
+    public void test_canUserJoinGroup() {
+        group.setGroupState(GroupState.GROUPFORMING);
+        assertTrue(groupService.canUserJoinGroup(group.getId()));
 
+        group.setGroupState(GroupState.INGREDIENTENTERING);
+        assertFalse(groupService.canUserJoinGroup(group.getId()));
+        group.setGroupState(GroupState.INGREDIENTVOTING);
+        assertFalse(groupService.canUserJoinGroup(group.getId()));
+        group.setGroupState(GroupState.FINAL);
+        assertFalse(groupService.canUserJoinGroup(group.getId()));
+        group.setGroupState(GroupState.RECIPE);
+        assertFalse(groupService.canUserJoinGroup(group.getId()));
     }
 
     @Test
-    public void taestname() {
+    public void test_changeGroupState() {
+        groupService.changeGroupState(group.getId(), GroupState.INGREDIENTENTERING);
+        assertEquals(GroupState.INGREDIENTENTERING, group.getGroupState());
 
+        verify(joinRequestService, times(1)).deleteJoinRequestsByGroupId(group.getId());
+        verify(invitationService, times(1)).deleteInvitationsByGroupId(group.getId());
     }
 
     @Test
-    public void testnamea() {
+    public void test_getGroupMemberAllergies() {
+        User host = new User();
+        host.setId(group.getHostId());
+        host.addAllergy("hostAllergy");
 
+        User guest = new User();
+        guest.setId(8L);
+        guest.addAllergy("guestAllergy");
+        group.addGuestId(guest.getId());
+
+        when(userService.getAllergiesById(host.getId())).thenReturn(host.getAllergiesSet());
+        when(userService.getAllergiesById(guest.getId())).thenReturn(guest.getAllergiesSet());
+
+        Set<String> expectedAllergies = new HashSet<>();
+        expectedAllergies.addAll(host.getAllergiesSet());
+        expectedAllergies.addAll(guest.getAllergiesSet());
+
+        assertEquals(expectedAllergies, groupService.getGroupMemberAllergies(group));
     }
 
     @Test
-    public void atestname() {
+    public void test_getGroupByHostId() {
+        when(groupRepository.findByHostId(group.getHostId())).thenReturn(group);
+        assertEquals(group, groupService.getGroupByHostId(group.getHostId()));
 
+        when(groupRepository.findByHostId(5L)).thenReturn(null);
+        assertThrows(ResponseStatusException.class, () -> {
+            groupService.getGroupByHostId(5L);
+        });
+    }
+
+    @Test
+    public void test_getGroupByUserId() {
+        User user = new User();
+        user.setId(15L);
+        
+        when(userService.getUserById(user.getId())).thenReturn(user);
+
+        assertEquals(null, groupService.getGroupByUserId(user.getId()));
+
+        user.setGroupId(group.getId());
+        assertEquals(group, groupService.getGroupByUserId(user.getId()));
     }
 
 }
