@@ -8,6 +8,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.Group;
 
 import javax.persistence.NamedQuery;
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository("recipeRepository")
@@ -19,4 +20,6 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     List<Recipe> findAllByGroup(@Param("group") Group group);
 
     Recipe findByExternalRecipeIdAndGroupId(Long externalRecipeId, Long groupId);
+
+    Optional<Recipe> findByUserId(Long userId); //optional prevents nullpointer errors
 }

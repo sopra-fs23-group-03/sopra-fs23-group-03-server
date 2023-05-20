@@ -76,24 +76,44 @@ public class APIService {
             RecipeInfo recipeInfo = searchResult.getResults().get(0);
             RecipeDetailInfo detailInfo = getRecipeDetails(recipeInfo.getId()); //to get more Details of the recipe
 
-            Recipe recipe = new Recipe();
-            // map properties from RecipeInfo to Recipe
-            recipe.setUser(user);
-            recipe.setExternalRecipeId(recipeInfo.getId());
-            recipe.setImage(recipeInfo.getImage() != null ? recipeInfo.getImage() : "Default image URL");
-            recipe.setTitle(recipeInfo.getTitle() != null ? recipeInfo.getTitle() : "Default title");
+            Long userId = user.getId();
+            Long externalRecipeId = recipeInfo.getId();
 
-            List<String> missedIngredientsNames = recipeInfo.getMissedIngredients() != null
-                    ? recipeInfo.getMissedIngredients().stream()
-                    .map(IngredientInfo::getName)
-                    .collect(Collectors.toList())
-                    : new ArrayList<>();
-            recipe.setMissedIngredients(missedIngredientsNames);
+            // Check if the recipe already exists for this user
+            Optional<Recipe> existingRecipeOptional = recipeRepository.findByUserId(userId);
 
-            recipe.setReadyInMinutes(detailInfo.getReadyInMinutes());
-            recipe.setInstructions(detailInfo.getInstructions() != null ? detailInfo.getInstructions() : "No instructions provided");
+            Recipe recipe;
+            if (existingRecipeOptional.isPresent()) {
+                recipe = existingRecipeOptional.get();
 
-            recipeRepository.save(recipe); // save recipe to db
+                // If the existing recipe is different from the new one, update and save the recipe
+                if (!recipe.getExternalRecipeId().equals(externalRecipeId)) {
+                    updateRecipe(recipe, recipeInfo, detailInfo, user);
+                    recipeRepository.save(recipe); // save updated recipe to db
+                }
+
+            } else {
+                // Recipe doesn't exist for user, so create a new one
+
+                recipe = new Recipe();
+                // map properties from RecipeInfo to Recipe
+                recipe.setUser(user);
+                recipe.setExternalRecipeId(recipeInfo.getId());
+                recipe.setImage(recipeInfo.getImage() != null ? recipeInfo.getImage() : "Default image URL");
+                recipe.setTitle(recipeInfo.getTitle() != null ? recipeInfo.getTitle() : "Default title");
+
+                List<String> missedIngredientsNames = recipeInfo.getMissedIngredients() != null
+                        ? recipeInfo.getMissedIngredients().stream()
+                        .map(IngredientInfo::getName)
+                        .collect(Collectors.toList())
+                        : new ArrayList<>();
+                recipe.setMissedIngredients(missedIngredientsNames);
+
+                recipe.setReadyInMinutes(detailInfo.getReadyInMinutes());
+                recipe.setInstructions(detailInfo.getInstructions() != null ? detailInfo.getInstructions() : "No instructions provided");
+
+                recipeRepository.save(recipe); // save recipe to db
+            }
 
             Map<String, Object> response = new HashMap<>();
             response.put("title", recipeInfo.getTitle());
@@ -113,6 +133,24 @@ public class APIService {
                 throw e;
             }
         }
+    }
+
+    private void updateRecipe(Recipe recipe, RecipeInfo recipeInfo, RecipeDetailInfo detailInfo, User user) {
+        // map properties from RecipeInfo to Recipe
+        recipe.setUser(user);
+        recipe.setExternalRecipeId(recipeInfo.getId());
+        recipe.setImage(recipeInfo.getImage() != null ? recipeInfo.getImage() : "Default image URL");
+        recipe.setTitle(recipeInfo.getTitle() != null ? recipeInfo.getTitle() : "Default title");
+
+        List<String> missedIngredientsNames = recipeInfo.getMissedIngredients() != null
+                ? recipeInfo.getMissedIngredients().stream()
+                .map(IngredientInfo::getName)
+                .collect(Collectors.toList())
+                : new ArrayList<>();
+        recipe.setMissedIngredients(missedIngredientsNames);
+
+        recipe.setReadyInMinutes(detailInfo.getReadyInMinutes());
+        recipe.setInstructions(detailInfo.getInstructions() != null ? detailInfo.getInstructions() : "No instructions provided");
     }
 
 
@@ -261,8 +299,6 @@ public class APIService {
             }
         }
     }
-
-
 
     public String getApiKey() {
         return apiKey;
