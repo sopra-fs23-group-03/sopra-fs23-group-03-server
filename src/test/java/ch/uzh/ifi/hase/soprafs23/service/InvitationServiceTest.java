@@ -96,7 +96,6 @@ public class InvitationServiceTest {
         assertTrue(exception.getMessage().contains("is not in the GROUPFORMING state"));
     }
 
-
     @Test
     public void createInvitation_existingInvitation_conflictException() {
         // given
@@ -115,6 +114,91 @@ public class InvitationServiceTest {
         // then
         verify(invitationRepository, never()).save(any());
         verify(invitationRepository, never()).flush();
+    }
+
+    @Test
+    public void getInvitationByGroupIdAndGuestId_valid() {
+        Long groupId = invitation.getGroupId();
+        Long guestId = invitation.getGuestId();
+
+        Invitation invitationDifferentGuest = new Invitation();
+        invitationDifferentGuest.setGroupId(groupId);
+        invitationDifferentGuest.setGuestId(5L);
+
+        Invitation invitationDifferentGroup = new Invitation();
+        invitationDifferentGroup.setGroupId(7L);
+        invitationDifferentGroup.setGroupId(guestId);
+
+        List<Invitation> groupInvitations = new ArrayList<>();
+        groupInvitations.add(invitation);
+        groupInvitations.add(invitationDifferentGuest);
+
+        List<Invitation> guestInvitations = new ArrayList<>();
+        guestInvitations.add(invitation);
+        guestInvitations.add(invitationDifferentGroup);
+
+        when(invitationRepository.findByGroupId(groupId)).thenReturn(groupInvitations);
+        when(invitationRepository.findByGuestId(guestId)).thenReturn(guestInvitations);
+
+        Invitation invitationByGroupIdAndGuestId = invitationService.getInvitationByGroupIdAndGuestId(groupId, guestId);
+        assertEquals(invitation, invitationByGroupIdAndGuestId);
+    }
+
+    @Test
+    public void getInvitationByGroupIdAndGuestId_invitationNotFound() {
+        Long groupId = invitation.getGroupId();
+        Long guestId = invitation.getGuestId();
+
+        Invitation invitationDifferentGuest = new Invitation();
+        invitationDifferentGuest.setGroupId(groupId);
+        invitationDifferentGuest.setGuestId(5L);
+
+        Invitation invitationDifferentGroup = new Invitation();
+        invitationDifferentGroup.setGroupId(7L);
+        invitationDifferentGroup.setGroupId(guestId);
+
+        List<Invitation> groupInvitations = new ArrayList<>();
+        groupInvitations.add(invitationDifferentGuest);
+
+        List<Invitation> guestInvitations = new ArrayList<>();
+        guestInvitations.add(invitationDifferentGroup);
+
+        when(invitationRepository.findByGroupId(groupId)).thenReturn(groupInvitations);
+        when(invitationRepository.findByGuestId(guestId)).thenReturn(guestInvitations);
+
+        assertThrows(ResponseStatusException.class, () -> {
+            invitationService.getInvitationByGroupIdAndGuestId(groupId, guestId);
+        });
+    }
+
+    @Test
+    public void test_getInvitationsByGuestId() {
+        Long guestId = invitation.getGuestId();
+
+        Invitation secondInvitation = new Invitation();
+        secondInvitation.setGroupId(7L);
+        secondInvitation.setGroupId(guestId);
+
+        List<Invitation> guestInvitations = new ArrayList<>();
+        guestInvitations.add(invitation);
+        guestInvitations.add(secondInvitation);
+
+        when(invitationRepository.findByGuestId(guestId)).thenReturn(guestInvitations);
+
+        assertEquals(guestInvitations, invitationService.getInvitationsByGuestId(guestId));
+    }
+
+    @Test
+    public void test_deleteInvitation() {
+        invitationService.deleteInvitation(invitation);
+        verify(invitationRepository, times(1)).delete(invitation);
+        verify(invitationRepository, times(1)).flush();
+    }
+
+    @Test
+    public void test_deleteInvitationsByGroupId() {
+        invitationService.deleteInvitationsByGroupId(invitation.getGroupId());
+        verify(invitationRepository, times(1)).deleteAllByGroupId(invitation.getGroupId());
     }
 
 }
