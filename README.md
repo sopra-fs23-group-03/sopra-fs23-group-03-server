@@ -4,8 +4,10 @@
 
 [Deployed Client](https://sopra-fs23-group-03-client.oa.r.appspot.com/)
 
-## Introduction
-the project’s goal and motivation
+CollaborEat is an online application where people can get together to plan a meal. Users can create an account and specify their allergies, favorite cuisines, and dietary preferences. They have an option to go solo and get a random recipe based on their profile. They can also opt to host a group and invite other users to plan a meal together. Guests can join groups by accepting an invitation to one, but they can also request to join an existing group in their group-forming stage. Once a group is formed and all the guests are ready, the host can start the meal-finding process. All members of the group must enter the ingredients they want to contribute to the upcoming meal, and once the information is gathered everyone must rate the potential contributions to the meal. Finally, a recipe will be chosen based on the final ingredients everyone has agreed upon and the members' allergies. A photo of the chosen meal, the instructions, and the necessary ingredients will be displayed to the members of the group and the rest is up to them! 
+
+### Motivation
+With our application we aim to help in reducing food waste, as we suggest recipes based on the ingredients that the users offer up, but we also hope to inspire people to get creative with their meals and to get together to bond and have fun cooking together. 
 
 ## Technologies
 - Java
