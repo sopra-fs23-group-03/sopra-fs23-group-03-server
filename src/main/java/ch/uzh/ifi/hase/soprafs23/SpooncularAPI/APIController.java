@@ -191,7 +191,7 @@ public class APIController {
         }
 
         // check that the group is at INGREDIENTENTERING state
-        Group group = groupService.getGroupById(tokenId);
+        Group group = groupService.getGroupById(user.getGroupId());
         if(!group.getGroupState().equals(GroupState.INGREDIENTENTERING)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not INGREDIENTENTERING");
         }
