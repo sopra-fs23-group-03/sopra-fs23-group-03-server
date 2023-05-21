@@ -189,9 +189,9 @@
 |             |        |  independent: Guards                                                             | X    |    
 |             | #40    |  Create path to be directed to the lobby screen (to wait for host to continue)   | X    |         
 | Ann-Kathrin |  #248  |  implement check that frontend send really just 1,-1,0 for ingredient ratings    |    X |
-|             |   #257 |   take allergies of all group members into account                               |      |
-|             |   #253 | make sure "No" ingredients are not used in the final recipe                      |      |
-|             |   #255 |    in case of an empty final ingredients list: provide RandomRecipe              |      |
+|             |   #257 |   take allergies of all group members into account                               |   X  |
+|             |   #253 | make sure "No" ingredients are not used in the final recipe                      |  X   |
+|             |   #255 |    in case of an empty final ingredients list: provide RandomRecipe              |    X |
 |             |        |                                                                                  |      |
 | Chiara      |  #15   |  Send list of all ratings of all ingredients to backend through REST API         |  X   |
 |             |  #25   |  Implement a function to enable guests and host to vote all ingredients          |  X   |
@@ -201,6 +201,25 @@
 |             |  #27   |  Display a message indicating that all ingredients must be rated before submit   |  X   |
 |             |  #19   |  Display the list of final ingredients in IngredientsFinal view (after voting)   |  X   |
 |             |  #133  |  Display the allregies of the group to help guests in the selection of ingredients to add |  X   |
+
+
+</p>
+
+## **Week 7** 
+
+<p>
+
+| Name        | Issues | Description                                                                      | Done |
+|-------------|--------|----------------------------------------------------------------------------------|------|
+| Lany        |        |                                                                                  |      |
+
+| Orestis     |        |                                                                                  |      | 
+| Kalliopi    |        |                                                                                  |      |
+|             |        
+| Ann-Kathrin |  #268  |  make GET Call                                                                   |    X |
+|             |  #269  |  retrieve personal info and write method to get recipe based on single pers data |  X   |
+|             |        |                                                                                  |      |
+| Chiara      |        |                                                                                  |      |                        
 
 
 </p>
