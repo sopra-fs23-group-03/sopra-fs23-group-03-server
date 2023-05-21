@@ -33,8 +33,7 @@ public class JoinRequestService {
         Long guestId = joinRequestPostDTO.getGuestId();
         Optional<JoinRequest> existingJoinRequest = joinRequestRepository.findByGuestIdAndGroupId(guestId, groupId);
         if (existingJoinRequest.isPresent()) {
-            String errorMessage = String.format("Guest %d already has an open request to join Group %d", guestId, groupId);
-            throw new ResponseStatusException(HttpStatus.CONFLICT, errorMessage);
+            throw new ResponseStatusException(HttpStatus.CREATED);
         }
 
         if (!groupService.canUserJoinGroup(groupId)) {

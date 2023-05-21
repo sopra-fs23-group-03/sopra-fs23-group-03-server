@@ -113,7 +113,7 @@ public class JoinRequestServiceTest {
     }
 
     @Test
-    public void testCreateJoinRequest_withExistingJoinRequest_throwsConflictException() {
+    public void testCreateJoinRequest_withExistingJoinRequest_throwsCreated201() {
         // given
         joinRequestPostDTO.setGuestId(1L);
 
@@ -130,8 +130,7 @@ public class JoinRequestServiceTest {
             joinRequestService.createJoinRequest(joinRequestPostDTO, group.getId());
         } catch (ResponseStatusException ex) {
             // then
-            assertEquals(HttpStatus.CONFLICT, ex.getStatus());
-            assertEquals(String.format("Guest %d already has an open request to join Group %d", joinRequestPostDTO.getGuestId(), group.getId()), ex.getReason());
+            assertEquals(HttpStatus.CREATED, ex.getStatus());
         }
     }
 
