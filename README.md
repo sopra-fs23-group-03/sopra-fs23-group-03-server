@@ -68,29 +68,49 @@ You can use the local Gradle Wrapper to build the application.
 
 More Information about [Gradle Wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html) and [Gradle](https://gradle.org/docs/).
 
-#### Build
-```bash
-./gradlew build
-```
+#### **Build** `./gradlew build`
 
-#### Run
-```bash
-./gradlew bootRun
-```
+#### **Run** `./gradlew bootRun`
 You can verify that the server is running by visiting `localhost:8080` in your browser.
 
-### Test
-```bash
-./gradlew test
-```
+#### **Test** `./gradlew test`
 
-## Illustrations
+#### **Development Mode**
+You can start the backend in development mode, this will automatically trigger a new build and reload the application once the content of a file has been changed.
+
+Start two terminal windows and run: `./gradlew build --continuous`
+
+and in the other one: `./gradlew bootRun`
+
+### API Endpoint Testing with Postman
+We recommend using [Postman](https://www.getpostman.com) to test our API Endpoints.
+
+### Debugging
+If something is not working and/or you don't know what is going on. We recommend using a debugger and step-through the process step-by-step.
+
+To configure a debugger for SpringBoot's Tomcat servlet (i.e. the process you start with `./gradlew bootRun` command), do the following:
+
+1. Open Tab: **Run**/Edit Configurations
+2. Add a new Remote Configuration and password it properly
+3. Start the Server in Debug mode: `./gradlew bootRun --debug-jvm`
+4. Press `Shift + F9` or the use **Run**/Debug "Name of your task"
+5. Set breakpoints in the application where you need it
+6. Step through the process one step at a time
+
+## External API
+TODO:
 In your client repository, briefly describe and illustrate the main user flow(s) of your interface. How does it work (without going into too much detail)? Feel free to include a few screenshots of your application.
+--> we here in the server want to say something on the external api
 
 ## Roadmap
 The top 2-3 features that new developers who want to contribute to your project could add.
 
 ## Authors and acknowledgment
+- Kalliopi Papadaki - [KallPap](https://github.com/KallPap)
+- Orestis Bollano - [OrestisBollano](https://github.com/OrestisBollano)
+- Ann-Kathrin Hedwig Sabina Müller - [akkuebler](https://github.com/akkuebler)
+- Chiara Letsch - [chiaralentsch](https://github.com/chiaralentsch)
+- Lany Dennise Weizenblut Oseguera - [wlany](https://github.com/wlany)
 
 ## License
 Say how your project is licensed
