@@ -13,10 +13,7 @@ import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientPutDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -423,4 +420,72 @@ public class UserServiceTest {
         assertFalse(userService.userHasIngredients(user_noIngredients.getId()));
     }
 
+    @Test
+    void joinGroupTest() {
+        User guest = new User();
+        guest.setId(3L);
+        when(userRepository.findById(guest.getId())).thenReturn(Optional.of(guest));
+
+        userService.joinGroup(guest.getId(), user.getGroupId());
+
+        verify(userRepository, times(1)).save(any(User.class));
+        verify(userRepository, times(1)).flush();
+
+        assertEquals(user.getGroupId(), guest.getGroupId());
+    }
+
+    @Test
+    void joinGroupConflictTest() {
+        assertThrows(ResponseStatusException.class, () -> userService.joinGroup(user.getId(), user.getGroupId()));
+    }
+
+    @Test
+    void isUserInGroupTest() {
+        assertTrue(userService.isUserInGroup(user.getId()));
+    }
+
+    @Test
+    void getAllergiesByIdTest() {
+        Set<String> allergies = userService.getAllergiesById(user.getId());
+
+        assertNotNull(allergies);
+    }
+
+    @Test
+    void setUserReadyTest() {
+        userService.setUserReady(user.getId());
+
+        verify(userRepository, times(1)).save(any(User.class));
+        assertTrue(user.isReady());
+    }
+
+    @Test
+    void setAllUsersNotReadyTest() {
+        userService.setAllUsersNotReady(Collections.singletonList(user.getId()));
+
+        verify(userRepository, times(1)).save(any(User.class));
+        assertFalse(user.isReady());
+    }
+
+    @Test
+    void deleteGroupAndSetAllUsersNotReadyTest() {
+        userService.deleteGroupAndSetAllUsersNotReady(user.getGroupId(), Collections.singletonList(user.getId()));
+
+        verify(groupService, times(1)).deleteGroup(any(Long.class));
+        verify(userRepository, times(1)).save(any(User.class));
+
+        assertFalse(user.isReady());
+    }
+
+    @Test
+    void getGroupUserReadyStatusTest() {
+        Group group = new Group();
+        group.setId(2L);
+        when(groupService.getGroupById(group.getId())).thenReturn(group);
+        when(groupService.getAllMemberIdsOfGroup(group)).thenReturn(Collections.singletonList(user.getId()));
+
+        Map<Long, Boolean> userReadyStatus = userService.getGroupUserReadyStatus(group.getId());
+
+        assertTrue(userReadyStatus.containsKey(user.getId()));
+    }
 }
