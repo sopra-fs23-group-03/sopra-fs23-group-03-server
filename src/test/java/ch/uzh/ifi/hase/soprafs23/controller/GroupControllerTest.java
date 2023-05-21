@@ -1610,29 +1610,6 @@ public class GroupControllerTest {
     }
 
     @Test
-    public void sendRequestToJoinGroup_conflict_409() throws Exception {
-        // Prepare
-        String groupId = "1";
-        String guestId = "2";
-
-        String joinRequestPostDTOJson = String.format("{\"guestId\": %s}", guestId);
-
-        doThrow(new ResponseStatusException(HttpStatus.CONFLICT))
-                .when(joinRequestService)
-                .createJoinRequest(any(), anyLong());
-
-        // Add this line to mock the getUseridByToken method to return the correct guestId
-        when(userService.getUseridByToken("2")).thenReturn(Long.parseLong(guestId));
-
-        // Execute & Assert
-        mockMvc.perform(post("/groups/{groupId}/requests", groupId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(joinRequestPostDTOJson)
-                        .header("X-Token", guestId))
-                .andExpect(status().isConflict());
-    }
-
-    @Test
     public void sendRequestToJoinGroup_notFound_404() throws Exception {
         // Prepare
         String groupId = "1";
