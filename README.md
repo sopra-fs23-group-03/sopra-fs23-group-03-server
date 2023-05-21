@@ -1,6 +1,7 @@
 # CollaborEat
 
 [Deployed Server](https://sopra-fs23-group-03-server.oa.r.appspot.com/)
+
 [Deployed Client](https://sopra-fs23-group-03-client.oa.r.appspot.com/)
 
 ## Introduction
@@ -11,6 +12,7 @@ the project’s goal and motivation
 - JPA (database functionality)
 - Spring Boot (RESTful API)
 - Google Cloud (doployment)
+- Recipe-Food-Nutrition API by spoonacular (external API)
 
 ## High-level components
 
