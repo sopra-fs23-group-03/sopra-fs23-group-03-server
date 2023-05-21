@@ -98,9 +98,13 @@ To configure a debugger for SpringBoot's Tomcat servlet (i.e. the process you st
 5. Set breakpoints in the application where you need it
 6. Step through the process one step at a time
 
+### Disclaimers
+We assume that all group members stay online and continue the meal-planning process together. If one member is not moving along in the process, all other members of the group get stuck at that point and would have to delete their local storage and create a new account in order to user our services.
+
+Further our application was developed and tested mostly on [Google Chrome](https://www.google.com/chrome/). We therefore recomend you download and install Chrome to have the best experience with our application.
+
 ## External API
-TODO:
-In your client repository, briefly describe and illustrate the main user flow(s) of your interface. How does it work (without going into too much detail)? Feel free to include a few screenshots of your application.
+TODO: anki
 --> we here in the server want to say something on the external api
 
 ## Roadmap
