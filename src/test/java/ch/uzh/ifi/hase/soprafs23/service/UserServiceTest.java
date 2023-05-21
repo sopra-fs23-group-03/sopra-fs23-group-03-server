@@ -11,6 +11,7 @@ import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.IngredientPutDTO;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
@@ -70,6 +71,14 @@ public class UserServiceTest {
     }
 
     @Test
+    public void test_getUsers() {
+        when(userRepository.findAll()).thenReturn(Collections.singletonList(user));
+
+        assertEquals(Collections.singletonList(user), userService.getUsers());
+    }
+
+
+    @Test
     public void getUseridByToken_test() {
         // mocks the findByToken(String token) method of UserRepository
         List<User> listWithTheUser = new ArrayList<User>();
@@ -81,6 +90,7 @@ public class UserServiceTest {
 
         assertEquals(1L, userService.getUseridByToken(user.getToken()));
         assertEquals(0L, userService.getUseridByToken("anotherToken"));
+        assertEquals(0L, userService.getUseridByToken(null));
     }
 
     @Test
@@ -154,7 +164,25 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateUser_ShouldUpdateUserFields_WhenUserExists() {
+    public void test_logout_inGroup() {
+        user.setStatus(UserStatus.ONLINE);
+
+        userService.logout(user.getId());
+        assertEquals(UserStatus.OFFLINE, user.getStatus());
+        assertEquals(null, user.getGroupId());
+    }
+
+    @Test
+    public void test_logout_notInGroup() {
+        user.setStatus(UserStatus.ONLINE);
+        user.setGroupId(null);
+
+        userService.logout(user.getId());
+        assertEquals(UserStatus.OFFLINE, user.getStatus());
+    }
+
+    @Test
+    public void updateUser_ShouldUpdateUserFields_WhenUserExists() {
         // given
         Long id = 5L;
         UserPutDTO userPutDTO = new UserPutDTO();
@@ -198,7 +226,7 @@ public class UserServiceTest {
 
     @Test
     public void testUpdateUserWithExistingUsername() {
-        String newUsername = "new_username";
+        String newUsername = "newUsername";
 
         UserPutDTO userPutDTO = new UserPutDTO();
         userPutDTO.setUsername(newUsername);
@@ -209,7 +237,27 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateUser_withSamePassword_throwsException() {
+    public void testUpdateUserWithInvalidUsername() {
+        String newUsername = "invalid-username123";
+
+        UserPutDTO userPutDTO = new UserPutDTO();
+        userPutDTO.setUsername(newUsername);
+
+        assertThrows(ResponseStatusException.class, () -> userService.updateUser(user.getId(), userPutDTO));
+    }
+
+    @Test
+    public void testUpdateUserWithUsernameSameAsPassword() {
+        String newUsername = user.getPassword();
+
+        UserPutDTO userPutDTO = new UserPutDTO();
+        userPutDTO.setUsername(newUsername);
+
+        assertThrows(ResponseStatusException.class, () -> userService.updateUser(user.getId(), userPutDTO));
+    }
+
+    @Test
+    public void updateUser_withSamePassword_throwsException() {
         userPutDTO = new UserPutDTO();
         userPutDTO.setCurrentPassword(user.getPassword());
         userPutDTO.setPassword(user.getPassword());
@@ -218,7 +266,15 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateUser_withEmptyPassword_throwsException() {
+    public void updateUser_withNoCurrentPassword_throwsException() {
+        userPutDTO = new UserPutDTO();
+        userPutDTO.setPassword(user.getPassword());
+
+        assertThrows(ResponseStatusException.class, () -> userService.updateUser(user.getId(), userPutDTO));
+    }
+
+    @Test
+    public void updateUser_withEmptyPassword_throwsException() {
         userPutDTO = new UserPutDTO();
         userPutDTO.setCurrentPassword(user.getPassword());
         userPutDTO.setPassword("");
@@ -227,7 +283,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateUser_withIncorrectCurrentPassword_throwsException() {
+    public void updateUser_withIncorrectCurrentPassword_throwsException() {
         userPutDTO = new UserPutDTO();
         userPutDTO.setPassword("new password");
         userPutDTO.setCurrentPassword("incorrect password");
@@ -255,6 +311,15 @@ public class UserServiceTest {
 
         // then
         assertTrue(user.getIngredients().stream().anyMatch(ingredient -> ingredient.getName().equals("newIngredient")));
+    }
+
+    @Test
+    public void addUserIngredients_userNotInAGroup_throwsException() {
+        user.setGroupId(null);
+        IngredientPutDTO ingredientPutDTO = new IngredientPutDTO();
+        ingredientPutDTO.setName("new_ingredient_name");
+
+        assertThrows(ResponseStatusException.class, () -> userService.addUserIngredients(user.getId(), Collections.singletonList(ingredientPutDTO)));
     }
 
     @Test
@@ -291,9 +356,8 @@ public class UserServiceTest {
         assertEquals(1, ingredient1Count);
     }
 
-
     @Test
-    void addUserIngredients_withNonexistentUserId_throwsException() {
+    public void addUserIngredients_withNonexistentUserId_throwsException() {
         Long nonexistentUserId = 999L;
         IngredientPutDTO ingredientPutDTO = new IngredientPutDTO();
         ingredientPutDTO.setName("new_ingredient_name");
@@ -304,7 +368,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateIngredientRatings_whenAllIngredientsRated_updatesUserVotingStatus() {
+    public void updateIngredientRatings_whenAllIngredientsRated_updatesUserVotingStatus() {
         // given
         Map<Long, String> ingredientRatings = new HashMap<>();
         ingredientRatings.put(1L, "1");
@@ -335,7 +399,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateIngredientRatings_withNonexistentUser_throwsException() {
+    public void updateIngredientRatings_withNonexistentUser_throwsException() {
         // given
         Long groupId = 1L;
         Long nonexistentUserId = 999L;
@@ -350,7 +414,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateIngredientRatings_whenUserAlreadyVoted_throwsException() {
+    public void updateIngredientRatings_whenUserAlreadyVoted_throwsException() {
         // given
         Long groupId = 1L;
         Map<Long, String> ingredientRatings = new HashMap<>();
@@ -368,7 +432,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateIngredientRatings_withInsufficientRatings_throwsException() {
+    public void updateIngredientRatings_withInsufficientRatings_throwsException() {
         // given
         Long groupId = 1L;
         Map<Long, String> ingredientRatings = new HashMap<>();
@@ -403,13 +467,13 @@ public class UserServiceTest {
     }
 
     @Test
-    void leaveGroup_test() {
+    public void leaveGroup_test() {
         userService.leaveGroup(user.getId());
         assertEquals(null, user.getGroupId());
     }
 
     @Test
-    void userHasIngredients_test() {
+    public void userHasIngredients_test() {
         assertTrue(userService.userHasIngredients(user.getId()));
 
         User user_noIngredients = new User();
@@ -421,7 +485,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void joinGroupTest() {
+    public void joinGroupTest() {
         User guest = new User();
         guest.setId(3L);
         when(userRepository.findById(guest.getId())).thenReturn(Optional.of(guest));
@@ -435,24 +499,24 @@ public class UserServiceTest {
     }
 
     @Test
-    void joinGroupConflictTest() {
+    public void joinGroupConflictTest() {
         assertThrows(ResponseStatusException.class, () -> userService.joinGroup(user.getId(), user.getGroupId()));
     }
 
     @Test
-    void isUserInGroupTest() {
+    public void isUserInGroupTest() {
         assertTrue(userService.isUserInGroup(user.getId()));
     }
 
     @Test
-    void getAllergiesByIdTest() {
+    public void getAllergiesByIdTest() {
         Set<String> allergies = userService.getAllergiesById(user.getId());
 
         assertNotNull(allergies);
     }
 
     @Test
-    void setUserReadyTest() {
+    public void setUserReadyTest() {
         userService.setUserReady(user.getId());
 
         verify(userRepository, times(1)).save(any(User.class));
@@ -460,7 +524,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void setAllUsersNotReadyTest() {
+    public void setAllUsersNotReadyTest() {
         userService.setAllUsersNotReady(Collections.singletonList(user.getId()));
 
         verify(userRepository, times(1)).save(any(User.class));
@@ -468,7 +532,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void deleteGroupAndSetAllUsersNotReadyTest() {
+    public void deleteGroupAndSetAllUsersNotReadyTest() {
         userService.deleteGroupAndSetAllUsersNotReady(user.getGroupId(), Collections.singletonList(user.getId()));
 
         verify(groupService, times(1)).deleteGroup(any(Long.class));
@@ -478,7 +542,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void getGroupUserReadyStatusTest() {
+    public void getGroupUserReadyStatusTest() {
         Group group = new Group();
         group.setId(2L);
         when(groupService.getGroupById(group.getId())).thenReturn(group);
@@ -488,4 +552,20 @@ public class UserServiceTest {
 
         assertTrue(userReadyStatus.containsKey(user.getId()));
     }
+
+    @Test
+    public void test_areAllUsersReady() {
+        user.setReady(true);
+
+        User secondUser = new User();
+        secondUser.setId(8L);
+        secondUser.setReady(false);
+
+        when(userRepository.findById(secondUser.getId())).thenReturn(Optional.of(secondUser));
+
+        assertTrue(userService.areAllUsersReady(Collections.singletonList(user.getId())));
+        assertFalse(userService.areAllUsersReady(Collections.singletonList(secondUser.getId())));
+    }
+
+
 }
