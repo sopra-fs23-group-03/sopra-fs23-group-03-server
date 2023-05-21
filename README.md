@@ -108,7 +108,7 @@ The top 2-3 features that new developers who want to contribute to your project 
 ## Authors and acknowledgment
 - Kalliopi Papadaki - [KallPap](https://github.com/KallPap)
 - Orestis Bollano - [OrestisBollano](https://github.com/OrestisBollano)
-- Ann-Kathrin Hedwig Sabina Müller - [akkuebler](https://github.com/akkuebler)
+- Ann-Kathrin Hedwig Sabina Kübler - [akkuebler](https://github.com/akkuebler)
 - Chiara Letsch - [chiaralentsch](https://github.com/chiaralentsch)
 - Lany Dennise Weizenblut Oseguera - [wlany](https://github.com/wlany)
 
