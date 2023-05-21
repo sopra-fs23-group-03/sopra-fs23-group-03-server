@@ -55,7 +55,8 @@ public class APIService {
                 "&number=1" +
                 "&ignorePantry=true" +
                 "&type=main course" +
-                "&fillIngredients=true"
+                "&fillIngredients=true" +
+                "&sort=random"
                 ;
         try {
             ResponseEntity<RecipeSearchResult> searchResponse = restTemplate.exchange(
