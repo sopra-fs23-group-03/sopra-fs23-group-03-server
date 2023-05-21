@@ -174,15 +174,26 @@ public class APIController {
         return ResponseEntity.ok(recipeInfo);
     }
 
-
     @GetMapping("/ingredients")
     @ResponseStatus(HttpStatus.OK) // 200
     @ResponseBody
     public List<String> getAllIngredients(HttpServletRequest request, @RequestParam String initialString) {
-        // check validity of token
-        String token = request.getHeader("X-Token"); // 401 - not authorized
-        if (userService.getUseridByToken(token).equals(0L)) {
+        // 401 - not authorized
+        Long tokenId = userService.getUseridByToken(request.getHeader("X-Token"));
+        if (tokenId.equals(0L)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, String.format("You are not authorized."));
+        }
+
+        // check that user is in a group
+        User user = userService.getUserById(tokenId);
+        if (user.getGroupId() == null) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "You need to be part of a group.");
+        }
+
+        // check that the group is at INGREDIENTENTERING state
+        Group group = groupService.getGroupById(tokenId);
+        if(!group.getGroupState().equals(GroupState.INGREDIENTENTERING)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not INGREDIENTENTERING");
         }
 
         // Fetch ingredients from the API if not already in the database

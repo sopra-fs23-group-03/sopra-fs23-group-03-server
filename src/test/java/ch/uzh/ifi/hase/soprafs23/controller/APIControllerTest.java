@@ -84,6 +84,7 @@ public class APIControllerTest {
 
         testUser = new User();
         testUser.setId(1L);
+        testUser.setGroupId(testGroup.getId());
 
         testIngredientInfo = new IngredientInfo();
         List<IngredientInfo> ingredientsUsed = new ArrayList<>();
@@ -129,7 +130,6 @@ public class APIControllerTest {
         doReturn(testRecipeDetails).when(apiService).getRecipeDetails(Mockito.any());
     }
 
-
     @Test
     public void getGroupRecipe_success_200() throws Exception {
         when(groupService.getGroupById(1L)).thenReturn(testGroup);
@@ -141,7 +141,6 @@ public class APIControllerTest {
 
         mockMvc.perform(getRequest).andExpect(status().is2xxSuccessful());
     }
-
 
     @Test
     public void getGroupRecipe_unauthorizedUser_401() throws Exception {
@@ -164,7 +163,6 @@ public class APIControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
-
 
     @Test
     public void getGroupRecipe_withDetailsFetched() throws Exception {
@@ -199,7 +197,6 @@ public class APIControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-//
 //    @Test
 //    public void getRandomRecipe_returnsUnauthorizedStatusCode401() throws Exception {
 //        // Set up mocks for the unauthorized case
@@ -214,6 +211,7 @@ public class APIControllerTest {
 
     @Test
     void getAllIngredients_validRequest_returnsListOfIngredients() throws Exception {
+        testGroup.setGroupState(GroupState.INGREDIENTENTERING);
         String initialString = "app";
 
         List<FullIngredient> fullIngredients = new ArrayList<>();
@@ -221,6 +219,8 @@ public class APIControllerTest {
 
         // given
         given(userService.getUseridByToken(anyString())).willReturn(1L);
+        given(userService.getUserById(testUser.getId())).willReturn(testUser);
+        given(groupService.getGroupById(testGroup.getId())).willReturn(testGroup);
         given(fullIngredientRepository.findByNameContainingIgnoreCase(initialString)).willReturn(fullIngredients);
 
         // when/then -> perform the request and validate the response
@@ -246,12 +246,46 @@ public class APIControllerTest {
     }
 
     @Test
+    public void getAllIngredients_returns409_userNotInGroup() throws Exception {
+        testUser.setGroupId(null);
+
+        given(userService.getUseridByToken(anyString())).willReturn(1L);
+        given(userService.getUserById(testUser.getId())).willReturn(testUser);
+
+        // Perform the test
+        mockMvc.perform(get("/ingredients")
+                        .header("X-Token", "token")
+                        .param("initialString", "a"))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void getAllIngredients_returns409_groupInWrongState() throws Exception {
+        testGroup.setGroupState(GroupState.GROUPFORMING);
+
+        given(userService.getUseridByToken(anyString())).willReturn(1L);
+        given(userService.getUserById(testUser.getId())).willReturn(testUser);
+        given(groupService.getGroupById(testGroup.getId())).willReturn(testGroup);
+
+        // Perform the test
+        mockMvc.perform(get("/ingredients")
+                        .header("X-Token", "token")
+                        .param("initialString", "a"))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
     void getIngredients_returnsNotFound_whenIngredientNotFound() throws Exception {
+        testGroup.setGroupState(GroupState.INGREDIENTENTERING);
+
         String nonExistentIngredient = "xyz";
 
         // Set up mocks for the case when the ingredient is not found
         List<FullIngredient> emptyList = new ArrayList<>();
         doReturn(emptyList).when(fullIngredientRepository).findByNameContainingIgnoreCase(nonExistentIngredient);
+        given(userService.getUseridByToken(anyString())).willReturn(1L);
+        given(userService.getUserById(testUser.getId())).willReturn(testUser);
+        given(groupService.getGroupById(testGroup.getId())).willReturn(testGroup);
 
         // Perform the test
         mockMvc.perform(get("/ingredients")
@@ -317,7 +351,5 @@ public class APIControllerTest {
 
         mockMvc.perform(getRequest).andExpect(status().isInternalServerError());
     }
-
-
 
 }
