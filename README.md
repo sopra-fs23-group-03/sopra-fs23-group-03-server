@@ -37,6 +37,53 @@ the project’s goal and motivation
 ## Launch & Deployment
 Write down the steps a new developer joining your team would have to take to get started with your application. What commands are required to build and run your project locally? How can they run the tests? Do you have external dependencies or a database that needs to be running? How can they do releases?
 
+### Getting started with Spring Boot
+-   Documentation: https://docs.spring.io/spring-boot/docs/current/reference/html/index.html
+-   Guides: http://spring.io/guides
+    -   Building a RESTful Web Service: http://spring.io/guides/gs/rest-service/
+    -   Building REST services with Spring: https://spring.io/guides/tutorials/rest/
+
+### Setup with your IDE of choice
+Download your IDE of choice (e.g., [IntelliJ](https://www.jetbrains.com/idea/download/), [Visual Studio Code](https://code.visualstudio.com/), or [Eclipse](http://www.eclipse.org/downloads/)). Make sure Java 17 is installed on your system (for Windows, please make sure your `JAVA_HOME` environment variable is set to the correct version of Java).
+
+#### IntelliJ
+1. File -> Open... -> SoPra server template
+2. Accept to import the project as a `gradle project`
+3. To build right click the `build.gradle` file and choose `Run Build`
+
+#### VS Code
+The following extensions can help you get started more easily:
+-   `vmware.vscode-spring-boot`
+-   `vscjava.vscode-spring-initializr`
+-   `vscjava.vscode-spring-boot-dashboard`
+-   `vscjava.vscode-java-pack`
+
+**Note:** You'll need to build the project first with Gradle, just click on the `build` command in the _Gradle Tasks_ extension. Then check the _Spring Boot Dashboard_ extension if it already shows `soprafs23` and hit the play button to start the server. If it doesn't show up, restart VS Code and check again.
+
+### Building with Gradle
+You can use the local Gradle Wrapper to build the application.
+-   macOS: `./gradlew`
+-   Linux: `./gradlew`
+-   Windows: `./gradlew.bat`
+
+More Information about [Gradle Wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html) and [Gradle](https://gradle.org/docs/).
+
+#### Build
+```bash
+./gradlew build
+```
+
+#### Run
+```bash
+./gradlew bootRun
+```
+You can verify that the server is running by visiting `localhost:8080` in your browser.
+
+### Test
+```bash
+./gradlew test
+```
+
 ## Illustrations
 In your client repository, briefly describe and illustrate the main user flow(s) of your interface. How does it work (without going into too much detail)? Feel free to include a few screenshots of your application.
 
