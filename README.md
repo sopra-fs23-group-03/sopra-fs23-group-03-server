@@ -126,6 +126,5 @@ TODO: anki
 - Lany Dennise Weizenblut Oseguera - [wlany](https://github.com/wlany)
 
 ## License
-Say how your project is licensed
-License guide: https://choosealicense.com/
+Apache License 2.0
 
