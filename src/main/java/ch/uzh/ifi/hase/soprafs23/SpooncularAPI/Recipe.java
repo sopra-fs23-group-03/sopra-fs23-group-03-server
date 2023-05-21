@@ -1,11 +1,17 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
-
+import ch.uzh.ifi.hase.soprafs23.entity.User;
 
 import java.util.List;
 import javax.persistence.*;
 import java.io.Serializable;
+
+/** Recipe
+ * This class is to store the final recipes, derived by the external API.
+ * The groupId is optional as also the recipes derived on the go-solo are store here and naturally do not have a groupId.
+ * Therefore, also the userId is nullable, as it is only used in the go solo option.
+ */
 
 @Entity
 @Table(name = "RECIPES")
@@ -39,13 +45,17 @@ public class Recipe implements Serializable {
     @Column(name = "INGREDIENT")
     private List<String> missedIngredients;
 
-    @ManyToOne
+    @ManyToOne (optional = true) //TODO: need to test then for this, also handle change in service and repository layers. e.g. retrieve or save Recipe instances
     @JoinColumn(name = "group_id")
     private Group group;
 
-
     @Column(nullable = false)
     private boolean isRandomBasedOnIntolerances;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = true)
+    private User user;
+
 
     public Recipe() {}
 
@@ -138,5 +148,13 @@ public class Recipe implements Serializable {
 
     public void setExternalRecipeId(Long externalRecipeId) {
         this.externalRecipeId = externalRecipeId;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

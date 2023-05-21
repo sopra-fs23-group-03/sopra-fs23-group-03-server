@@ -2,7 +2,11 @@ package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
 import java.util.List;
 
-// API response contains now a results array inside a results field --> need this class to map response
+/** RecipeSearchResult
+ * This class is used in the getRandomRecipeUser and helps mapping the API response of the first API call,
+ * which includes as a result, an array inside a results field.
+*/
+
 public class RecipeSearchResult {
     private List<RecipeInfo> results;
 

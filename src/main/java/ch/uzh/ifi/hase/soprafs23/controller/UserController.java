@@ -4,7 +4,6 @@ import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
-import ch.uzh.ifi.hase.soprafs23.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.GroupGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs23.rest.dto.UserPostDTO;
@@ -302,7 +301,7 @@ public class UserController {
     public ResponseEntity<Void> setReady(@PathVariable Long userId, @PathVariable Long groupId, HttpServletRequest request) {
 
         //404 - user not found
-        User user = userService.getUserById(userId);
+        userService.getUserById(userId);
 
         //404 - group not found
         Group group = groupService.getGroupById(groupId);

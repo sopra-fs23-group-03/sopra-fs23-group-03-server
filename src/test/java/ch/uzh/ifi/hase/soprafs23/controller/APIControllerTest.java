@@ -4,7 +4,6 @@ import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.*;
 import ch.uzh.ifi.hase.soprafs23.entity.FullIngredient;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
-import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.IngredientInfo;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
@@ -27,14 +26,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -83,6 +84,7 @@ public class APIControllerTest {
 
         testUser = new User();
         testUser.setId(1L);
+        testUser.setGroupId(testGroup.getId());
 
         testIngredientInfo = new IngredientInfo();
         List<IngredientInfo> ingredientsUsed = new ArrayList<>();
@@ -128,7 +130,6 @@ public class APIControllerTest {
         doReturn(testRecipeDetails).when(apiService).getRecipeDetails(Mockito.any());
     }
 
-
     @Test
     public void getGroupRecipe_success_200() throws Exception {
         when(groupService.getGroupById(1L)).thenReturn(testGroup);
@@ -140,7 +141,6 @@ public class APIControllerTest {
 
         mockMvc.perform(getRequest).andExpect(status().is2xxSuccessful());
     }
-
 
     @Test
     public void getGroupRecipe_unauthorizedUser_401() throws Exception {
@@ -163,7 +163,6 @@ public class APIControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
-
 
     @Test
     public void getGroupRecipe_withDetailsFetched() throws Exception {
@@ -198,7 +197,6 @@ public class APIControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-//
 //    @Test
 //    public void getRandomRecipe_returnsUnauthorizedStatusCode401() throws Exception {
 //        // Set up mocks for the unauthorized case
@@ -213,6 +211,7 @@ public class APIControllerTest {
 
     @Test
     void getAllIngredients_validRequest_returnsListOfIngredients() throws Exception {
+        testGroup.setGroupState(GroupState.INGREDIENTENTERING);
         String initialString = "app";
 
         List<FullIngredient> fullIngredients = new ArrayList<>();
@@ -220,6 +219,8 @@ public class APIControllerTest {
 
         // given
         given(userService.getUseridByToken(anyString())).willReturn(1L);
+        given(userService.getUserById(testUser.getId())).willReturn(testUser);
+        given(groupService.getGroupById(testGroup.getId())).willReturn(testGroup);
         given(fullIngredientRepository.findByNameContainingIgnoreCase(initialString)).willReturn(fullIngredients);
 
         // when/then -> perform the request and validate the response
@@ -245,12 +246,46 @@ public class APIControllerTest {
     }
 
     @Test
+    public void getAllIngredients_returns409_userNotInGroup() throws Exception {
+        testUser.setGroupId(null);
+
+        given(userService.getUseridByToken(anyString())).willReturn(1L);
+        given(userService.getUserById(testUser.getId())).willReturn(testUser);
+
+        // Perform the test
+        mockMvc.perform(get("/ingredients")
+                        .header("X-Token", "token")
+                        .param("initialString", "a"))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void getAllIngredients_returns409_groupInWrongState() throws Exception {
+        testGroup.setGroupState(GroupState.GROUPFORMING);
+
+        given(userService.getUseridByToken(anyString())).willReturn(1L);
+        given(userService.getUserById(testUser.getId())).willReturn(testUser);
+        given(groupService.getGroupById(testGroup.getId())).willReturn(testGroup);
+
+        // Perform the test
+        mockMvc.perform(get("/ingredients")
+                        .header("X-Token", "token")
+                        .param("initialString", "a"))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
     void getIngredients_returnsNotFound_whenIngredientNotFound() throws Exception {
+        testGroup.setGroupState(GroupState.INGREDIENTENTERING);
+
         String nonExistentIngredient = "xyz";
 
         // Set up mocks for the case when the ingredient is not found
         List<FullIngredient> emptyList = new ArrayList<>();
         doReturn(emptyList).when(fullIngredientRepository).findByNameContainingIgnoreCase(nonExistentIngredient);
+        given(userService.getUseridByToken(anyString())).willReturn(1L);
+        given(userService.getUserById(testUser.getId())).willReturn(testUser);
+        given(groupService.getGroupById(testGroup.getId())).willReturn(testGroup);
 
         // Perform the test
         mockMvc.perform(get("/ingredients")
@@ -259,4 +294,62 @@ public class APIControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound()); // 404
     }
+
+    @Test
+    public void getSoloRecipe_success_200() throws Exception {
+        when(userService.getUserById(1L)).thenReturn(testUser);
+        testUser.setRecipe(testRecipe);
+
+        Map<String, Object> mockRecipeInfo = new HashMap<>();
+        mockRecipeInfo.put("title", "Test Recipe");
+        mockRecipeInfo.put("image", "Test Image");
+        mockRecipeInfo.put("readyInMinutes", 30);
+        mockRecipeInfo.put("instructions", "Test Instructions");
+        mockRecipeInfo.put("missedIngredients", List.of("Test Ingredient"));
+
+        when(apiService.getRandomRecipeUser(testUser)).thenReturn(mockRecipeInfo);
+
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/solo/result", 1L)
+                .header("X-Token", "valid-token")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(getRequest).andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void getSoloRecipe_unauthorized_401() throws Exception {
+        doReturn(0L).when(userService).getUseridByToken("invalid-token");
+
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/solo/result", 1L)
+                .header("X-Token", "invalid-token")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(getRequest).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void getSoloRecipe_noRecipeFound_404() throws Exception {
+        when(userService.getUserById(1L)).thenReturn(testUser);
+        testUser.setRecipe(null);
+
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/solo/result", 1L)
+                .header("X-Token", "valid-token")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(getRequest).andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getSoloRecipe_internalError_500() throws Exception {
+        when(userService.getUserById(1L)).thenReturn(testUser);
+
+        when(apiService.getRandomRecipeUser(testUser)).thenThrow(new RestClientException("Test Exception"));
+
+        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/solo/result", 1L)
+                .header("X-Token", "valid-token")
+                .contentType(MediaType.APPLICATION_JSON);
+
+        mockMvc.perform(getRequest).andExpect(status().isInternalServerError());
+    }
+
 }

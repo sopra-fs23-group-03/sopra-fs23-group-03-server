@@ -65,7 +65,7 @@ public class JoinRequestService {
         Group group = groupService.getGroupById(groupId);
         User guest = userService.getUserById(guestId);
 
-        groupService.addGuestToGroup(group, guest.getId());
+        groupService.addGuestToGroupMembers(guest.getId(), group.getId());
 
         userService.joinGroup(guestId, groupId);
     }
@@ -82,6 +82,7 @@ public class JoinRequestService {
             }
         }
     }
+    
     public List<JoinRequest> getOpenJoinRequestsByGroupId(Long groupId) {
         return joinRequestRepository.findAllByGroupId(groupId);
     }
@@ -99,5 +100,3 @@ public class JoinRequestService {
     }
 
 }
-
-
