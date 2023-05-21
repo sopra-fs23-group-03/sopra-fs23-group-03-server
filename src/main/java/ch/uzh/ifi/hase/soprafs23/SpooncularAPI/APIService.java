@@ -9,26 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 import ch.uzh.ifi.hase.soprafs23.repository.RecipeRepository;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.LockModeType;
-import javax.persistence.criteria.CriteriaBuilder;
 import java.nio.charset.StandardCharsets;
 
 import java.util.*;
 import java.net.URLEncoder;
-import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -40,6 +33,7 @@ public class APIService {
     private static final Logger logger = LoggerFactory.getLogger(APIService.class);
     @Autowired
     private GroupService groupService;
+    @Autowired
     private RecipeRepository recipeRepository;
     private final RestTemplate restTemplate = new RestTemplate();
     private final String apiKey = "56638b96d69d409cab5a0cdf9a8a1f5d";
@@ -49,37 +43,111 @@ public class APIService {
     private IngredientRepository ingredientRepository;
 
 
-    public Recipe getRandomRecipe(User host) { //TODO: use for Solo trip
-        String intolerances = String.join(",", host.getAllergiesSet());
-        String diet = host.getSpecialDiet();
-        String cuisine = String.join(",", host.getFavoriteCuisineSet());
+    public Map<String, Object> getRandomRecipeUser(User user) {  // used Map so no creating any new classes or changing existing ones
+        String intolerances = String.join(",", user.getAllergiesSet());
+        String diet = user.getSpecialDiet();
+        String cuisine = String.join(",", user.getFavoriteCuisineSet());
 
         String searchApiUrl = "https://api.spoonacular.com/recipes/complexSearch?apiKey=" + apiKey +
-                "&intolerances=" + intolerances + "&diet=" + diet + "&cuisine=" + cuisine;
-
+                "&intolerances=" + intolerances +
+                "&diet=" + diet +
+                "&cuisine=" + cuisine +
+                "&number=1" +
+                "&ignorePantry=true" +
+                "&type=main course" +
+                "&fillIngredients=true"
+                ;
         try {
-            ResponseEntity<ComplexSearchResponse> searchResponse = restTemplate.getForEntity(searchApiUrl, ComplexSearchResponse.class);
-            List<Recipe> recipes = Objects.requireNonNull(searchResponse.getBody()).getResults();
+            ResponseEntity<RecipeSearchResult> searchResponse = restTemplate.exchange(
+                    searchApiUrl,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<RecipeSearchResult>() {
+                    }
+            );
+            RecipeSearchResult searchResult = searchResponse.getBody();
 
-            if (recipes.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Results cannot be calculated yet");
+            if(searchResult.getResults().isEmpty()){
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No recipes found");
             }
 
-            Random random = new Random();
-            Recipe selectedRecipe = recipes.get(random.nextInt(recipes.size())); // Choose a random recipe from the list
+            RecipeInfo recipeInfo = searchResult.getResults().get(0);
+            RecipeDetailInfo detailInfo = getRecipeDetails(recipeInfo.getId()); //to get more Details of the recipe
 
-            String informationApiUrl = "https://api.spoonacular.com/recipes/" + selectedRecipe.getId() + "/information?apiKey=" + apiKey;
-            ResponseEntity<Recipe> informationResponse = restTemplate.getForEntity(informationApiUrl, Recipe.class);
-            Recipe detailedRecipe = informationResponse.getBody();
+            Long userId = user.getId();
+            Long externalRecipeId = recipeInfo.getId();
 
-            return detailedRecipe;
+            // Check if the recipe already exists for this user
+            Optional<Recipe> existingRecipeOptional = recipeRepository.findByUserId(userId);
+
+            Recipe recipe;
+            if (existingRecipeOptional.isPresent()) {
+                recipe = existingRecipeOptional.get();
+
+                // If the existing recipe is different from the new one, update and save the recipe
+                if (!recipe.getExternalRecipeId().equals(externalRecipeId)) {
+                    updateRecipe(recipe, recipeInfo, detailInfo, user);
+                    recipeRepository.save(recipe); // save updated recipe to db
+                }
+
+            } else {
+                // Recipe doesn't exist for user, so create a new one
+                recipe = new Recipe();
+                // map properties from RecipeInfo to Recipe
+                recipe.setUser(user);
+                recipe.setExternalRecipeId(recipeInfo.getId());
+                recipe.setImage(recipeInfo.getImage() != null ? recipeInfo.getImage() : "Default image URL");
+                recipe.setTitle(recipeInfo.getTitle() != null ? recipeInfo.getTitle() : "Default title");
+
+                List<String> missedIngredientsNames = recipeInfo.getMissedIngredients() != null
+                        ? recipeInfo.getMissedIngredients().stream()
+                        .map(IngredientInfo::getName)
+                        .collect(Collectors.toList())
+                        : new ArrayList<>();
+                recipe.setMissedIngredients(missedIngredientsNames);
+
+                recipe.setReadyInMinutes(detailInfo.getReadyInMinutes());
+                recipe.setInstructions(detailInfo.getInstructions() != null ? detailInfo.getInstructions() : "No instructions provided");
+
+                recipeRepository.save(recipe); // save recipe to db
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("title", recipeInfo.getTitle());
+            response.put("image", recipe.getImage());
+            response.put("readyInMinutes", recipe.getReadyInMinutes());
+            response.put("instructions", recipe.getInstructions());
+            response.put("missedIngredients", recipe.getMissedIngredients());
+
+            return response;
+
         }
         catch (ResponseStatusException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found");
+            if (e.getStatus() == HttpStatus.NOT_FOUND && e.getReason().equalsIgnoreCase("No recipes found")) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unfortunately, there were no recipes found based on the information you provided in your profile."); // 404 - not found
+            }
+            else {
+                throw e;
+            }
         }
-        catch (HttpServerErrorException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized");
-        }
+    }
+
+    private void updateRecipe(Recipe recipe, RecipeInfo recipeInfo, RecipeDetailInfo detailInfo, User user) {
+        // map properties from RecipeInfo to Recipe
+        recipe.setUser(user);
+        recipe.setExternalRecipeId(recipeInfo.getId());
+        recipe.setImage(recipeInfo.getImage() != null ? recipeInfo.getImage() : "Default image URL");
+        recipe.setTitle(recipeInfo.getTitle() != null ? recipeInfo.getTitle() : "Default title");
+
+        List<String> missedIngredientsNames = recipeInfo.getMissedIngredients() != null
+                ? recipeInfo.getMissedIngredients().stream()
+                .map(IngredientInfo::getName)
+                .collect(Collectors.toList())
+                : new ArrayList<>();
+        recipe.setMissedIngredients(missedIngredientsNames);
+
+        recipe.setReadyInMinutes(detailInfo.getReadyInMinutes());
+        recipe.setInstructions(detailInfo.getInstructions() != null ? detailInfo.getInstructions() : "No instructions provided");
     }
 
 
@@ -190,7 +258,7 @@ public class APIService {
     }
 
 
-    public RecipeDetailInfo getRecipeDetails(Long externalRecipeId) {
+    public RecipeDetailInfo getRecipeDetails(Long externalRecipeId) { // to fill readyInMinutes and Instructions
         String informationApiUrl = "https://api.spoonacular.com/recipes/" + externalRecipeId + "/information?apiKey=" + apiKey;
         try {
             ResponseEntity<RecipeDetailInfo> infoResponse = restTemplate.exchange(informationApiUrl, HttpMethod.GET, null, new ParameterizedTypeReference<RecipeDetailInfo>() {

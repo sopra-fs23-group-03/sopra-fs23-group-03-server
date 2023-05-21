@@ -2,8 +2,11 @@ package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
 import java.util.List;
 
+/** RecipeInfo
+ * This class stores the information from the external spoonacular API, regarding the first call.
+ */
+
 public class RecipeInfo {
-    // this class is to store the information from the external spoonacular API, regarding the first call.
 
     private Long id;
     private String title;
