@@ -69,56 +69,61 @@ public class APIController {
 
         List<APIGetDTO> apiGetDTOS = new ArrayList<>();
 
-        // Check if there is already a recipe associated with the group
-        List<Recipe> existingRecipes = recipeService.getRecipesByGroup(group);
+        // lock --> ensures only one thread proceeds at a time!
+        synchronized (this) {
+
+            // Check if there is already a recipe associated with group
+            List<Recipe> existingRecipes = recipeService.getRecipesByGroup(group);
 
 
-        // If recipes exist, convert them to APIGetDTO and return
-        if (!existingRecipes.isEmpty()) {
-            for (Recipe recipe : existingRecipes) {
-                APIGetDTO apiGetDTO = convertRecipeToAPIGetDTO(recipe);
-                apiGetDTOS.add(apiGetDTO);
+            // If recipes exist, convert them to APIGetDTO and return
+            if (!existingRecipes.isEmpty()) {
+                for (Recipe recipe : existingRecipes) {
+                    APIGetDTO apiGetDTO = convertRecipeToAPIGetDTO(recipe);
+                    apiGetDTOS.add(apiGetDTO);
+                }
             }
-        } else {
-            // Else get new recipes from the Spoonacular API
-            List<RecipeInfo> recipeInfos = apiService.getRecipe(group);
+            else {
+                // Else get new recipes from Spoonacular
+                List<RecipeInfo> recipeInfos = apiService.getRecipe(group);
 
-            if (recipeInfos.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No recipes found");
-            }
-
-            for (RecipeInfo recipeInfo : recipeInfos) {
-                // Try to find recipe in db
-                Recipe recipe = recipeService.findByExternalRecipeIdAndGroupId(recipeInfo.getId(), groupId);
-
-                // If recipe does not exist in db, create new one
-                if (recipe == null) {
-                    recipe = new Recipe();
-                    recipe.setExternalRecipeId(recipeInfo.getId());
+                if (recipeInfos.isEmpty()) {
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No recipes found");
                 }
 
-                recipe.setTitle(recipeInfo.getTitle());
-                recipe.setUsedIngredients(recipeInfo.getUsedIngredients().stream().map(IngredientInfo::getName).collect(Collectors.toList()));
-                recipe.setMissedIngredients(recipeInfo.getMissedIngredients().stream().map(IngredientInfo::getName).collect(Collectors.toList()));
-                recipe.setIsRandomBasedOnIntolerances(recipeInfo.getIsRandomBasedOnIntolerances());
-                recipe.setGroup(group);
+                for (RecipeInfo recipeInfo : recipeInfos) {
+                    // Try to find recipe in db
+                    Recipe recipe = recipeService.findByExternalRecipeIdAndGroupId(recipeInfo.getId(), groupId);
 
-                // Fetch additional details --> makes call to Spoonacular API and map response to RecipeDetailInfo object
-                RecipeDetailInfo detailInfo = apiService.getRecipeDetails(recipe.getExternalRecipeId());
-                if (detailInfo != null) {
-                    recipe.setTitle(detailInfo.getTitle());
-                    recipe.setReadyInMinutes(detailInfo.getReadyInMinutes());
-                    recipe.setImage(detailInfo.getImage() != null ? detailInfo.getImage() : "Default image URL");
-                    recipe.setInstructions(detailInfo.getInstructions() != null ? detailInfo.getInstructions() : "No instructions provided");
+                    // If recipe does not exist in db, create new one
+                    if (recipe == null) {
+                        recipe = new Recipe();
+                        recipe.setExternalRecipeId(recipeInfo.getId());
+                    }
 
+                    recipe.setTitle(recipeInfo.getTitle());
+                    recipe.setUsedIngredients(recipeInfo.getUsedIngredients().stream().map(IngredientInfo::getName).collect(Collectors.toList()));
+                    recipe.setMissedIngredients(recipeInfo.getMissedIngredients().stream().map(IngredientInfo::getName).collect(Collectors.toList()));
+                    recipe.setIsRandomBasedOnIntolerances(recipeInfo.getIsRandomBasedOnIntolerances());
+                    recipe.setGroup(group);
+
+                    // Fetch additional details --> makes call to Spoonacular API and map response to RecipeDetailInfo object
+                    RecipeDetailInfo detailInfo = apiService.getRecipeDetails(recipe.getExternalRecipeId());
+                    if (detailInfo != null) {
+                        recipe.setTitle(detailInfo.getTitle());
+                        recipe.setReadyInMinutes(detailInfo.getReadyInMinutes());
+                        recipe.setImage(detailInfo.getImage() != null ? detailInfo.getImage() : "Default image URL");
+                        recipe.setInstructions(detailInfo.getInstructions() != null ? detailInfo.getInstructions() : "No instructions provided");
+
+                    }
+                    recipe.setGroup(group);
+
+                    // Save/update recipe in db
+                    recipeService.save(recipe);
+
+                    APIGetDTO apiGetDTO = convertRecipeToAPIGetDTO(recipe);
+                    apiGetDTOS.add(apiGetDTO);
                 }
-                recipe.setGroup(group);
-
-                // Save/update the recipe in db
-                recipeService.save(recipe);
-
-                APIGetDTO apiGetDTO = convertRecipeToAPIGetDTO(recipe);
-                apiGetDTOS.add(apiGetDTO);
             }
         }
         return new ResponseEntity<>(apiGetDTOS, HttpStatus.OK);
