@@ -40,6 +40,14 @@ With our application we aim to help in reducing food waste, as we suggest recipe
 - Role: At the end of the process a recipe is found for the group.
 - Relation: The final recipe is found based on the ingredients the users contibute, the rating of these ingredients, and the group members' allergies.
 
+## External API
+The spoonacular API (https://spoonacular.com/food-api) is used to retrieve the final recipes based on the given ingredients, intolerances, favourite cuisines and dietary preferences. Also the ingredients which the user can choose to contribute to the meal, are retrieved from the API to avoid the need for natural language processing. Furthermore, also the intolerances, favourite cuisines and dietary preferences are retrieved from spoonacular to later match the requests to the external API.
+
+For every displayed final recipe, two calls are needed: One to retrieve the recipe suggestion based on the ingredients with respect to the intolerances and favourite cuisines, a second time to retrieve more detailed information such as image, instructions and ready-in-minutes. For the first call we use the complex search provided by spoonacular, with the following additions: ignorePantry=true (we assume that pantry items are at home already), type=main course (we give only recipes for main courses), sort=max-used-ingredients (we first maximise the used ingredients, instead of minimising the additionally needed ones). The second call uses the api.spoonacular.com/recipes/id/information. 
+
+The dietary preferences mentioned in the user’s profile are only taken into account while using the go solo option. 
+
+
 ## Launch & Deployment
 
 ### Getting started with Spring Boot
@@ -107,9 +115,6 @@ We assume that all group members stay online and continue the meal-planning proc
 
 Further our application was developed and tested mostly on [Google Chrome](https://www.google.com/chrome/). We therefore recomend you download and install Chrome to have the best experience with our application.
 
-## External API
-TODO: anki
---> we here in the server want to say something on the external api
 
 ## Roadmap
 
