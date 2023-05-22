@@ -213,10 +213,10 @@ public class UserService {
         }
     }
 
-    public void addUserIngredients(Long userId, List<IngredientPutDTO> ingredientsPutDTO) {
+    public synchronized void addUserIngredients(Long userId, List<IngredientPutDTO> ingredientsPutDTO) {
         User user = getUserById(userId);
 
-        List<Ingredient> newIngredients = new ArrayList<>();
+        Set<Ingredient> newIngredients = new HashSet<>(); // Changed from List to Set
         List<String> missingIngredients = new ArrayList<>();
 
         if(user.getGroupId() == null) {
@@ -233,7 +233,7 @@ public class UserService {
                 continue;
             }
 
-            Optional<Ingredient> ingredientOptional = ingredientRepository.findByName(ingredientPutDTO.getName());
+            Optional<Ingredient> ingredientOptional = ingredientRepository.findByNameAndGroupId(ingredientPutDTO.getName(), user.getGroupId());
             Ingredient ingredient;
             if(ingredientOptional.isPresent()) {
                 ingredient = ingredientOptional.get();
@@ -252,8 +252,12 @@ public class UserService {
             boolean userAlreadyHasIngredient = user.getIngredients().stream()
                     .anyMatch(existingIngredient -> existingIngredient.getName().equals(ingredientName));
 
-            if (!userAlreadyHasIngredient) {
+            boolean newIngredientsContainsIngredient = newIngredients.stream()
+                    .anyMatch(existingIngredient -> existingIngredient.getName().equals(ingredientName));
+
+            if (!userAlreadyHasIngredient && !newIngredientsContainsIngredient) {
                 ingredient.setGroup(group);
+                ingredient.getUsersSet().add(user);
                 newIngredients.add(ingredient);
             }
         }
@@ -265,6 +269,9 @@ public class UserService {
         user.getIngredients().addAll(newIngredients);
         userRepository.save(user);
     }
+
+
+
 
     @Transactional //for Spring; makes all changes to db persisted in one single transaction --> helps rolling back in case of an error (data consistency)
     public void updateIngredientRatings(Long groupId, Long userId, Map <Long, String> ingredientRatings) {
