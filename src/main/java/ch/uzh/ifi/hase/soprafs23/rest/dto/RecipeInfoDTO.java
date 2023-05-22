@@ -7,13 +7,9 @@ public class RecipeInfoDTO {
         private Long id;
         private String title;
         private String image;
-        private String imageType;
-        private int usedIngredientCount;
-        private int missedIngredientCount;
         private List<IngredientInfoDTO> missedIngredients;
         private List<IngredientInfoDTO> usedIngredients;
         private List<IngredientInfoDTO> unusedIngredients;
-        private int likes;
         private String instructions;
         private int readyInMinutes;
 
@@ -41,33 +37,6 @@ public class RecipeInfoDTO {
         this.image = image;
     }
 
-    public String getImageType() {
-        return imageType;
-    }
-
-    public void setImageType(String imageType) {
-        this.imageType = imageType;
-    }
-
-    public int getUsedIngredientCount() {
-        return usedIngredientCount;
-    }
-
-    public void setUsedIngredientCount(int usedIngredientCount) {
-        this.usedIngredientCount = usedIngredientCount;
-    }
-
-    public int getMissedIngredientCount() {
-        return missedIngredientCount;
-    }
-
-    public void setMissedIngredientCount(int missedIngredientCount) {
-        this.missedIngredientCount = missedIngredientCount;
-    }
-
-    public List<IngredientInfoDTO> getMissedIngredients() {
-        return missedIngredients;
-    }
 
     public void setMissedIngredients(List<IngredientInfoDTO> missedIngredients) {
         this.missedIngredients = missedIngredients;
@@ -87,14 +56,6 @@ public class RecipeInfoDTO {
 
     public void setUnusedIngredients(List<IngredientInfoDTO> unusedIngredients) {
         this.unusedIngredients = unusedIngredients;
-    }
-
-    public int getLikes() {
-        return likes;
-    }
-
-    public void setLikes(int likes) {
-        this.likes = likes;
     }
 
     public String getInstructions() {
