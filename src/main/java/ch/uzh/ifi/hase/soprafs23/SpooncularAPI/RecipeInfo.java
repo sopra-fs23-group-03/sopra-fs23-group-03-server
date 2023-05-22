@@ -18,10 +18,8 @@ public class RecipeInfo {
     private List<IngredientInfo> unusedIngredients;
     private boolean isRandomBasedOnIntolerances;
 
-
     public RecipeInfo() {
     }
-
 
     // getters and setters
     public Long getId() {
