@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User Controller
@@ -258,7 +259,7 @@ public class UserController {
     @PutMapping("/users/{userId}/ingredients")
     @ResponseStatus(HttpStatus.NO_CONTENT) // 204
     public void updateUserIngredients(@PathVariable Long userId,
-                                      @RequestBody List<IngredientPutDTO> ingredientsPutDTO, // I get list of objects (arrays)
+                                      @RequestBody List<IngredientPutDTO> ingredientsPutDTOSet, // changing List to Set here
                                       @RequestHeader(name = "X-Token") String xToken) {
         // 404 - group not found
         User user = userService.getUserById(userId);
@@ -280,7 +281,7 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not INGREDIENTENTERING"); // 409
         }
 
-        userService.addUserIngredients(userId, ingredientsPutDTO);
+        userService.addUserIngredients(userId, ingredientsPutDTOSet); // passing Set here
 
         // Check if all members of group have entered ingredients, change state if so
         List<Long> memberIds = groupService.getAllMemberIdsOfGroup(group);

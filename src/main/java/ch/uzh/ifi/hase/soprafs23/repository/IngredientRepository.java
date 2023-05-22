@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.repository;
 
+import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -17,5 +18,6 @@ public interface IngredientRepository extends JpaRepository<Ingredient, Long> {
 
     List<Ingredient> findByGroupId(Long id); //TODO: does it work?
 
+    Optional<Ingredient> findByNameAndGroupId(String name, Long groupId);
 
 }
