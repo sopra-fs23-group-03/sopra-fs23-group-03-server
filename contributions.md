@@ -48,7 +48,7 @@
 | Kalliopi    | #80    | Create navigation bar                                                            |  X   |
 |             | #52    | Create a landing page with sections for displaying the users and active groups.  |  X   |
 |             | #9     | Display user as logged in                                                        |  X   |
-|             | #11    | Set user to offline and delete localStorage                                      |      |
+|             | #11    | Set user to offline and delete localStorage                                      |  X   |
 |             | #10    | Make Logout Button accessible                                                    |  X   |
 |             | #79    | Implement method to sort the users based on their online/offline status          |  X   |
 |             | #68    | Create the Form Group button in the Landing Page                                 |  X   |
