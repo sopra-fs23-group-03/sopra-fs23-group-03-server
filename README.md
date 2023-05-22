@@ -41,11 +41,10 @@ With our application we aim to help in reducing food waste, as we suggest recipe
 - Relation: The final recipe is found based on the ingredients the users contibute, the rating of these ingredients, and the group members' allergies.
 
 ## External API
-The spoonacular API (https://spoonacular.com/food-api) is used to retrieve the final recipes based on the given ingredients, intolerances, favourite cuisines and dietary preferences. Also the ingredients which the user can choose to contribute to the meal, are retrieved from the API to avoid the need for natural language processing. Furthermore, also the intolerances, favourite cuisines and dietary preferences are retrieved from spoonacular to later match the requests to the external API.
+The [spoonacular API](https://spoonacular.com/food-api) is used to retrieve the final recipes based on the given ingredients, intolerances, favourite cuisines and dietary preferences. Also the ingredients which the user can choose to contribute to the meal, are retrieved from the API to avoid the need for natural language processing on the backend. Furthermore, also the intolerances, favourite cuisines and dietary preferences used to personalize the profile are retrieved from spoonacular to later match the requests to the API.
 
-For every displayed final recipe, two calls are needed: One to retrieve the recipe suggestion based on the ingredients with respect to the intolerances and favourite cuisines, a second time to retrieve more detailed information such as image, instructions and ready-in-minutes. For the first call we use the complex search provided by spoonacular, with the following additions: ignorePantry=true (we assume that pantry items are at home already), type=main course (we give only recipes for main courses), sort=max-used-ingredients (we first maximise the used ingredients, instead of minimising the additionally needed ones). The second call uses the api.spoonacular.com/recipes/id/information. 
-
-The dietary preferences mentioned in the user’s profile are only taken into account while using the go solo option. 
+We distinguish between the recipe retrieval for a.) groups and b.) for single users (go solo option). 
+For every displayed final recipe, two calls are needed: First, to retrieve the recipe suggestion based on a.) the ingredients with respect to the intolerances b.) intolerances, dietary preferences and favourite cuisines. With the second call, more detailed information such as image, instructions and ready-in-minutes are retrieved. For the first call we use the complex search provided by spoonacular, with the following additions: ignorePantry=true (we assume that pantry items are at home already), type=main course (we give only recipes for main courses), sort=max-used-ingredients (we first maximise the used ingredients, instead of minimising the additionally needed ones). The second call uses the api.spoonacular.com/recipes/id/information. 
 
 
 ## Launch & Deployment
@@ -111,9 +110,9 @@ To configure a debugger for SpringBoot's Tomcat servlet (i.e. the process you st
 6. Step through the process one step at a time
 
 ### Disclaimers
-We assume that all group members stay online and continue the meal-planning process together. If one member is not moving along in the process, all other members of the group get stuck at that point and would have to delete their local storage and create a new account in order to user our services.
+We assume that all group members stay online and continue the meal-planning process together. If one member is not moving along in the process, all other members of the group get stuck at that point and would have to delete their local storage and create a new account in order to use our services.
 
-Further our application was developed and tested mostly on [Google Chrome](https://www.google.com/chrome/). We therefore recomend you download and install Chrome to have the best experience with our application.
+Further our application was developed and tested mostly on [Google Chrome](https://www.google.com/chrome/). We therefore recommend you download and install Chrome to have the best experience with our application.
 
 
 ## Roadmap
