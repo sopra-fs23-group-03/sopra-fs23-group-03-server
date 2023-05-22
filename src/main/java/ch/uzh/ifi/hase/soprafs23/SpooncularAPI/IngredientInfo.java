@@ -2,11 +2,12 @@ package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
 public class IngredientInfo {
 
-    // maps exactly response from spoonacular API
+    /**
+    This class maps exactly the response from the spoonacular API regarding the ingredients
+     */
 
     private int id;
     private String name;
-
 
     public int getId() {
         return id;
