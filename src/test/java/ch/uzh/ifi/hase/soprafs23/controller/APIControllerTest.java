@@ -197,17 +197,6 @@ public class APIControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-//    @Test
-//    public void getRandomRecipe_returnsUnauthorizedStatusCode401() throws Exception {
-//        // Set up mocks for the unauthorized case
-//        doReturn(0L).when(userService).getUseridByToken("unauthorized-token");
-//
-//        // Perform the test
-//        mockMvc.perform(get("/groups/{groupId}/result", 1L)
-//                        .header("X-Token", "unauthorized-token")
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isUnauthorized()); // 401
-//    }
 
     @Test
     void getAllIngredients_validRequest_returnsListOfIngredients() throws Exception {

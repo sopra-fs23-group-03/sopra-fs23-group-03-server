@@ -38,9 +38,11 @@ public class APIService {
 
     private final RestTemplate restTemplate;
     @Autowired
-    public APIService(RestTemplate restTemplate) {
+    public APIService(RestTemplate restTemplate, FullIngredientRepository fullIngredientRepository) {
         this.restTemplate = restTemplate;
+        this.fullIngredientRepository = fullIngredientRepository;
     }
+
 
     //private final RestTemplate restTemplate = new RestTemplate();
     private final String apiKey = "56638b96d69d409cab5a0cdf9a8a1f5d";
@@ -253,7 +255,7 @@ public class APIService {
             RecipeSearchResult searchResult = searchResponse.getBody();
 
             if (searchResult == null || searchResult.getResults().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NO_CONTENT, "Now we only send only the allergies from all the guests in your group, but there is still no recipe found for it.");
+                throw new ResponseStatusException(HttpStatus.NO_CONTENT, "Now the recipe request included only the allergies from all the guests in your group, but there is still no recipe found for it.");
             }
             RecipeInfo resultRecipe = searchResult.getResults().get(0);
             resultRecipe.setIsRandomBasedOnIntolerances(false); // Setting new field to false
