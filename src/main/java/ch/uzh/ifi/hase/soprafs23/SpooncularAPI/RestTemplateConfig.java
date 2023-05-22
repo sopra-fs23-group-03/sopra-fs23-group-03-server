@@ -9,9 +9,9 @@ public class RestTemplateConfig {
 
     @Bean("spoonacularRestTemplate")
     public RestTemplate restTemplate() {
-        // Configure your RestTemplate as needed
+
         RestTemplate restTemplate = new RestTemplate();
-        // Add any additional configurations or customizations
+
         return restTemplate;
     }
 }
