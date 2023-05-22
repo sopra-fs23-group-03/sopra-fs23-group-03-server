@@ -1,5 +1,7 @@
 # CollaborEat
 
+![CollaborEat logo](/assets/logo.jpg)
+
 [Deployed Server](https://sopra-fs23-group-03-server.oa.r.appspot.com/)
 
 [Deployed Client](https://sopra-fs23-group-03-client.oa.r.appspot.com/)
