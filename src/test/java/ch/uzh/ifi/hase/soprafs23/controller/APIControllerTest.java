@@ -213,14 +213,14 @@ public class APIControllerTest {
         testGroup.setGroupState(GroupState.INGREDIENTENTERING);
         String initialString = "app";
 
-        List<FullIngredient> fullIngredients = new ArrayList<>();
-        fullIngredients.add(testFullIngredient);
+        List<String> ingredientNames = new ArrayList<>();
+        ingredientNames.add("apple");
 
         // given
         given(userService.getUseridByToken(anyString())).willReturn(1L);
         given(userService.getUserById(testUser.getId())).willReturn(testUser);
         given(groupService.getGroupById(testGroup.getId())).willReturn(testGroup);
-        given(fullIngredientRepository.findByNameContainingIgnoreCase(initialString)).willReturn(fullIngredients);
+        given(apiService.fetchIngredientsByInitialString(testUser.getId(), initialString)).willReturn(ingredientNames);
 
         // when/then -> perform the request and validate the response
         mockMvc.perform(get("/ingredients")
@@ -280,11 +280,11 @@ public class APIControllerTest {
         String nonExistentIngredient = "xyz";
 
         // Set up mocks for the case when the ingredient is not found
-        List<FullIngredient> emptyList = new ArrayList<>();
-        doReturn(emptyList).when(fullIngredientRepository).findByNameContainingIgnoreCase(nonExistentIngredient);
         given(userService.getUseridByToken(anyString())).willReturn(1L);
         given(userService.getUserById(testUser.getId())).willReturn(testUser);
         given(groupService.getGroupById(testGroup.getId())).willReturn(testGroup);
+        given(apiService.fetchIngredientsByInitialString(testUser.getId(), nonExistentIngredient))
+                .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         // Perform the test
         mockMvc.perform(get("/ingredients")
