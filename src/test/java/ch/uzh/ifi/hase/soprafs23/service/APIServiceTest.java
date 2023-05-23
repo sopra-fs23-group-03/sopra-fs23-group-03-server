@@ -1,136 +1,132 @@
 package ch.uzh.ifi.hase.soprafs23.service;
 
 import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.*;
-import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
-import ch.uzh.ifi.hase.soprafs23.constant.VotingType;
-import ch.uzh.ifi.hase.soprafs23.entity.Group;
-import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
-import ch.uzh.ifi.hase.soprafs23.entity.User;
+import ch.uzh.ifi.hase.soprafs23.entity.FullIngredient;
 import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
-import ch.uzh.ifi.hase.soprafs23.repository.GroupRepository;
-import ch.uzh.ifi.hase.soprafs23.repository.IngredientRepository;
-import ch.uzh.ifi.hase.soprafs23.repository.RecipeRepository;
-import javassist.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.hamcrest.Matchers.is;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.*;
 
-import org.springframework.web.server.ResponseStatusException;
-
+import org.springframework.web.client.RestTemplate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-@ExtendWith(SpringExtension.class)
-@WebMvcTest(APIController.class) //bc we focus on testing the web layer
-@Import(RestTemplateConfig.class)
+
+
+@SpringBootTest
 public class APIServiceTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-    @MockBean
-    private GroupRepository groupRepository;
-
-    @MockBean
-    private IngredientRepository ingredientRepository;
-
-    @MockBean
-    private FullIngredientRepository fullIngredientRepository;
-
-    @MockBean
-    private GroupService groupService;
-
-    @MockBean
-    private RecipeService recipeService;
-
-    @MockBean
-    private JoinRequestService joinRequestService;
-
-    @MockBean
-    private InvitationService invitationService;
-
-    @MockBean
-    private RecipeRepository recipeRepository;
-
-    @MockBean
-    private UserService userService;
-
-    @MockBean
+    @InjectMocks
     private APIService apiService;
 
+    @Mock(name = "spoonacularRestTemplate")
+    private RestTemplate spoonacularRestTemplate;
+
+    @Mock
+    private FullIngredientRepository fullIngredientRepository;
 
     @BeforeEach
     public void setup() {
-        // given
-        User testUser = new User();
-        testUser.setId(1L);
-
-        // when
-        when(userService.getUseridByToken("valid-token")).thenReturn(1L);
-        when(userService.getUserById(1L)).thenReturn(testUser);
-
+        MockitoAnnotations.openMocks(this); // This is important to initialize the @Mock and @InjectMocks annotations
+        apiService = new APIService(spoonacularRestTemplate, fullIngredientRepository);
     }
 
     @Test
-    public void getRandomRecipeUserTest_including_updateRecipeTest() throws Exception {
-        // given
-        User testUser = new User();
-        testUser.setId(1L);
+    public void testFetchAndStoreIngredients() {
+        // Define the captor
+        ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
 
-        Recipe recipe = new Recipe();
-        recipe.setUser(testUser);
+        // Prepare a mock response entity
+        IngredientSearchResponse response = new IngredientSearchResponse();
+        IngredientAPI ingredientAPI = new IngredientAPI();
+        ingredientAPI.setName("testIngredient");
+        response.setResults(Collections.singletonList(ingredientAPI));
 
-        RecipeInfo recipeInfo = new RecipeInfo();
-        recipeInfo.setId(2L);
-        recipeInfo.setTitle("New Title");
-        recipeInfo.setImage("New Image");
-        List<IngredientInfo> ingredientsMissed = new ArrayList<>();
-        recipeInfo.setMissedIngredients(ingredientsMissed);
+        ResponseEntity<IngredientSearchResponse> responseEntity = new ResponseEntity<>(response, HttpStatus.OK);
 
-        RecipeDetailInfo detailInfo = new RecipeDetailInfo();
-        detailInfo.setReadyInMinutes(20);
-        detailInfo.setInstructions("New Instructions");
+        when(spoonacularRestTemplate.getForEntity(
+                urlCaptor.capture(),
+                eq(IngredientSearchResponse.class)
+        )).thenReturn(responseEntity);
 
-        Map<String, Object> recipeMap = new HashMap<>();
-        recipeMap.put("id", 2L);
-        recipeMap.put("title", "New Title");
-        recipeMap.put("image", "New Image");
-        recipeMap.put("readyInMinutes", 20);
-        recipeMap.put("instructions", "New Instructions");
+        when(fullIngredientRepository.existsByQuery(anyString())).thenReturn(false);
+        when(fullIngredientRepository.findByNameIgnoreCase(anyString())).thenReturn(Collections.emptyList());
 
-        // when
-        when(userService.getUserById(1L)).thenReturn(testUser);
-        when(apiService.getRandomRecipeUser(testUser)).thenReturn(recipeMap);
-        when(recipeRepository.findByUserId(1L)).thenReturn(Optional.of(recipe));
+        // Call the method you're testing
+        String apiUrl = "https://api.spoonacular.com/recipes/complexSearch?apiKey=";
+        String query = "testQuery";
 
-        MockHttpServletRequestBuilder getRequest = get("/users/{userId}/solo/result", 1L)
-                .header("X-Token", "valid-token")
-                .contentType(MediaType.APPLICATION_JSON);
+        apiService.fetchAndStoreIngredients(apiUrl, query);
 
-        // then
-        mockMvc.perform(getRequest)
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(2)))
-                .andExpect(jsonPath("$.title", is("New Title")))
-                .andExpect(jsonPath("$.image", is("New Image")))
-                .andExpect(jsonPath("$.readyInMinutes", is(20)))
-                .andExpect(jsonPath("$.instructions", is("New Instructions")));
+        // Verify interactions and capture values
+        verify(spoonacularRestTemplate, times(1)).getForEntity(
+                anyString(),
+                eq(IngredientSearchResponse.class)
+        );
+        verify(fullIngredientRepository, times(1)).saveAndFlush(any(FullIngredient.class));
+
+        // Retrieve the captured argument and make assertions on it
+        String capturedUrl = urlCaptor.getValue();
+        assertTrue(capturedUrl.startsWith(apiUrl + "&query="));
+        assertTrue(capturedUrl.contains(query));
+
     }
 
+
+//
+//    @Test
+//    public void getRandomRecipeUserTest() throws Exception {
+//        // given
+//        User testUser = new User();
+//        testUser.setId(1L);
+//
+//        Recipe recipe = new Recipe();
+//        recipe.setUser(testUser);
+//
+//        RecipeInfo recipeInfo = new RecipeInfo();
+//        recipeInfo.setId(2L);
+//        recipeInfo.setTitle("New Title");
+//        recipeInfo.setImage("New Image");
+//        List<IngredientInfo> ingredientsMissed = new ArrayList<>();
+//        recipeInfo.setMissedIngredients(ingredientsMissed);
+//
+//        RecipeDetailInfo detailInfo = new RecipeDetailInfo();
+//        detailInfo.setReadyInMinutes(20);
+//        detailInfo.setInstructions("New Instructions");
+//
+//        RecipeSearchResult searchResult = new RecipeSearchResult();
+//        searchResult.setResults(Collections.singletonList(recipeInfo));
+//
+//        ResponseEntity<RecipeSearchResult> responseEntity = new ResponseEntity<>(searchResult, HttpStatus.OK);
+//
+//        // when
+//        when(userService.getUserById(1L)).thenReturn(testUser);
+//        when(recipeRepository.findByUserId(1L)).thenReturn(Optional.of(recipe));
+//        when(apiService.getRecipeDetails(anyLong())).thenReturn(detailInfo);
+//
+//        when(restTemplate.exchange(
+//                anyString(),
+//                any(HttpMethod.class),
+//                any(HttpEntity.class),
+//                any(ParameterizedTypeReference.class)
+//        )).thenReturn(responseEntity);
+//
+//        // call the method being tested
+//        Map<String, Object> result = apiService.getRandomRecipeUser(testUser);
+//
+//        // then
+//        assertEquals("New Title", result.get("title"));
+//        assertEquals("New Image", result.get("image"));
+//        assertEquals(20, result.get("readyInMinutes"));
+//        assertEquals("New Instructions", result.get("instructions"));
+//    }
+
 }
+

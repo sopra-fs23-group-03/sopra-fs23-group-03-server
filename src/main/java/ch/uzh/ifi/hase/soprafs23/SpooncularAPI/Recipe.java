@@ -141,7 +141,6 @@ public class Recipe implements Serializable {
         this.isRandomBasedOnIntolerances = isRandomBasedOnIntolerances;
     }
 
-
     public Long getExternalRecipeId() {
         return externalRecipeId;
     }

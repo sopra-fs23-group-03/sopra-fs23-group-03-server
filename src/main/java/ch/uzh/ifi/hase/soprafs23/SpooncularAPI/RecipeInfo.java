@@ -12,19 +12,14 @@ public class RecipeInfo {
     private String title;
     private String image;
     private int readyInMinutes;
-    private int servings;
-    private String sourceUrl;
-    private int spoonacularScore;
     private String instructions;
     private List<IngredientInfo> missedIngredients;
     private List<IngredientInfo> usedIngredients;
     private List<IngredientInfo> unusedIngredients;
     private boolean isRandomBasedOnIntolerances;
 
-
     public RecipeInfo() {
     }
-
 
     // getters and setters
     public Long getId() {
@@ -59,29 +54,6 @@ public class RecipeInfo {
         this.readyInMinutes = readyInMinutes;
     }
 
-    public int getServings() {
-        return servings;
-    }
-
-    public void setServings(int servings) {
-        this.servings = servings;
-    }
-
-    public String getSourceUrl() {
-        return sourceUrl;
-    }
-
-    public void setSourceUrl(String sourceUrl) {
-        this.sourceUrl = sourceUrl;
-    }
-
-    public int getSpoonacularScore() {
-        return spoonacularScore;
-    }
-
-    public void setSpoonacularScore(int spoonacularScore) {
-        this.spoonacularScore = spoonacularScore;
-    }
 
     public String getInstructions() {
         return instructions;

@@ -69,7 +69,7 @@ public class APIController {
 
         List<APIGetDTO> apiGetDTOS = new ArrayList<>();
 
-        // lock --> ensures only one thread proceeds at a time!
+        // Acquire lock --> ensures only one thread proceeds at a time
         synchronized (this) {
 
             // Check if there is already a recipe associated with group

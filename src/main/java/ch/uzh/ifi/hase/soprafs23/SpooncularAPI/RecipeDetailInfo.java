@@ -16,8 +16,6 @@ public class RecipeDetailInfo {
     private String instructions;
     private List<IngredientInfo> ingredients = new ArrayList<>();
 
-
-
     public int getReadyInMinutes() {
         return readyInMinutes;
     }
