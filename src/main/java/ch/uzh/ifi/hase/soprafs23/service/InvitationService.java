@@ -13,7 +13,6 @@ import org.springframework.web.server.ResponseStatusException;
 import ch.uzh.ifi.hase.soprafs23.entity.Invitation;
 import ch.uzh.ifi.hase.soprafs23.repository.InvitationRepository;
 
-
 /**
  * Invitation Service
  * This class can be seen as a "working class" for all invitation related methods.
