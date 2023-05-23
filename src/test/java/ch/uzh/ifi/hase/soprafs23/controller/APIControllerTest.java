@@ -220,7 +220,7 @@ public class APIControllerTest {
         given(userService.getUseridByToken(anyString())).willReturn(1L);
         given(userService.getUserById(testUser.getId())).willReturn(testUser);
         given(groupService.getGroupById(testGroup.getId())).willReturn(testGroup);
-        given(apiService.fetchIngredientsByInitialString(testUser.getId(), initialString)).willReturn(ingredientNames);
+        given(apiService.fetchIngredientsByInitialString(initialString)).willReturn(ingredientNames);
 
         // when/then -> perform the request and validate the response
         mockMvc.perform(get("/ingredients")
@@ -283,7 +283,7 @@ public class APIControllerTest {
         given(userService.getUseridByToken(anyString())).willReturn(1L);
         given(userService.getUserById(testUser.getId())).willReturn(testUser);
         given(groupService.getGroupById(testGroup.getId())).willReturn(testGroup);
-        given(apiService.fetchIngredientsByInitialString(testUser.getId(), nonExistentIngredient))
+        given(apiService.fetchIngredientsByInitialString(nonExistentIngredient))
                 .willThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         // Perform the test

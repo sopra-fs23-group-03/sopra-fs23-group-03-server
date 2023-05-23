@@ -4,7 +4,9 @@ import ch.uzh.ifi.hase.soprafs23.SpooncularAPI.*;
 import ch.uzh.ifi.hase.soprafs23.entity.FullIngredient;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
+import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.repository.FullIngredientRepository;
+import ch.uzh.ifi.hase.soprafs23.repository.RecipeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -39,10 +41,13 @@ public class APIServiceTest {
     @Mock
     private GroupService groupService;
 
+    @Mock
+    private RecipeRepository recipeRepository;
+
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.openMocks(this); // This is important to initialize the @Mock and @InjectMocks annotations
-        apiService = new APIService(spoonacularRestTemplate, fullIngredientRepository, groupService);
+        MockitoAnnotations.openMocks(this);
+        apiService = new APIService(spoonacularRestTemplate, fullIngredientRepository, groupService, recipeRepository);
     }
 
 
@@ -234,6 +239,109 @@ public class APIServiceTest {
         assertEquals("Test Recipe", resultDetailInfo.getTitle());
         assertEquals(Integer.valueOf(30), resultDetailInfo.getReadyInMinutes());
         assertEquals("Test Instructions", resultDetailInfo.getInstructions());
+    }
+
+    @Test
+    public void testGetRandomRecipeUser() {
+        // Prepare mock user and externalRecipeId
+        User user = new User();
+        user.setId(123L);
+        user.setAllergiesSet(new HashSet<>(Arrays.asList("nuts", "gluten")));
+        user.setSpecialDiet("Vegan");
+        user.setFavoriteCuisineSet(new HashSet<>(Arrays.asList("Italian", "Mexican")));
+
+        Long externalRecipeId = 456L;
+
+        // Define expected API responses
+        RecipeSearchResult searchResult = new RecipeSearchResult();
+        RecipeInfo recipeInfo = new RecipeInfo();
+        recipeInfo.setId(externalRecipeId);
+        recipeInfo.setTitle("Test Recipe");
+        recipeInfo.setImage("Test Image");
+        searchResult.setResults(Collections.singletonList(recipeInfo));
+
+        RecipeDetailInfo detailInfo = new RecipeDetailInfo();
+        detailInfo.setReadyInMinutes(0);
+        detailInfo.setInstructions("Test Instructions");
+
+        ResponseEntity<RecipeSearchResult> searchResponseEntity = new ResponseEntity<>(searchResult, HttpStatus.OK);
+        ResponseEntity<RecipeDetailInfo> detailResponseEntity = new ResponseEntity<>(detailInfo, HttpStatus.OK);
+
+        // Define a Recipe
+        Recipe recipe = new Recipe();
+        recipe.setUser(user);
+        recipe.setExternalRecipeId(externalRecipeId);
+        recipe.setTitle("Test Recipe");
+        recipe.setImage("Test Image");
+
+        // Mock interactions
+        when(spoonacularRestTemplate.exchange(
+                anyString(),
+                eq(HttpMethod.GET),
+                eq(null),
+                eq(new ParameterizedTypeReference<RecipeSearchResult>() {})
+        )).thenReturn(searchResponseEntity);
+
+        when(spoonacularRestTemplate.exchange(
+                anyString(),
+                eq(HttpMethod.GET),
+                eq(null),
+                eq(new ParameterizedTypeReference<RecipeDetailInfo>() {})
+        )).thenReturn(detailResponseEntity);
+
+        when(recipeRepository.findByUserId(user.getId())).thenReturn(Optional.of(recipe));
+
+        // Call method
+        Map<String, Object> resultMap = apiService.getRandomRecipeUser(user);
+
+        // Assert result
+        assertNotNull(resultMap);
+        assertEquals("Test Recipe", resultMap.get("title"));
+        assertEquals("Test Image", resultMap.get("image"));
+        assertEquals(0, resultMap.get("readyInMinutes")); // 0 bc this is filled in GetRecipeDetails
+        assertNull(resultMap.get("instructions")); // null bc this is filled in GetRecipeDetails
+        assertFalse(resultMap.get("missedIngredients") instanceof List<?>);
+    }
+
+    @Test
+    public void testFetchIngredientsByInitialString() {
+        // Prepare
+        String initialString = "cheese";
+
+        // Define API response
+        IngredientSearchResponse searchResponse = new IngredientSearchResponse();
+        IngredientAPI ingredientAPI = new IngredientAPI();
+        ingredientAPI.setName("cheese");
+        searchResponse.setResults(Collections.singletonList(ingredientAPI));
+
+        ResponseEntity<IngredientSearchResponse> responseEntity = new ResponseEntity<>(searchResponse, HttpStatus.OK);
+
+        // mock FullIngredient
+        FullIngredient fullIngredient = new FullIngredient();
+        fullIngredient.setName("cheese");
+
+        // Mock interactions
+        when(spoonacularRestTemplate.getForEntity(
+                anyString(),
+                eq(IngredientSearchResponse.class)
+        )).thenReturn(responseEntity);
+
+        when(fullIngredientRepository.findByNameContainingIgnoreCase(initialString)).thenReturn(Collections.singletonList(fullIngredient));
+
+        // Call method
+        List<String> ingredientNames = apiService.fetchIngredientsByInitialString(initialString);
+
+        // Verify interactions and capture values
+        verify(spoonacularRestTemplate, times(6)).getForEntity(
+                anyString(),
+                eq(IngredientSearchResponse.class)
+        );
+        verify(fullIngredientRepository, times(1)).findByNameContainingIgnoreCase(initialString);
+
+        // Assert result
+        assertNotNull(ingredientNames);
+        assertEquals(1, ingredientNames.size());
+        assertEquals("cheese", ingredientNames.get(0));
     }
 
 }

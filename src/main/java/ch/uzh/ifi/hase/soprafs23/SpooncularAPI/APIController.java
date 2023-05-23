@@ -211,6 +211,6 @@ public class APIController {
         }
 
         // Fetch ingredients from the API
-        return apiService.fetchIngredientsByInitialString(tokenId, initialString);
+        return apiService.fetchIngredientsByInitialString(initialString);
     }
 }
