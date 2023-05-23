@@ -30,7 +30,6 @@ import java.util.*;
  * It also is responsible for storing/retrieving data from the db.
  */
 
-
 @Service
 @Transactional
 public class UserService {

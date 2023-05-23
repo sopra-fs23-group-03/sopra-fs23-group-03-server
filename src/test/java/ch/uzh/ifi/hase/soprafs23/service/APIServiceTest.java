@@ -48,10 +48,10 @@ public class APIServiceTest {
 
     @Test
     public void testFetchAndStoreIngredients() {
-        // Define the captor
+        // Define captor
         ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
 
-        // Prepare a mock response entity
+        // Prepare mock response entity
         IngredientSearchResponse response = new IngredientSearchResponse();
         IngredientAPI ingredientAPI = new IngredientAPI();
         ingredientAPI.setName("testIngredient");
@@ -67,7 +67,7 @@ public class APIServiceTest {
         when(fullIngredientRepository.existsByQuery(anyString())).thenReturn(false);
         when(fullIngredientRepository.findByNameIgnoreCase(anyString())).thenReturn(Collections.emptyList());
 
-        // Call the method you're testing
+        // Call method
         String apiUrl = "https://api.spoonacular.com/recipes/complexSearch?apiKey=";
         String query = "testQuery";
 
@@ -80,7 +80,7 @@ public class APIServiceTest {
         );
         verify(fullIngredientRepository, times(1)).saveAndFlush(any(FullIngredient.class));
 
-        // Retrieve the captured argument and make assertions on it
+        // Retrieve the captured argument and make assertions
         String capturedUrl = urlCaptor.getValue();
         assertTrue(capturedUrl.startsWith(apiUrl + "&query="));
         assertTrue(capturedUrl.contains(query));
@@ -89,17 +89,13 @@ public class APIServiceTest {
 
     @Test
     public void testGetRecipe() {
-        // Define the captor
+        // Define captor and prepare mocks
         ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
 
-        // Prepare a mock Group
         Group testGroup = new Group();
-
-        // Prepare mock Ingredient sets
         Set<Ingredient> goodIngredients = new HashSet<>(Arrays.asList(new Ingredient("tomato"), new Ingredient("cheese")));
         Set<Ingredient> badIngredients = new HashSet<>(Arrays.asList(new Ingredient("onion"), new Ingredient("garlic")));
 
-        // Prepare mock intolerance list
         Set<String> allergies = new HashSet<>(Arrays.asList("peanuts", "gluten"));
 
         // Define expected API response
@@ -111,10 +107,57 @@ public class APIServiceTest {
 
         ResponseEntity<RecipeSearchResult> responseEntity = new ResponseEntity<>(response, HttpStatus.OK);
 
-        // Mock GroupService methods
+        // Mock methods
         when(groupService.getFinalIngredients(testGroup)).thenReturn(goodIngredients);
         when(groupService.getBadIngredients(testGroup)).thenReturn(badIngredients);
         when(groupService.getGroupMemberAllergies(testGroup)).thenReturn(allergies);
+
+        when(spoonacularRestTemplate.exchange(
+                urlCaptor.capture(),
+                eq(HttpMethod.GET),
+                eq(null),
+                eq(new ParameterizedTypeReference<RecipeSearchResult>() {})
+        )).thenReturn(responseEntity);
+
+        // Call method to test
+        List<RecipeInfo> recipeResults = apiService.getRecipe(testGroup);
+
+        // Verify interactions and capture values
+        verify(spoonacularRestTemplate, times(1)).exchange(
+                anyString(),
+                eq(HttpMethod.GET),
+                eq(null),
+                eq(new ParameterizedTypeReference<RecipeSearchResult>() {})
+        );
+
+        // Retrieve captured argument and make assertions on it
+        String capturedUrl = urlCaptor.getValue();
+        assertTrue(capturedUrl.contains("tomato"));
+        assertTrue(capturedUrl.contains("cheese"));
+        assertTrue(capturedUrl.contains("peanuts"));
+        assertTrue(capturedUrl.contains("gluten"));
+
+        // Assert result
+        assertNotNull(recipeResults);
+        assertEquals(1, recipeResults.size());
+        assertEquals(Long.valueOf(123), recipeResults.get(0).getId());
+        assertEquals("Test Recipe", recipeResults.get(0).getTitle());
+    }
+
+    @Test
+    public void testGetRandomRecipeGroup() {
+        // Define captor and prepare mock
+        ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
+        String intolerances = "peanuts,gluten";
+
+        // Define expected API response
+        RecipeSearchResult response = new RecipeSearchResult();
+        RecipeInfo recipe = new RecipeInfo();
+        recipe.setId(123L);
+        recipe.setTitle("Test Recipe");
+        response.setResults(Collections.singletonList(recipe));
+
+        ResponseEntity<RecipeSearchResult> responseEntity = new ResponseEntity<>(response, HttpStatus.OK);
 
         // Mock restTemplate.exchange()
         when(spoonacularRestTemplate.exchange(
@@ -124,8 +167,8 @@ public class APIServiceTest {
                 eq(new ParameterizedTypeReference<RecipeSearchResult>() {})
         )).thenReturn(responseEntity);
 
-        // Call the method you're testing
-        List<RecipeInfo> recipeResults = apiService.getRecipe(testGroup);
+        // Call method
+        RecipeInfo resultRecipe = apiService.getRandomRecipeGroup(intolerances);
 
         // Verify interactions and capture values
         verify(spoonacularRestTemplate, times(1)).exchange(
@@ -137,19 +180,61 @@ public class APIServiceTest {
 
         // Retrieve the captured argument and make assertions on it
         String capturedUrl = urlCaptor.getValue();
-        assertTrue(capturedUrl.contains("tomato"));
-        assertTrue(capturedUrl.contains("cheese"));
         assertTrue(capturedUrl.contains("peanuts"));
         assertTrue(capturedUrl.contains("gluten"));
 
-
         // Assert result
-        assertNotNull(recipeResults);
-        assertEquals(1, recipeResults.size());
-        assertEquals(Long.valueOf(123), recipeResults.get(0).getId());
-        assertEquals("Test Recipe", recipeResults.get(0).getTitle());
+        assertNotNull(resultRecipe);
+        assertEquals(Long.valueOf(123), resultRecipe.getId());
+        assertEquals("Test Recipe", resultRecipe.getTitle());
+        assertFalse(resultRecipe.getIsRandomBasedOnIntolerances());
     }
 
+    @Test
+    public void testGetRecipeDetails() {
+        // Define captor
+        ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
+
+        // Prepare mock
+        Long externalRecipeId = 123L;
+
+        // Define expected response
+        RecipeDetailInfo detailInfo = new RecipeDetailInfo();
+        detailInfo.setTitle("Test Recipe");
+        detailInfo.setReadyInMinutes(30);
+        detailInfo.setInstructions("Test Instructions");
+
+        ResponseEntity<RecipeDetailInfo> responseEntity = new ResponseEntity<>(detailInfo, HttpStatus.OK);
+
+        // Mock restTemplate.exchange()
+        when(spoonacularRestTemplate.exchange(
+                urlCaptor.capture(),
+                eq(HttpMethod.GET),
+                eq(null),
+                eq(new ParameterizedTypeReference<RecipeDetailInfo>() {})
+        )).thenReturn(responseEntity);
+
+        // Call the method
+        RecipeDetailInfo resultDetailInfo = apiService.getRecipeDetails(externalRecipeId);
+
+        // Verify interactions and capture values
+        verify(spoonacularRestTemplate, times(1)).exchange(
+                anyString(),
+                eq(HttpMethod.GET),
+                eq(null),
+                eq(new ParameterizedTypeReference<RecipeDetailInfo>() {})
+        );
+
+        // Retrieve the captured argument and make assertions on it
+        String capturedUrl = urlCaptor.getValue();
+        assertTrue(capturedUrl.contains(externalRecipeId.toString()));
+
+        // Assert result
+        assertNotNull(resultDetailInfo);
+        assertEquals("Test Recipe", resultDetailInfo.getTitle());
+        assertEquals(Integer.valueOf(30), resultDetailInfo.getReadyInMinutes());
+        assertEquals("Test Instructions", resultDetailInfo.getInstructions());
+    }
 
 }
 

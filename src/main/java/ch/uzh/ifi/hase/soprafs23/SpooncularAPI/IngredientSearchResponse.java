@@ -3,8 +3,7 @@ package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 import java.util.List;
 
 /** IngredientSearchResponse
- * TODO: fill it
- *
+ * represent the JSON response from the API call to search for ingredients
  */
 
 public class IngredientSearchResponse {

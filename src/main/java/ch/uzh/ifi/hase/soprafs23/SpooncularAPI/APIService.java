@@ -216,16 +216,6 @@ public class APIService {
                     }
             );
 
-            if (searchResponse == null) {
-                logger.error("No recipes found for the given ingredients. " +
-                        "This is due to too high restrictions, e.g. your allergies matching all the given ingredients. " +
-                        "We provide you now with a random recipe based only on your allergies, so you still have a cool meal to cook together!");
-                RecipeInfo randomRecipe = getRandomRecipeGroup(intolerancesString);
-                randomRecipe.setIsRandomBasedOnIntolerances(true);
-                return Arrays.asList(randomRecipe);
-            }
-            // TODO: with this change , definitely check the random recipe retrieval again!!!!!
-
             RecipeSearchResult searchResult = searchResponse.getBody();
 
             if (searchResult == null || searchResult.getResults().isEmpty()) {
