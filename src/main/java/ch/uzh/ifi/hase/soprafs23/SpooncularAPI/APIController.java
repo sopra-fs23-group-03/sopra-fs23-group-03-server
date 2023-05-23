@@ -49,12 +49,6 @@ public class APIController {
     @Autowired
     private UserService userService;
 
-    private final String apiKey = "56638b96d69d409cab5a0cdf9a8a1f5d";
-
-    @Autowired
-    private FullIngredientRepository fullIngredientRepository;
-
-
     @Autowired
     private RecipeService recipeService;
 

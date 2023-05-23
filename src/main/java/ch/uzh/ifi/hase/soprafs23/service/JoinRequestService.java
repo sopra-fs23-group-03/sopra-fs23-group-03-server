@@ -22,7 +22,6 @@ import java.util.Optional;
 @Service
 @Transactional
 public class JoinRequestService {
-
     private final JoinRequestRepository joinRequestRepository;
     private final GroupService groupService;
     private final UserService userService;

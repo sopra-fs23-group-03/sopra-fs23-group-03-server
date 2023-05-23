@@ -45,7 +45,7 @@ public class Recipe implements Serializable {
     @Column(name = "INGREDIENT")
     private List<String> missedIngredients;
 
-    @ManyToOne (optional = true) //TODO: need to test then for this, also handle change in service and repository layers. e.g. retrieve or save Recipe instances
+    @ManyToOne (optional = true)
     @JoinColumn(name = "group_id")
     private Group group;
 
