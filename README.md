@@ -110,10 +110,18 @@ To configure a debugger for SpringBoot's Tomcat servlet (i.e. the process you st
 6. Step through the process one step at a time
 
 ### Disclaimers
+
+#### **Users don't leave the process**
 We assume that all group members stay online and continue the meal-planning process together. If one member is not moving along in the process, all other members of the group get stuck at that point and would have to delete their local storage and create a new account in order to use our services.
 
-Further our application was developed and tested mostly on [Google Chrome](https://www.google.com/chrome/). We therefore recommend you download and install Chrome to have the best experience with our application.
+#### **Web Browser**
+Our application was developed and tested mostly on [Google Chrome](https://www.google.com/chrome/). We therefore recommend you download and install Chrome to have the best experience with our application.
 
+#### **Database**
+We have kept the in-memory H2 database of the template project provided by the SoPra FS23 Team. This means that whenever the server gets terminated, e.g. in our deployment due to inactivity, the database gets destroyed with it.
+
+#### **Server Instances**
+In a first interaction with our application, upon a server instance being created, you might experience our application stating that the server cannot be reached. This will resolve itself once the server has started properly. In order to avoid issues with multiple instances of the server we have also limited the maximum number of instances to one. This means, that our application does not scale for too many clients.
 
 ## Roadmap
 
