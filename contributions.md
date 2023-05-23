@@ -180,19 +180,17 @@
 | Orestis     | #210   | Updated the logic of retrieval of all ingredients from external API to avoid spelling mistakes. | X    |
 |             | #47    | Re-opened Create Logout Method which sets User to offline to add some extra functionality to it. | X    |
 |             | #77    | Implement a new Ready/Not Ready logic to transition from some states to other states. |          
-| Kalliopi    |        |                                                                                  |      |
-|             |  #42   |  Create path to be redirected back to the landing page                           | X    |
+| Kalliopi    |  #42   |  Create path to be redirected back to the landing page                           | X    |
 |             |  #37  |  Create path to be redirected back to the landing page                           | X    |
 |             | #41    |  Map cancel button to make all members leave the group                              | X    | 
 |             |  #144  | When dropping out, the user is directed to the LANDING PAGE again                | X    | 
 |             | #39    |  Map continue button to perform the PUT /groups/{id}/state request to have the group move on to the next step | X    |
-|             |        |  independent: Guards                                                             | X    |    
-|             | #40    |  Create path to be directed to the lobby screen (to wait for host to continue)   | X    |         
+|             |        |  independent: Guards                                                             | X    |
+|             | #40    |  Create path to be directed to the lobby screen (to wait for host to continue)   | X    |
 | Ann-Kathrin |  #248  |  implement check that frontend send really just 1,-1,0 for ingredient ratings    |    X |
 |             |   #257 |   take allergies of all group members into account                               |   X  |
 |             |   #253 | make sure "No" ingredients are not used in the final recipe                      |  X   |
 |             |   #255 |    in case of an empty final ingredients list: provide RandomRecipe              |    X |
-|             |        |                                                                                  |      |
 | Chiara      |  #15   |  Send list of all ratings of all ingredients to backend through REST API         |  X   |
 |             |  #25   |  Implement a function to enable guests and host to vote all ingredients          |  X   |
 |             |  #28   |  Implement a submit button to save the ratings                                   |  X   |
@@ -202,7 +200,6 @@
 |             |  #19   |  Display the list of final ingredients in IngredientsFinal view (after voting)   |  X   |
 |             |  #133  |  Display the allregies of the group to help guests in the selection of ingredients to add |  X   |
 
-
 </p>
 
 ## **Week 7** 
@@ -211,15 +208,16 @@
 
 | Name        | Issues | Description                                                                      | Done |
 |-------------|--------|----------------------------------------------------------------------------------|------|
-| Lany        |        |                                                                                  |      |
-| Orestis     |        |                                                                                  |      | 
+| Lany        | #285   | independent: complete testing of the controller classes                          | X    |
+|             | #286   | independent: complete testing of the service classes                             | X    |
+| Orestis     |        |                                                                                  |      |
+|             |        |                                                                                  |      |
 | Kalliopi    |        |                                                                                  |      |
-|             |        
+|             |        |                                                                                  |      |
 | Ann-Kathrin |  #268  |  make GET Call                                                                   |    X |
 |             |  #269  |  retrieve personal info and write method to get recipe based on single pers data |  X   |
+| Chiara      |        |                                                                                  |      |
 |             |        |                                                                                  |      |
-| Chiara      |        |                                                                                  |      |                        
-
 
 </p>
 
