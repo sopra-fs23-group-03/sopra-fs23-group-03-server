@@ -31,25 +31,26 @@ import org.slf4j.LoggerFactory;
 @Component
 public class APIService {
     private static final Logger logger = LoggerFactory.getLogger(APIService.class);
-    @Autowired
-    private GroupService groupService;
+
     @Autowired
     private RecipeRepository recipeRepository;
 
     private final RestTemplate restTemplate;
-    @Autowired
-    public APIService(RestTemplate restTemplate, FullIngredientRepository fullIngredientRepository) {
-        this.restTemplate = restTemplate;
-        this.fullIngredientRepository = fullIngredientRepository;
-    }
 
+    private final GroupService groupService;
 
-    //private final RestTemplate restTemplate = new RestTemplate();
     private final String apiKey = "56638b96d69d409cab5a0cdf9a8a1f5d";
     @Autowired
     private FullIngredientRepository fullIngredientRepository;
     @Autowired
     private IngredientRepository ingredientRepository;
+
+    @Autowired
+    public APIService(RestTemplate restTemplate, FullIngredientRepository fullIngredientRepository, GroupService groupService) {
+        this.restTemplate = restTemplate;
+        this.fullIngredientRepository = fullIngredientRepository;
+        this.groupService = groupService;
+    }
 
 
     public Map<String, Object> getRandomRecipeUser(User user) {  // used Map so no creating any new classes or changing existing ones
@@ -210,6 +211,17 @@ public class APIService {
                     new ParameterizedTypeReference<RecipeSearchResult>() {
                     }
             );
+
+            if (searchResponse == null) {
+                logger.error("No recipes found for the given ingredients. " +
+                        "This is due to too high restrictions, e.g. your allergies matching all the given ingredients. " +
+                        "We provide you now with a random recipe based only on your allergies, so you still have a cool meal to cook together!");
+                RecipeInfo randomRecipe = getRandomRecipeGroup(intolerancesString);
+                randomRecipe.setIsRandomBasedOnIntolerances(true);
+                return Arrays.asList(randomRecipe);
+            }
+            // TODO: with this change , definitely check the random recipe retrieval again!!!!!
+
             RecipeSearchResult searchResult = searchResponse.getBody();
 
             if (searchResult == null || searchResult.getResults().isEmpty()) {
