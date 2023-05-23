@@ -276,9 +276,6 @@ public class UserService {
         userRepository.save(user);
     }
 
-
-
-
     @Transactional //for Spring; makes all changes to db persisted in one single transaction --> helps rolling back in case of an error (data consistency)
     public void updateIngredientRatings(Long groupId, Long userId, Map <Long, String> ingredientRatings) {
         // fetch User and Group
