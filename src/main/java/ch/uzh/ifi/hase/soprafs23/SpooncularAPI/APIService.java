@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs23.entity.Ingredient;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.service.GroupService;
+import ch.uzh.ifi.hase.soprafs23.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -48,6 +49,8 @@ public class APIService {
     private FullIngredientRepository fullIngredientRepository;
     @Autowired
     private IngredientRepository ingredientRepository;
+    @Autowired
+    private UserService userService;
 
     @Autowired
     public APIService(RestTemplate restTemplate, FullIngredientRepository fullIngredientRepository, GroupService groupService) {
@@ -55,7 +58,6 @@ public class APIService {
         this.fullIngredientRepository = fullIngredientRepository;
         this.groupService = groupService;
     }
-
 
     public Map<String, Object> getRandomRecipeUser(User user) {  // used Map so no creating any new classes or changing existing ones
         String intolerances = String.join(",", user.getAllergiesSet());
@@ -170,7 +172,6 @@ public class APIService {
         recipe.setInstructions(detailInfo.getInstructions() != null ? detailInfo.getInstructions() : "No instructions provided");
     }
 
-
     public List<RecipeInfo> getRecipe(Group group) {
         Set<Ingredient> finalSetIngredients = groupService.getFinalIngredients(group);// good Ingredients
         Set<Ingredient> badSetIngredients = groupService.getBadIngredients(group);// bad Ingredients
@@ -278,7 +279,6 @@ public class APIService {
         }
     }
 
-
     public RecipeDetailInfo getRecipeDetails(Long externalRecipeId) { // to fill readyInMinutes and Instructions
         String informationApiUrl = "https://api.spoonacular.com/recipes/" + externalRecipeId + "/information?apiKey=" + apiKey;
         try {
@@ -330,6 +330,22 @@ public class APIService {
                 }
             }
         }
+    }
+
+    public List<String> fetchIngredientsByInitialString(Long tokenId, String initialString) {
+        // Fetch ingredients from the API if not already in the database
+        for (char ch : initialString.toCharArray()) {
+            String apiUrl = "https://api.spoonacular.com/food/ingredients/search?apiKey=" + apiKey + "&number=1000";
+            fetchAndStoreIngredients(apiUrl, String.valueOf(ch));
+        }
+
+        List<FullIngredient> fullIngredients = fullIngredientRepository.findByNameContainingIgnoreCase(initialString);
+        List<String> ingredientNames = fullIngredients.stream().map(FullIngredient::getName).collect(Collectors.toList());
+
+        if (ingredientNames.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No ingredients found with the name: '%s'.", initialString));
+        }
+        return ingredientNames;
     }
 
     public String getApiKey() {

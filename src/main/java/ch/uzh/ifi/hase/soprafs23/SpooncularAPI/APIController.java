@@ -210,18 +210,7 @@ public class APIController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "The groupState is not INGREDIENTENTERING");
         }
 
-        // Fetch ingredients from the API if not already in the database
-        for (char ch : initialString.toCharArray()) {
-            String apiUrl = "https://api.spoonacular.com/food/ingredients/search?apiKey=" + apiKey + "&number=1000";
-            apiService.fetchAndStoreIngredients(apiUrl, String.valueOf(ch));
-        }
-
-        List<FullIngredient> fullIngredients = fullIngredientRepository.findByNameContainingIgnoreCase(initialString);
-        List<String> ingredientNames = fullIngredients.stream().map(FullIngredient::getName).collect(Collectors.toList());
-
-        if (ingredientNames.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("No ingredients found with the name: '%s'.", initialString));
-        }
-        return ingredientNames;
+        // Fetch ingredients from the API
+        return apiService.fetchIngredientsByInitialString(tokenId, initialString);
     }
 }
