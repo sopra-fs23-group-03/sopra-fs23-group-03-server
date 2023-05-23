@@ -29,10 +29,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -185,9 +182,10 @@ public class APIControllerTest {
                 .andExpect(jsonPath("$[0].groupId").value(testGroup.getId()));
     }
 
+
     @Test
     public void getGroupRecipe_groupNotFound() throws Exception {
-        doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found")) // TODO: not sure if this is cheating though! Had difficulties with calling the getGroupId otherwise
+        doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Group not found"))
                 .when(groupService).getGroupById(Mockito.any());
 
 
@@ -195,6 +193,18 @@ public class APIControllerTest {
                         .header("X-Token", "valid-token")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getGroupRecipe_groupStateNotRecipe() throws Exception {
+        // Set the group state to something other than RECIPE
+        testGroup.setGroupState(GroupState.GROUPFORMING);
+        when(groupService.getGroupById(any())).thenReturn(testGroup);
+
+        mockMvc.perform(get("/groups/{groupId}/result", 1L)
+                        .header("X-Token", "valid-token")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
     }
 
 

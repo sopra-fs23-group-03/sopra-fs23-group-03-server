@@ -24,6 +24,13 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
+/**
+ * User Service
+ * This class can be seen as a "working class" for all user related methods.
+ * It also is responsible for storing/retrieving data from the db.
+ */
+
+
 @Service
 @Transactional
 public class UserService {

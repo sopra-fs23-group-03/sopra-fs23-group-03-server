@@ -10,6 +10,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 
+/**
+ * Recipe Service
+ * This class can be seen as a "working class" for all recipe related methods.
+ * It also is responsible for storing/retrieving data from the respective recipeRepository.
+ */
+
 @Service
 public class RecipeService {
     @Autowired

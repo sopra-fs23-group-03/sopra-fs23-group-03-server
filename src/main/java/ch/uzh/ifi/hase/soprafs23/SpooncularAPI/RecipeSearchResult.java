@@ -14,5 +14,8 @@ public class RecipeSearchResult {
         return results;
     }
 
+    public void setResults(List<RecipeInfo> results) {
+        this.results = results;
+    }
 }
 

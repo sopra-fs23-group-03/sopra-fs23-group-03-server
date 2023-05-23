@@ -14,6 +14,11 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * JoinRequest Service
+ * This class can be seen as a "working class" for all join requests related methods.
+ * It also is responsible for storing/retrieving data from the respective joinRequestRepository.
+ */
 @Service
 @Transactional
 public class JoinRequestService {
