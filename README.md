@@ -48,7 +48,7 @@ For every displayed final recipe, two calls are needed: First, to retrieve the r
 
 ## Disclaimers
 
-### Users don't leave the process
+### Users should't leave the process
 We assume that all group members stay online and continue the meal-planning process together. If one member is not moving along in the process, all other members of the group get stuck at that point and would have to delete their local storage and create a new account in order to use our services.
 
 ### Web Browser
