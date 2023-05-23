@@ -46,7 +46,19 @@ The [spoonacular API](https://spoonacular.com/food-api) is used to retrieve the 
 We distinguish between the recipe retrieval for a.) groups and b.) for single users (*solo* option). 
 For every displayed final recipe, two calls are needed: First, to retrieve the recipe suggestion based on a.) the ingredients with respect to the intolerances b.) intolerances, dietary preferences and favourite cuisines. With the second call, more detailed information such as image, instructions and ready-in-minutes are retrieved. For the first call we use the complex search provided by spoonacular, with the following additions: `ignorePantry=true` (we assume that pantry items are at home already), `type=main course` (we give only recipes for main courses), `sort=max-used-ingredients` (we first maximise the used ingredients, instead of minimising the additionally needed ones). The second call uses the `api.spoonacular.com/recipes/id/information` call to retireve the additional information on the recipe. 
 
+## Disclaimers
 
+### Users don't leave the process
+We assume that all group members stay online and continue the meal-planning process together. If one member is not moving along in the process, all other members of the group get stuck at that point and would have to delete their local storage and create a new account in order to use our services.
+
+### Web Browser
+Our application was developed and tested mostly using [Google Chrome](https://www.google.com/chrome/). We therefore recommend you download and install Chrome to have the best experience with our application.
+
+### Database
+We have kept the in-memory H2 database of the template project provided by the SoPra FS23 Team. This means that whenever the server gets terminated, e.g. in our deployment due to inactivity, the database gets destroyed with it.
+
+### Server Instance
+In a first interaction with our deployed application, upon a server instance being created, you might experience our application stating that the server cannot be reached. This will resolve itself once the server has started properly. In order to avoid issues with multiple instances of the server we have also limited the maximum number of instances to one. This means, that our application does not scale for too many clients.
 ## Launch & Deployment
 
 ### Getting started with Spring Boot
@@ -109,20 +121,6 @@ To configure a debugger for SpringBoot's Tomcat servlet (i.e. the process you st
 5. Set breakpoints in the application where you need it
 6. Step through the process one step at a time
 
-### Disclaimers
-
-#### **Users don't leave the process**
-We assume that all group members stay online and continue the meal-planning process together. If one member is not moving along in the process, all other members of the group get stuck at that point and would have to delete their local storage and create a new account in order to use our services.
-
-#### **Web Browser**
-Our application was developed and tested mostly using [Google Chrome](https://www.google.com/chrome/). We therefore recommend you download and install Chrome to have the best experience with our application.
-
-#### **Database**
-We have kept the in-memory H2 database of the template project provided by the SoPra FS23 Team. This means that whenever the server gets terminated, e.g. in our deployment due to inactivity, the database gets destroyed with it.
-
-#### **Server Instance**
-In a first interaction with our deployed application, upon a server instance being created, you might experience our application stating that the server cannot be reached. This will resolve itself once the server has started properly. In order to avoid issues with multiple instances of the server we have also limited the maximum number of instances to one. This means, that our application does not scale for too many clients.
-
 ## Roadmap
 See the [Future Work](https://github.com/orgs/sopra-fs23-group-03/projects/1/views/5?filterQuery=milestone%3A%22Future+Work%22) in our Project Board for the functionality we'd plan to develop further in our application. Here are the three most interesting additions we'd like to implement:
 
@@ -131,7 +129,6 @@ See the [Future Work](https://github.com/orgs/sopra-fs23-group-03/projects/1/vie
 - **Additional decision logic**: The rating of the ingredients is implemented with a majority-vote-logic. In a next step, we'd add additional decision logics to this step, e.g. a point-distribution logic. Related user story: [#22](https://github.com/sopra-fs23-group-03/sopra-fs23-group-03-server/issues/22)
 
 - **Choose from multiple recipes**: A group will get one final recipe at the end of the process, if the spoonacular API had returned multiple recipes, we choose one at random for the group. In a next step we'd give the group all options that the spoonacular API provides and let the host choose one of them as the final recipe. Related user story: [#25](https://github.com/sopra-fs23-group-03/sopra-fs23-group-03-server/issues/25)
-
 
 ## Authors and acknowledgment
 - Kalliopi Papadaki - [KallPap](https://github.com/KallPap)
