@@ -328,7 +328,7 @@ public class APIService {
         }
     }
 
-    public List<String> fetchIngredientsByInitialString(Long tokenId, String initialString) {
+    public List<String> fetchIngredientsByInitialString(String initialString) {
         // Fetch ingredients from the API if not already in the database
         for (char ch : initialString.toCharArray()) {
             String apiUrl = "https://api.spoonacular.com/food/ingredients/search?apiKey=" + apiKey + "&number=1000";
