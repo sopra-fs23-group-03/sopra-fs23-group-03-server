@@ -138,7 +138,7 @@ public class APIService {
         catch (ResponseStatusException e) {
             HttpStatus status = e.getStatus();
             String reason = e.getReason();
-            if (status == null || reason == null) {
+            if (reason == null) {
                 throw e;
             }
             if (status == HttpStatus.NOT_FOUND && reason.equalsIgnoreCase("No recipes found")) {
@@ -327,7 +327,7 @@ public class APIService {
             }
         }
     }
-
+    @Transactional
     public List<String> fetchIngredientsByInitialString(String initialString) {
         // Fetch ingredients from the API if not already in the database
         for (char ch : initialString.toCharArray()) {

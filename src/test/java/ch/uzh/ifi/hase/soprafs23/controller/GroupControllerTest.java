@@ -1939,7 +1939,7 @@ public class GroupControllerTest {
     @Test
     void shouldReturnReadyMembersWhenUserIsHost() throws Exception {
         Map<Long, Boolean> expectedMap = new HashMap<>();
-        expectedMap.put(3L, true); // You can put your own data here
+        expectedMap.put(3L, true);
 
         given(userService.getGroupUserReadyStatus(group.getId())).willReturn(expectedMap);
         String expectedJson = objectMapper.writeValueAsString(expectedMap);

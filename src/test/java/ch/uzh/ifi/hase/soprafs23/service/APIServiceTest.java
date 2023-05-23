@@ -46,7 +46,7 @@ public class APIServiceTest {
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.openMocks(this); // This is important to initialize the @Mock and @InjectMocks annotations
+        MockitoAnnotations.openMocks(this);
         apiService = new APIService(spoonacularRestTemplate, fullIngredientRepository, groupService, recipeRepository);
     }
 
@@ -299,10 +299,50 @@ public class APIServiceTest {
         assertEquals("Test Recipe", resultMap.get("title"));
         assertEquals("Test Image", resultMap.get("image"));
         assertEquals(0, resultMap.get("readyInMinutes")); // 0 bc this is filled in GetRecipeDetails
-        assertEquals(null, resultMap.get("instructions")); // null bc this is filled in GetRecipeDetails
+        assertNull(resultMap.get("instructions")); // null bc this is filled in GetRecipeDetails
         assertFalse(resultMap.get("missedIngredients") instanceof List<?>);
     }
 
+    @Test
+    public void testFetchIngredientsByInitialString() {
+        // Prepare
+        String initialString = "cheese";
+
+        // Define API response
+        IngredientSearchResponse searchResponse = new IngredientSearchResponse();
+        IngredientAPI ingredientAPI = new IngredientAPI();
+        ingredientAPI.setName("cheese");
+        searchResponse.setResults(Collections.singletonList(ingredientAPI));
+
+        ResponseEntity<IngredientSearchResponse> responseEntity = new ResponseEntity<>(searchResponse, HttpStatus.OK);
+
+        // mock FullIngredient
+        FullIngredient fullIngredient = new FullIngredient();
+        fullIngredient.setName("cheese");
+
+        // Mock interactions
+        when(spoonacularRestTemplate.getForEntity(
+                anyString(),
+                eq(IngredientSearchResponse.class)
+        )).thenReturn(responseEntity);
+
+        when(fullIngredientRepository.findByNameContainingIgnoreCase(initialString)).thenReturn(Collections.singletonList(fullIngredient));
+
+        // Call method
+        List<String> ingredientNames = apiService.fetchIngredientsByInitialString(initialString);
+
+        // Verify interactions and capture values
+        verify(spoonacularRestTemplate, times(6)).getForEntity(
+                anyString(),
+                eq(IngredientSearchResponse.class)
+        );
+        verify(fullIngredientRepository, times(1)).findByNameContainingIgnoreCase(initialString);
+
+        // Assert result
+        assertNotNull(ingredientNames);
+        assertEquals(1, ingredientNames.size());
+        assertEquals("cheese", ingredientNames.get(0));
+    }
 
 }
 
