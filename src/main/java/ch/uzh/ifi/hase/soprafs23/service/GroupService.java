@@ -24,6 +24,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * Group Service
+ * This class can be seen as a "working class" for all group related methods.
+ * It also is responsible for storing/retrieving data from the db.
+ */
 
 @Service
 @Transactional

@@ -27,7 +27,11 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+/**
+ * API Service
+ * This class can be seen as a "working class" for all external API related methods like retrieving ingredients or getting the recipe results.
+ * It also is responsible for storing/retrieving data from the respective repositories.
+ */
 @Component
 public class APIService {
     private static final Logger logger = LoggerFactory.getLogger(APIService.class);

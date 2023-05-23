@@ -23,6 +23,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
+/**
+ * APIController
+ * This class is responsible for handling all REST request that are related to
+ * the external API Calls.
+ * The controller will receive the request and delegate the execution (apart from some mapping) to the
+ * APIService and finally return the result.
+ */
+
+
 @RestController
 public class APIController {
 
@@ -129,7 +139,6 @@ public class APIController {
         return new ResponseEntity<>(apiGetDTOS, HttpStatus.OK);
     }
 
-    //TODO: do we need our own DTOMapperAPI Class?
     private APIGetDTO convertRecipeToAPIGetDTO(Recipe recipe) {
         APIGetDTO apiGetDTO = new APIGetDTO();
         apiGetDTO.setId(recipe.getId());
