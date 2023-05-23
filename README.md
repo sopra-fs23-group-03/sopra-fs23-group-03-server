@@ -59,6 +59,7 @@ We have kept the in-memory H2 database of the template project provided by the S
 
 ### Server Instance
 In a first interaction with our deployed application, upon a server instance being created, you might experience our application stating that the server cannot be reached. This will resolve itself once the server has started properly. In order to avoid issues with multiple instances of the server we have also limited the maximum number of instances to one. This means, that our application does not scale for too many clients.
+
 ## Launch & Deployment
 
 ### Getting started with Spring Boot
