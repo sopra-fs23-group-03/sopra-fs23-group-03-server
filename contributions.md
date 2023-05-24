@@ -81,8 +81,7 @@
 |             |   #88  | Reopened and fixed the updating attributes and the tests                         |  X   |
 |             |  #176  | check if existing PUT /users/{userId} call can be used and add updated name/password to the call. |  X   |
 |             |  #177  | check for valid token in PUT call.                                               |  X   |    
-| Kalliopi    |        |                                                                                   |  X   |
-|             |   #77  | Create host view of group forming page                                           |  X   |
+| Kalliopi    |   #77  | Create host view of group forming page                                           |  X   |
 |             |   #43  | Create guest view of group forming page                                           |  X   |
 |             |   #12  |Create redirection to Login page                                                  |  X   |
 |             |   #57  | Create "Ingredient Page"                                                         |  X   |
@@ -130,7 +129,6 @@
 |             | #35    | Perform the GET request to get the group information                             |  X   | 
 |             | #64    | create notification section                                                      |  X   |
 |             | #34    | Create the group forming page                                                    |  X   |   
-|             | #35    | Perform the GET request to get the group information                             |  X   | 
 |             | #36    | Create path to be redirected back to the landing pagen                           |  X   |     
 |             | #66    | Path to be redirected to Group Forming Page - Group Overview if user accepts invitation |  X   |
 | Ann-Kathrin | #105   |  Implement a method for adding the ingredient contributions                      |  X   |
@@ -222,9 +220,7 @@
 | Lany        | #285   | independent: complete testing of the controller classes                          | X    |
 |             | #286   | independent: complete testing of the service classes                             | X    |
 | Orestis     | #291   | Independent: create GET /groups/{groupId}/members/ready.                         | X    |
-|             |        |                                                                                  |      |
 | Kalliopi    |        |                                                                                  |      |
-|             |        |                                                                                  |      |
 | Ann-Kathrin |  #268  |  Make GET Call                                                                   |  X   |
 |             |  #269  |  Retrieve personal info and write method to get recipe based on single pers data |  X   |
 | Chiara      |  #145  |  Create Go-Solo button, connect it with Landing Page, direct to final recipe     |  X   |
