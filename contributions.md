@@ -98,7 +98,6 @@
 |             | #75    | Create buttons for both creating and deleting group                              |  X   |
 |             | #74    | Move guests into the guests section                                              |  X   |
 |             | #73    | Create a guests section                                                          |  X   |
-|             | #51    | Create path to be redirected to user profile                                     |  X   |
 |             | #46    | Create API calls with body for backend communication                             |  X   |
 |             | #47    | Display username, allergies, favorite cuisine, and special diet on user profile  |  X   |
 |             | #49    | Create save button to save the edited fields                                     |  X   |
@@ -120,7 +119,6 @@
 |             | #167   |implement POST /groups/{groupId}/requests call                                    | X    |
 |             | #169   | implement PUT /groups/{groupId}/requests/accept call                             | X    |
 | Kalliopi    | #18    | Implement a function to fetch the recipe suggestion the backend API              |  X   |
-|             | #17    | Display the randomly selected recipe suggestion on the screen                    |  X   |
 |             | #55    | Display all active planning groups with their group name, host and guests        |  X   |
 |             | #67    | Redirect user to landing page if invitation is rejected                          |  X   |
 |             | #65    | Add red notification signal when user gets a new notification                    |  X   |
@@ -214,10 +212,10 @@
 |             |        |                                                                                  |      |
 | Kalliopi    |        |                                                                                  |      |
 |             |        |                                                                                  |      |
-| Ann-Kathrin |  #268  |  make GET Call                                                                   |    X |
-|             |  #269  |  retrieve personal info and write method to get recipe based on single pers data |  X   |
-| Chiara      |        |                                                                                  |      |
-|             |        |                                                                                  |      |
+| Ann-Kathrin |  #268  |  Make GET Call                                                                   |  X   |
+|             |  #269  |  Retrieve personal info and write method to get recipe based on single pers data |  X   |
+| Chiara      |  #145  |  Create Go-Solo button, connect it with Landing Page, direct to final recipe     |  X   |
+|             |  #17   |  Display the randomly selected recipe suggestion on the screen                   |  X   |
 
 </p>
 
