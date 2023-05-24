@@ -179,7 +179,7 @@
 |             | #67 & #173 | Implemented previously, connected to corresponding commits.                  | X    |
 | Orestis     | #210   | Updated the logic of retrieval of all ingredients from external API to avoid spelling mistakes. | X    |
 |             | #47    | Re-opened Create Logout Method which sets User to offline to add some extra functionality to it. | X    |
-|             | #77    | Implement a new Ready/Not Ready logic to transition from some states to other states. | X    |          
+|             | #292   | Independent: create PUT /users/{userId}/{groupId}/ready.                         | X    |          
 | Kalliopi    |  #42   |  Create path to be redirected back to the landing page                           | X    |
 |             |  #37  |  Create path to be redirected back to the landing page                           | X    |
 |             | #41    |  Map cancel button to make all members leave the group                              | X    | 
@@ -210,7 +210,7 @@
 |-------------|--------|----------------------------------------------------------------------------------|------|
 | Lany        | #285   | independent: complete testing of the controller classes                          | X    |
 |             | #286   | independent: complete testing of the service classes                             | X    |
-| Orestis     |        |                                                                                  |      |
+| Orestis     | #291   | Independent: create GET /groups/{groupId}/members/ready.                         | X    |
 |             |        |                                                                                  |      |
 | Kalliopi    |        |                                                                                  |      |
 |             |        |                                                                                  |      |
