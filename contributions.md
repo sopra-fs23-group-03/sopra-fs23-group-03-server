@@ -24,6 +24,7 @@
 |             | #40    | Change Status                                                                    |  X   |
 |             | #39    | Check for valid password                                                         |  X   |
 |             | #37    | Check if user exists                                                             |  X   |
+|             | #38    | Write error messages                                                             |  X   |   
 | Chiara      | #1     | Create Register page                                                             |  X   |
 |             | #4     | Create Login page                                                                |  X   |
 |             | #2     | Write error messages                                                             |  X   |
