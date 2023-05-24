@@ -78,6 +78,8 @@
 |             | #187   | Create GET /groups/{id}/members request                                          |  X   |
 | Orestis     |   #57  | Function to randomly select one recipe suggestion from the API                   |  X   |
 |             |   #88  | Reopened and fixed the updating attributes and the tests                         |  X   |
+|             |  #176  | check if existing PUT /users/{userId} call can be used and add updated name/password to the call. |  X   |
+|             |  #177  | check for valid token in PUT call.                                               |  X   |    
 | Kalliopi    |   #42  | Create host view of group forming page                                           |  X   |
 |             |   #43  | Create guest view of group forming page                                          |  X   |
 |             |   #57  | Create "Ingredient Page"                                                         |  X   |
