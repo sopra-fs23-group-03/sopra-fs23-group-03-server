@@ -61,4 +61,3 @@ public class FullIngredient implements Serializable {
         this.isLocked = isLocked;
     }
 }
-
