@@ -81,8 +81,9 @@
 |             |   #88  | Reopened and fixed the updating attributes and the tests                         |  X   |
 |             |  #176  | check if existing PUT /users/{userId} call can be used and add updated name/password to the call. |  X   |
 |             |  #177  | check for valid token in PUT call.                                               |  X   |    
-| Kalliopi    |   #42  | Create host view of group forming page                                           |  X   |
-|             |   #43  | Create guest view of group forming page                                          |  X   |
+| Kalliopi    |        |                                                                                   |  X   |
+|             |   #77  | Create host view of group forming page                                           |  X   |
+|             |   #43  | Create guest view of group forming page                                           |  X   |
 |             |   #57  | Create "Ingredient Page"                                                         |  X   |
 |             |   #63  | Create a button to submit the final contributions and transition to next page    |  X   |
 |             |   #58  | Create ingredient input field and a button for adding an ingredient to the meal  |  X   |
@@ -125,6 +126,11 @@
 |             | #55    | Display all active planning groups with their group name, host and guests        |  X   |
 |             | #67    | Redirect user to landing page if invitation is rejected                          |  X   |
 |             | #65    | Add red notification signal when user gets a new notification                    |  X   |
+|             | #35    | Perform the GET request to get the group information                             |  X   | 
+|             | #64    | create notification section                                                      |  X   |
+|             | #34    | Create the group forming page                                                    |  X   |   
+|             | #35    | Perform the GET request to get the group information                             |  X   | 
+|             | #36    | Create path to be redirected back to the landing pagen                           |  X   |     
 |             | #66    | Path to be redirected to Group Forming Page - Group Overview if user accepts invitation |  X   |
 | Ann-Kathrin | #105   |  Implement a method for adding the ingredient contributions                      |  X   |
 |             | #210   |  Retrieve all ingredients from external API to avoid spelling mistakes           |  X   |
@@ -185,9 +191,12 @@
 |             |  #37  |  Create path to be redirected back to the landing page                           | X    |
 |             | #41    |  Map cancel button to make all members leave the group                              | X    | 
 |             |  #144  | When dropping out, the user is directed to the LANDING PAGE again                | X    | 
-|             | #39    |  Map continue button to perform the PUT /groups/{id}/state request to have the group move on to the next step | X    |
-|             |        |  independent: Guards                                                             | X    |
+|             | #39    |  Map continue button to perform the PUT /groups/{id}/state request to have the group move on to the next step | X |
 |             | #40    |  Create path to be directed to the lobby screen (to wait for host to continue)   | X    |
+|             | #98    |    Display continue button, save changes and send them to backend                | X    |   
+|             | #96    |  Accept/reject join requests in Groupforming-Host page                           | X    |
+|             | #97    |   Display accept/reject button and give functions                                | X    |
+|             | #95    |   Add join-group buttons (and the related functionality) in the Landing page     | X    |
 | Ann-Kathrin |  #248  |  implement check that frontend send really just 1,-1,0 for ingredient ratings    |    X |
 |             |   #257 |   take allergies of all group members into account                               |   X  |
 |             |   #253 | make sure "No" ingredients are not used in the final recipe                      |  X   |
