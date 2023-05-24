@@ -856,6 +856,7 @@ public class UserControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(userService, times(1)).setAllUsersNotReady(Collections.singletonList(1L));
+        verify(groupService, times(1)).changeGroupState(1L, GroupState.INGREDIENTENTERING);
     }
 
     @Test
@@ -870,6 +871,7 @@ public class UserControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(userService, times(1)).setAllUsersNotReady(Collections.singletonList(1L));
+        verify(groupService, times(1)).changeGroupState(1L, GroupState.RECIPE);
     }
 
     @Test
