@@ -13,7 +13,7 @@
 | Orestis     | #106   | Create new fields for allergies, favorite cuisine and special diet in user class |  X   |
 |             | #124   | Make sure there's only one host per group                                        |  X   |
 |             | #125   | Make a function to assign name to group                                          |  X   |
-|             | #127   | Create method checking if group name already exists                              |  X   |
+|             | #127 / #133  | Create method checking if group name already exists                              |  X   |
 |             | #126   | Create POST /groups for the creation of a new group                              |  X   |
 |             | #123   | Assign user as host                                                              |  X   |
 | Kalliopi    | #4     | Create Login page                                                                |  X   |
