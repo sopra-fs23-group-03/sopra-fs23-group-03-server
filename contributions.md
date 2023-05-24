@@ -84,6 +84,7 @@
 | Kalliopi    |        |                                                                                   |  X   |
 |             |   #77  | Create host view of group forming page                                           |  X   |
 |             |   #43  | Create guest view of group forming page                                           |  X   |
+|             |   #12  |Create redirection to Login page                                                  |  X   |
 |             |   #57  | Create "Ingredient Page"                                                         |  X   |
 |             |   #63  | Create a button to submit the final contributions and transition to next page    |  X   |
 |             |   #58  | Create ingredient input field and a button for adding an ingredient to the meal  |  X   |
