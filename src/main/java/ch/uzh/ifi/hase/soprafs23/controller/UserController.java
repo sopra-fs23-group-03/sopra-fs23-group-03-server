@@ -334,9 +334,9 @@ public class UserController {
         if (allReady) {
             // If all users are ready, change the state and set isReady to false for all
             if (groupState == GroupState.GROUPFORMING) {
-                group.setGroupState(GroupState.INGREDIENTENTERING);
+                groupService.changeGroupState(groupId, GroupState.INGREDIENTENTERING);
             } else if (groupState == GroupState.FINAL) {
-                group.setGroupState(GroupState.RECIPE);
+                groupService.changeGroupState(groupId, GroupState.RECIPE);
             } else if (groupState == GroupState.RECIPE) {
                 userService.deleteGroupAndSetAllUsersNotReady(groupId, memberIds);
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
