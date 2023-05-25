@@ -50,6 +50,9 @@ public class APIController {
     private UserService userService;
 
     @Autowired
+    private FullIngredientRepository fullIngredientRepository;
+
+    @Autowired
     private RecipeService recipeService;
 
     @GetMapping("/groups/{groupId}/result")
