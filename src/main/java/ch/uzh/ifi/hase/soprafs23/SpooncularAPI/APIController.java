@@ -1,6 +1,5 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
-import ch.uzh.ifi.hase.soprafs23.entity.FullIngredient;
 import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
@@ -48,6 +47,8 @@ public class APIController {
 
     @Autowired
     private UserService userService;
+
+    private final String apiKey = "56638b96d69d409cab5a0cdf9a8a1f5d";
 
     @Autowired
     private FullIngredientRepository fullIngredientRepository;
