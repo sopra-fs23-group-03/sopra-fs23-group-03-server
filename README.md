@@ -38,7 +38,7 @@ Our motivation for this project was to aid fellow students in planning their mea
 - Relation: The ingredients are added to the group by the members of the group. The members then rate the ingredients and based on them a final recipe is chosen for the group.
 
 ### [Recipe](https://github.com/sopra-fs23-group-03/sopra-fs23-group-03-server/blob/main/src/main/java/ch/uzh/ifi/hase/soprafs23/SpooncularAPI/Recipe.java)
-- Role: At the end of the process or when choosing to go *solo* a recipe is found for the group. 
+- Role: At the end of the process or when choosing to go *solo* a recipe is found. 
 - Relation: The final recipe is found based on the ingredients the users contibute, the rating of these ingredients, and the group members' allergies. If the *solo* option is chosen, the favorite cuisine and allergies of the user will be taken into account.
 
 ## External API
