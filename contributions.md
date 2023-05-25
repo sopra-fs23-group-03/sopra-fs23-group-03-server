@@ -192,8 +192,6 @@
 |             | #39    |  Map continue button to perform the PUT /groups/{id}/state request to have the group move on to the next step | X |
 |             | #40    |  Create path to be directed to the lobby screen (to wait for host to continue)   | X    |
 |             | #98    |    Display continue button, save changes and send them to backend                | X    |   
-|             | #96    |  Accept/reject join requests in Groupforming-Host page                           | X    |
-|             | #97    |   Display accept/reject button and give functions                                | X    |
 |             | #95    |   Add join-group buttons (and the related functionality) in the Landing page     | X    |
 | Ann-Kathrin |  #248  |  implement check that frontend send really just 1,-1,0 for ingredient ratings    |    X |
 |             |   #257 |   take allergies of all group members into account                               |   X  |
@@ -221,6 +219,8 @@
 | Orestis     | #292   | Independent: create PUT /users/{userId}/{groupId}/ready.                         | X    |    
 |             | #291   | Independent: create GET /groups/{groupId}/members/ready.                         | X    |
 | Kalliopi    |        |                                                                                  |      |
+|             | #96    |  Accept/reject join requests in Groupforming-Host page                           | X    |
+|             | #97    |   Display accept/reject button and give functions                                | X    |
 | Ann-Kathrin |  #268  |  Make GET Call                                                                   |  X   |
 |             |  #269  |  Retrieve personal info and write method to get recipe based on single pers data |  X   |
 | Chiara      |  #145  |  Create Go-Solo button, connect it with Landing Page, direct to final recipe     |  X   |
