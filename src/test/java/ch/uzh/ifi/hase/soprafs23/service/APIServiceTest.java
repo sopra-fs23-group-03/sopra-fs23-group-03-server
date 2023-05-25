@@ -303,46 +303,5 @@ public class APIServiceTest {
         assertFalse(resultMap.get("missedIngredients") instanceof List<?>);
     }
 
-//    @Test
-//    public void testFetchIngredientsByInitialString() {
-//        // Prepare
-//        String initialString = "cheese";
-//
-//        // Define API response
-//        IngredientSearchResponse searchResponse = new IngredientSearchResponse();
-//        IngredientAPI ingredientAPI = new IngredientAPI();
-//        ingredientAPI.setName("cheese");
-//        searchResponse.setResults(Collections.singletonList(ingredientAPI));
-//
-//        ResponseEntity<IngredientSearchResponse> responseEntity = new ResponseEntity<>(searchResponse, HttpStatus.OK);
-//
-//        // mock FullIngredient
-//        FullIngredient fullIngredient = new FullIngredient();
-//        fullIngredient.setName("cheese");
-//
-//        // Mock interactions
-//        when(spoonacularRestTemplate.getForEntity(
-//                anyString(),
-//                eq(IngredientSearchResponse.class)
-//        )).thenReturn(responseEntity);
-//
-//        when(fullIngredientRepository.findByNameContainingIgnoreCase(initialString)).thenReturn(Collections.singletonList(fullIngredient));
-//
-//        // Call method
-//        List<String> ingredientNames = apiService.fetchIngredientsByInitialString(initialString);
-//
-//        // Verify interactions and capture values
-//        verify(spoonacularRestTemplate, times(6)).getForEntity(
-//                anyString(),
-//                eq(IngredientSearchResponse.class)
-//        );
-//        verify(fullIngredientRepository, times(1)).findByNameContainingIgnoreCase(initialString);
-//
-//        // Assert result
-//        assertNotNull(ingredientNames);
-//        assertEquals(1, ingredientNames.size());
-//        assertEquals("cheese", ingredientNames.get(0));
-//    }
-
 }
 
