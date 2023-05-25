@@ -52,7 +52,7 @@ For every displayed final recipe, two calls are needed: First, to retrieve the r
 We assume that all group members stay online and continue the meal-planning process together. If one member is not moving along in the process, all other members of the group get stuck at that point and would have to delete their local storage and create a new account in order to use our services.
 
 ### Web Browser
-Our application was developed and tested mostly using the desktop version of [Google Chrome](https://www.google.com/chrome/). We therefore recommend you download and install Chrome to have the best experience with our application.
+Our application was developed and tested mostly using the desktop version of [Google Chrome](https://www.google.com/chrome/). We therefore recommend you download and install Chrome to have the best experience with our application. Additionally we'd like to warn you at this point that you might want to adjust the aspect ratio of your browser in order to see all of our screens. Check our illustrations in the [Readme.md](https://github.com/sopra-fs23-group-03/sopra-fs23-group-03-client/blob/main/README.md) of our client repository if you are unsure whether you see the whole screen or not.
 
 ### Database
 We have kept the in-memory H2 database of the template project provided by the SoPra FS23 Team. This means that whenever the server gets terminated, e.g. in our deployment due to inactivity, the database gets destroyed with it.
