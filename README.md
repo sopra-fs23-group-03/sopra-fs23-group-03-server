@@ -135,7 +135,7 @@ See the [Future Work](https://github.com/orgs/sopra-fs23-group-03/projects/1/vie
 - Kalliopi Papadaki - [KallPap](https://github.com/KallPap)
 - Orestis Bollano - [OrestisBollano](https://github.com/OrestisBollano)
 - Ann-Kathrin Hedwig Sabina Kübler - [akkuebler](https://github.com/akkuebler)
-- Chiara Letsch - [chiaralentsch](https://github.com/chiaralentsch)
+- Chiara Lentsch - [chiaralentsch](https://github.com/chiaralentsch)
 - Lany Dennise Weizenblut Oseguera - [wlany](https://github.com/wlany)
 
 ## License
