@@ -61,7 +61,7 @@ public class UserService {
         }
       
         List<User> users = userRepository.findByToken(token);
-        assert users.size() <= 1; // if this is not the case, there is duplicate tokens!!!
+        assert users.size() <= 1; // if this is not the case, there is duplicate tokens!
       
         if(users.size() == 1) {
             return users.get(0).getId();
@@ -284,7 +284,6 @@ public class UserService {
 
         if(user.getVotingStatus() == UserVotingStatus.VOTED) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "You voted already"); // 409 - user already voted
-            // TODO: check (or change) enum everytime someone leaves the group, also at the end after planning when redirected to Landing Page
         }
 
         // Count entries in map and check if user rated all of them.

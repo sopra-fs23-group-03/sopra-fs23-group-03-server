@@ -49,7 +49,6 @@ public class User implements Serializable {
     @Column(nullable = false)
     private UserVotingStatus votingStatus;
 
-    // Add a new field isReady
     @Column(nullable = false)
     private boolean isReady;
 
@@ -59,7 +58,7 @@ public class User implements Serializable {
     @ManyToMany(cascade = CascadeType.ALL) // so all changes are applied to ingredients class which is associated
     @JoinTable(
             name = "USER_INGREDIENT",
-            joinColumns = @JoinColumn(name = "user_id"), //those are the 2 foreign keys
+            joinColumns = @JoinColumn(name = "user_id"), // those are the 2 foreign keys
             inverseJoinColumns = @JoinColumn(name = "ingredient_id"))
     private Set<Ingredient> ingredientsSet = new HashSet<>(); // set of ingredients objects of the corresponding user
 

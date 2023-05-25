@@ -54,7 +54,6 @@ public class APIController {
     @Autowired
     private FullIngredientRepository fullIngredientRepository;
 
-
     @Autowired
     private RecipeService recipeService;
 

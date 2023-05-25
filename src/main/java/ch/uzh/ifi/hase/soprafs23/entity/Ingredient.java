@@ -27,7 +27,7 @@ public class Ingredient implements Serializable  {
     @ManyToOne
     private Group group;
 
-    @ElementCollection //TODO: makes sense to have own table?
+    @ElementCollection
     @Column(nullable = true)
     private List<String> singleUserRatings = new ArrayList<>();
 
@@ -40,7 +40,6 @@ public class Ingredient implements Serializable  {
         this.usersSet = new HashSet<>();
     }
 
-    //Methods
     public Long getId() {
         return id;
     }

@@ -67,7 +67,6 @@ public class GroupController {
         return groupGetDTOs;
     }
 
-    // TODO: change VotingType check when POINTDISTRIBUTION is implemented
     @PostMapping("/groups")
     @ResponseStatus(HttpStatus.CREATED) // 201
     @ResponseBody
@@ -122,7 +121,7 @@ public class GroupController {
         }
 
         // Loop through each guest id and create an invitation for them:
-        // idea--> create InvitationPostDTO object for each guest id, set guest id in it, then use DTOMapper to convert it to an Invit entity
+        // idea--> create InvitationPostDTO object for each guest id, set guest id in it, then use DTOMapper to convert it to an Invitation entity
         for (Long guestId : ListGuestIds) {
             // check if users to be invited exist
             userService.getUserById(guestId); // 404 - user not found

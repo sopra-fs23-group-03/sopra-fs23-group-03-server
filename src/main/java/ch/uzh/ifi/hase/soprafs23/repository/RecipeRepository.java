@@ -13,8 +13,6 @@ import java.util.Optional;
 @Repository("recipeRepository")
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
-    List<Recipe> findByGroupId(Long groupId);
-
     @Query("SELECT r FROM Recipe r WHERE r.group = :group")
     List<Recipe> findAllByGroup(@Param("group") Group group);
 
