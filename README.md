@@ -61,6 +61,25 @@ We have kept the in-memory H2 database of the template project provided by the S
 ### Server Instance
 In a first interaction with our deployed application, upon a server instance being created, you might experience our application stating that the server cannot be reached. This will resolve itself once the server has started properly. In order to avoid issues with multiple instances of the server we have also limited the maximum number of instances to one. This means, that our application does not scale for too many clients.
 
+## Roadmap
+See the [Future Work](https://github.com/orgs/sopra-fs23-group-03/projects/1/views/5?filterQuery=milestone%3A%22Future+Work%22) in our Project Board for the functionality we'd plan to develop further in our application. Here are the three most interesting additions we'd like to implement:
+
+- **The distribution of missing ingredients**: While we maximize the ingredients from the final list of ingredients to be used in the recipe, it can happen, that the recipe requires ingredients, that are missing. In a next step, we'd implement a way to decide/plan which of the members of the group will bring which of the missing ingredients. Related user story: [#24](https://github.com/sopra-fs23-group-03/sopra-fs23-group-03-server/issues/24)
+
+- **Additional decision logic**: The rating of the ingredients is implemented with a majority-vote-logic. In a next step, we'd add additional decision logics to this step, e.g. a point-distribution logic. Related user story: [#22](https://github.com/sopra-fs23-group-03/sopra-fs23-group-03-server/issues/22)
+
+- **Choose from multiple recipes**: A group will get one final recipe at the end of the process, if the spoonacular API had returned multiple recipes, we choose one at random for the group. In a next step we'd give the group all options that the spoonacular API provides and let the host choose one of them as the final recipe. Related user story: [#25](https://github.com/sopra-fs23-group-03/sopra-fs23-group-03-server/issues/25)
+
+## Authors and acknowledgment
+- Kalliopi Papadaki - [KallPap](https://github.com/KallPap)
+- Orestis Bollano - [OrestisBollano](https://github.com/OrestisBollano)
+- Ann-Kathrin Hedwig Sabina Kübler - [akkuebler](https://github.com/akkuebler)
+- Chiara Lentsch - [chiaralentsch](https://github.com/chiaralentsch)
+- Lany Dennise Weizenblut Oseguera - [wlany](https://github.com/wlany)
+
+## License
+Apache License 2.0
+
 ## Launch & Deployment
 
 ### Getting started with Spring Boot
@@ -122,23 +141,4 @@ To configure a debugger for SpringBoot's Tomcat servlet (i.e. the process you st
 4. Press `Shift + F9` or the use **Run**/Debug "Name of your task"
 5. Set breakpoints in the application where you need it
 6. Step through the process one step at a time
-
-## Roadmap
-See the [Future Work](https://github.com/orgs/sopra-fs23-group-03/projects/1/views/5?filterQuery=milestone%3A%22Future+Work%22) in our Project Board for the functionality we'd plan to develop further in our application. Here are the three most interesting additions we'd like to implement:
-
-- **The distribution of missing ingredients**: While we maximize the ingredients from the final list of ingredients to be used in the recipe, it can happen, that the recipe requires ingredients, that are missing. In a next step, we'd implement a way to decide/plan which of the members of the group will bring which of the missing ingredients. Related user story: [#24](https://github.com/sopra-fs23-group-03/sopra-fs23-group-03-server/issues/24)
-
-- **Additional decision logic**: The rating of the ingredients is implemented with a majority-vote-logic. In a next step, we'd add additional decision logics to this step, e.g. a point-distribution logic. Related user story: [#22](https://github.com/sopra-fs23-group-03/sopra-fs23-group-03-server/issues/22)
-
-- **Choose from multiple recipes**: A group will get one final recipe at the end of the process, if the spoonacular API had returned multiple recipes, we choose one at random for the group. In a next step we'd give the group all options that the spoonacular API provides and let the host choose one of them as the final recipe. Related user story: [#25](https://github.com/sopra-fs23-group-03/sopra-fs23-group-03-server/issues/25)
-
-## Authors and acknowledgment
-- Kalliopi Papadaki - [KallPap](https://github.com/KallPap)
-- Orestis Bollano - [OrestisBollano](https://github.com/OrestisBollano)
-- Ann-Kathrin Hedwig Sabina Kübler - [akkuebler](https://github.com/akkuebler)
-- Chiara Lentsch - [chiaralentsch](https://github.com/chiaralentsch)
-- Lany Dennise Weizenblut Oseguera - [wlany](https://github.com/wlany)
-
-## License
-Apache License 2.0
 
