@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs23.SpooncularAPI;
 
+import ch.uzh.ifi.hase.soprafs23.entity.FullIngredient;
 import ch.uzh.ifi.hase.soprafs23.constant.GroupState;
 import ch.uzh.ifi.hase.soprafs23.entity.Group;
 import ch.uzh.ifi.hase.soprafs23.entity.User;
