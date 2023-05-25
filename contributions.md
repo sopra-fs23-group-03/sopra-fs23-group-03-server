@@ -218,8 +218,7 @@
 |             | #286   | independent: complete testing of the service classes                             | X    |
 | Orestis     | #292   | Independent: create PUT /users/{userId}/{groupId}/ready.                         | X    |    
 |             | #291   | Independent: create GET /groups/{groupId}/members/ready.                         | X    |
-| Kalliopi    |        |                                                                                  |      |
-|             | #96    |  Accept/reject join requests in Groupforming-Host page                           | X    |
+| Kalliopi    | #96    |  Accept/reject join requests in Groupforming-Host page                           | X    |             
 |             | #97    |   Display accept/reject button and give functions                                | X    |
 | Ann-Kathrin |  #268  |  Make GET Call                                                                   |  X   |
 |             |  #269  |  Retrieve personal info and write method to get recipe based on single pers data |  X   |
