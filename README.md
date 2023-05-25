@@ -12,11 +12,12 @@ CollaborEat is an online application where people can get together to plan a mea
 Our motivation for this project was to aid fellow students in planning their meals with food they might already have at home. With our application we aim to reduce food waste and help in saving money and time for our users, but we also hope to inspire people to get creative with their meals and to get together to bond and have fun cooking together.
 
 ## Technologies
-- Java
-- JPA (database functionality)
-- Spring Boot (RESTful API)
-- Google Cloud (deployment)
-- Recipe-Food-Nutrition API by spoonacular (external API)
+- [Java](https://www.java.com/en/)
+- [JPA](https://spring.io/projects/spring-data-jpa) (database functionality)
+- [Spring Boot](https://spring.io/projects/spring-boot) (RESTful API)
+- [Google Cloud](https://cloud.google.com/) (deployment)
+- [Recipe-Food-Nutrition API](https://spoonacular.com/food-api) by spoonacular (external API)
+- [GitHub](https://github.com/)
 
 ## High-level components
 
